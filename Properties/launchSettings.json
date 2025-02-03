@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "kafi (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "kafi (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
