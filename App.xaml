@@ -8,20 +8,21 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="/Styles/PaneTheme.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
             <!--  Lexend Font  -->
-            <FontFamily x:Key="Lexend">Assets/Fonts/Lexend-Regular.ttf#Lexend</FontFamily>
-            <FontFamily x:Key="LexendLight">Assets/Fonts/Lexend-Light.ttf#Lexend Light</FontFamily>
-            <FontFamily x:Key="LexendMedium">Assets/Fonts/Lexend-Medium.ttf#Lexend Medium</FontFamily>
-            <FontFamily x:Key="LexendSemiBold">Assets/Fonts/Lexend-SemiBold.ttf#Lexend SemiBold</FontFamily>
-            <FontFamily x:Key="LexendBold">Assets/Fonts/Lexend-Bold.ttf#Lexend</FontFamily>
+            <FontFamily x:Key="Lexend">/Assets/Fonts/Lexend-Regular.ttf#Lexend</FontFamily>
+            <FontFamily x:Key="LexendLight">/Assets/Fonts/Lexend-Light.ttf#Lexend Light</FontFamily>
+            <FontFamily x:Key="LexendMedium">/Assets/Fonts/Lexend-Medium.ttf#Lexend Medium</FontFamily>
+            <FontFamily x:Key="LexendSemiBold">/Assets/Fonts/Lexend-SemiBold.ttf#Lexend SemiBold</FontFamily>
+            <FontFamily x:Key="LexendBold">/Assets/Fonts/Lexend-Bold.ttf#Lexend</FontFamily>
 
             <!--  ClimateCrisis Font  -->
-            <FontFamily x:Key="ClimateCrisis">Assets/Fonts/ClimateCrisis-Regular.ttf#Climate Crisis</FontFamily>
+            <FontFamily x:Key="ClimateCrisis">/Assets/Fonts/ClimateCrisis-Regular.ttf#Climate Crisis</FontFamily>
 
             <!--  SeoulHangangCL Font  -->
-            <FontFamily x:Key="SeoulHangangCL">Assets/Fonts/SeoulHangang CL Regular.ttf#SeoulHangang CL</FontFamily>
+            <FontFamily x:Key="SeoulHangangCL">/Assets/Fonts/SeoulHangang CL Regular.ttf#SeoulHangang CL</FontFamily>
 
             <!--  Default TextBlock  -->
             <Style TargetType="TextBlock">
