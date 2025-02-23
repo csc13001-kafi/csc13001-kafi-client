@@ -6,12 +6,121 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:kafi.ViewModels"
     mc:Ignorable="d">
-    <Grid>
-        <TextBlock
+    <Page.Resources>
+        <Style x:Key="BoxStyle" TargetType="Control">
+            <Setter Property="Height" Value="50" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="BorderBrush" Value="Black" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style BasedOn="{StaticResource BoxStyle}" TargetType="TextBox">
+            <Setter Property="Padding" Value="10,11,0,0" />
+        </Style>
+        <Style BasedOn="{StaticResource BoxStyle}" TargetType="PasswordBox">
+            <Setter Property="Padding" Value="10,11,0,0" />
+            <Setter Property="IsPasswordRevealButtonEnabled" Value="False" />
+        </Style>
+        <Style BasedOn="{StaticResource BoxStyle}" TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="Segoe UI Variable" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="IsEditable" Value="True" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style BasedOn="{StaticResource BoxStyle}" TargetType="CalendarDatePicker">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style x:Key="SubmitInfoButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Width" Value="150" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+    </Page.Resources>
+    <Grid
+        Padding="140,0,40,0"
+        VerticalAlignment="Center"
+        ColumnSpacing="60">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MaxWidth="1000" />
+        </Grid.ColumnDefinitions>
+        <StackPanel
+            Grid.Column="0"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="24"
-            Text="This is the Info Page" />
+            Spacing="10">
+            <PersonPicture
+                Width="250"
+                Height="250"
+                VerticalAlignment="Top" />
+            <Button
+                x:Name="ChangeProfilePictureButton"
+                HorizontalAlignment="Center"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="ChangeProfilePictureButton_Click"
+                Content="Thay đổi hình đại diện"
+                FontSize="16" />
+        </StackPanel>
+        <Border
+            Grid.Column="1"
+            Width="1"
+            Height="300"
+            VerticalAlignment="Top"
+            Background="Black" />
+        <StackPanel
+            Grid.Column="2"
+            Padding="0,0,100,0"
+            Spacing="80">
+            <StackPanel Spacing="33">
+                <TextBox PlaceholderText="Họ và Tên" />
+                <Grid ColumnSpacing="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" PlaceholderText="Email" />
+                    <TextBox Grid.Column="1" PlaceholderText="Mã định danh" />
+                </Grid>
+                <Grid ColumnSpacing="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" PlaceholderText="Số điện thoại" />
+                    <ComboBox Grid.Column="1" PlaceholderText="Chi nhánh" />
+                </Grid>
+                <Grid ColumnSpacing="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox Grid.Column="0" PlaceholderText="Vị trí" />
+                    <CalendarDatePicker
+                        Grid.Column="1"
+                        DateFormat="{}{day.integer}/{month.integer}/{year.full}"
+                        PlaceholderText="Ngày sinh" />
+                </Grid>
+                <Button
+                    HorizontalAlignment="Right"
+                    Content="Thay đổi"
+                    Style="{StaticResource SubmitInfoButton}" />
+            </StackPanel>
+            <StackPanel Spacing="33">
+                <PasswordBox IsPasswordRevealButtonEnabled="False" PlaceholderText="Mật khẩu cũ" />
+                <PasswordBox PlaceholderText="Mật khẩu mới" />
+                <PasswordBox PlaceholderText="Nhập lại mật khẩu mới" />
+                <Button
+                    HorizontalAlignment="Right"
+                    Content="Cập nhật"
+                    Style="{StaticResource SubmitInfoButton}" />
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

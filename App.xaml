@@ -10,6 +10,7 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="/Styles/PaneTheme.xaml" />
                 <ResourceDictionary Source="/Styles/Image.xaml" />
+                <ResourceDictionary Source="/Styles/Colors.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
             <!--  Lexend Font  -->
@@ -28,6 +29,10 @@
             <!--  Default TextBlock  -->
             <Style TargetType="TextBlock">
                 <Setter Property="Foreground" Value="Black" />
+                <Setter Property="FontFamily" Value="{StaticResource Lexend}" />
+            </Style>
+
+            <Style TargetType="TextBox">
                 <Setter Property="FontFamily" Value="{StaticResource Lexend}" />
             </Style>
         </ResourceDictionary>

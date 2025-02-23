@@ -24,5 +24,19 @@ namespace kafi.Views
         {
             LoginButtonText.Foreground = new SolidColorBrush(Colors.White);
         }
+
+        private void TogglePasswordButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (Password.PasswordRevealMode == PasswordRevealMode.Visible)
+            {
+                Password.PasswordRevealMode = PasswordRevealMode.Hidden;
+                TogglePasswordIcon.Glyph = "\uED1A";
+            }
+            else
+            {
+                Password.PasswordRevealMode = PasswordRevealMode.Visible;
+                TogglePasswordIcon.Glyph = "\uF78D";
+            }
+        }
     }
 }

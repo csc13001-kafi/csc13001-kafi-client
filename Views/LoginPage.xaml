@@ -63,6 +63,7 @@
                 </Grid>
             </Canvas>
         </StackPanel>
+
         <StackPanel
             Grid.Column="1"
             HorizontalAlignment="Center"
@@ -88,18 +89,28 @@
                     CornerRadius="18"
                     FontSize="20"
                     PlaceholderText="Tên đăng nhập" />
-                <PasswordBox
-                    x:Name="Password"
-                    Width="480"
-                    Height="44"
-                    Background="Transparent"
-                    BorderBrush="Black"
-                    BorderThickness="2"
-                    CornerRadius="18"
-                    FontSize="20"
-                    PasswordRevealMode="Hidden"
-                    PlaceholderText="Mật khẩu" />
-
+                <Grid VerticalAlignment="Center">
+                    <PasswordBox
+                        x:Name="Password"
+                        Width="480"
+                        Height="44"
+                        Background="Transparent"
+                        BorderBrush="Black"
+                        BorderThickness="2"
+                        CornerRadius="18"
+                        FontSize="20"
+                        IsPasswordRevealButtonEnabled="False"
+                        PasswordRevealMode="Hidden"
+                        PlaceholderText="Mật khẩu" />
+                    <Button
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="TogglePasswordButton_Click">
+                        <FontIcon x:Name="TogglePasswordIcon" Glyph="&#xED1A;" />
+                    </Button>
+                </Grid>
             </StackPanel>
             <Button
                 Margin="0,0,0,50"
