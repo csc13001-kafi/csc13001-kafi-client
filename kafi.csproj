@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Controls\HeaderControl.xaml" />
     <None Remove="Controls\LoginImage.xaml" />
+    <None Remove="Styles\TextBlock.xaml" />
     <None Remove="Views\InventoryPage.xaml" />
     <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\TablePage.xaml" />
