@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Controls\HeaderControl.xaml" />
     <None Remove="Controls\LoginImage.xaml" />
+    <None Remove="Views\InventoryPage.xaml" />
     <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\TablePage.xaml" />
   </ItemGroup>
@@ -43,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.1.240916" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
   </ItemGroup>
@@ -71,6 +73,11 @@
     <Content Update="Assets\Fonts\Lexend-SemiBold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\InventoryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Styles\Colors.xaml">

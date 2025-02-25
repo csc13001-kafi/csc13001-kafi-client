@@ -1,8 +1,11 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
@@ -40,9 +43,61 @@ public sealed partial class ShellPage : Page
                 case "MenuPage":
                     ContentFrame.Navigate(typeof(MenuPage));
                     break;
+                case "InventoryPage":
+                    ContentFrame.Navigate(typeof(InventoryPage));
+                    break;
             }
+            ShowOrHideHeader(selectedTag);
         }
     }
+
+    private async void ShowOrHideHeader(string pageTag)
+    {
+        var pagesWithoutHeader = new string[] { "LoginPage" };
+        var shouldShowHeader = !pagesWithoutHeader.Contains(pageTag);
+
+        var header = FindName("PageHeader") as UIElement;
+        if (header == null) return; // Ensure header exists
+
+        if (shouldShowHeader)
+        {
+            // Fade in animation for the header
+            var fadeIn = new DoubleAnimation()
+            {
+                To = 1,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500)),
+                EasingFunction = new QuadraticEase()
+            };
+            Storyboard.SetTarget(fadeIn, header);
+            Storyboard.SetTargetProperty(fadeIn, "Opacity");
+
+            var sb = new Storyboard();
+            sb.Children.Add(fadeIn);
+            header.Visibility = Visibility.Visible;
+            sb.Begin();
+        }
+        else
+        {
+            // Fade out animation for the header
+            var fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500)),
+                EasingFunction = new QuadraticEase()
+            };
+            Storyboard.SetTarget(fadeOut, header);
+            Storyboard.SetTargetProperty(fadeOut, "Opacity");
+
+            var sb = new Storyboard();
+            sb.Children.Add(fadeOut);
+            sb.Begin();
+
+            // Wait for animation to finish before hiding
+            await Task.Delay(500);
+            header.Visibility = Visibility.Collapsed;
+        }
+    }
+
     private void NavView_PaneOpening(NavigationView sender, object args)
     {
         UpdateTextVisibility(sender, Visibility.Visible); // Show text
