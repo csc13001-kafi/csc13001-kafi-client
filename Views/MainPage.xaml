@@ -8,53 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!--  Header  -->
-        <Grid Grid.Row="0" Padding="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <!--  Right Side (Cart, Notification, Avatar, Name)  -->
-            <StackPanel
-                Grid.Column="2"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal"
-                Spacing="10">
-                <Button
-                    Width="40"
-                    Height="40"
-                    Content="🛒" />
-                <Button
-                    Width="40"
-                    Height="40"
-                    Content="🔔" />
-
-                <StackPanel
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="5">
-                    <Ellipse
-                        Width="40"
-                        Height="40"
-                        Fill="Gray" />
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        Foreground="White"
-                        Text="John Doe" />
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-
-        <!--  Main Content  -->
-        <Grid Grid.Row="1">
-            <!--  Your main content here  -->
-        </Grid>
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="24"
+            Text="This is the Main Page" />
     </Grid>
 </Page>
