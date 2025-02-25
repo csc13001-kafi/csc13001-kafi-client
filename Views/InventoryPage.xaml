@@ -7,11 +7,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:kafi.ViewModels"
+    xmlns:viewmodels="using:kafi.ViewModels"
     xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
     <Page.DataContext>
-        <vm:InventoryViewModel />
+        <viewmodels:InventoryViewModel />
     </Page.DataContext>
     <Page.Resources>
         <!--  Storyboard để hiển thị bảng (sheet)  -->
@@ -72,8 +72,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock
                 Grid.Column="0"
-                FontSize="30"
-                FontWeight="Bold"
+                Style="{StaticResource PageTitleStyle}"
                 Text="Kho" />
             <Button
                 x:Name="AddInventoryButton"
@@ -117,6 +116,7 @@
                 Foreground="#71747D"
                 GridLinesVisibility="Horizontal"
                 HorizontalScrollBarVisibility="Hidden"
+                IsReadOnly="True"
                 ItemsSource="{Binding Inventories}"
                 RowHeight="50">
                 <controls:DataGrid.ColumnHeaderStyle>

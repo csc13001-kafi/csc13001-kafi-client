@@ -33,6 +33,7 @@ public partial class ShellViewModel
             new() { Icon = "/Assets/IconFoodMenu.svg", Content = "Menu", Tag = "MenuPage" },
             new() { Icon = "/Assets/IconTeaTime.svg", Content = "Bàn", Tag = "TablePage" },
             new() { Icon = "/Assets/IconNotepad.svg", Content = "Đơn hàng", Tag = "OrderPage" },
+            new() { Icon = "/Assets/IconInventory.svg", Content = "Kho hàng", Tag = "InventoryPage" },
             new() { Icon = "/Assets/IconSetting.svg", Content = "Thông tin", Tag = "InfoPage" },
             new() { Icon = "/Assets/IconLogOut.svg", Content = "Đăng xuất", Tag = "LogOut" },
         };

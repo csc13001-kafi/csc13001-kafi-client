@@ -25,9 +25,7 @@
             <Setter Property="IsPasswordRevealButtonEnabled" Value="False" />
         </Style>
         <Style BasedOn="{StaticResource BoxStyle}" TargetType="ComboBox">
-            <Setter Property="FontFamily" Value="Segoe UI Variable" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="IsEditable" Value="True" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style BasedOn="{StaticResource BoxStyle}" TargetType="CalendarDatePicker">
@@ -41,6 +39,9 @@
             <Setter Property="CornerRadius" Value="20" />
             <Setter Property="FontSize" Value="18" />
         </Style>
+        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
     </Page.Resources>
     <Grid
         Padding="140,0,40,0"
@@ -101,7 +102,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" PlaceholderText="Vị trí" />
+                    <TextBox Grid.Column="0" PlaceholderText="Vị trí" />
                     <CalendarDatePicker
                         Grid.Column="1"
                         DateFormat="{}{day.integer}/{month.integer}/{year.full}"

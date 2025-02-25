@@ -16,7 +16,7 @@ namespace kafi.Views
             this.InitializeComponent();
         }
 
-        private async void ChangeProfilePictureButton_Click(object sender, RoutedEventArgs e)
+        private void ChangeProfilePictureButton_Click(object sender, RoutedEventArgs e)
         {
             //disable the button to avoid double-clicking
             var senderButton = sender as Button;
