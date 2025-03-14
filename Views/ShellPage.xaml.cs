@@ -113,7 +113,6 @@ public sealed partial class ShellPage : Page
         Debug.WriteLine(navView.MenuItems.Count);
         foreach (var item in navView.MenuItems.OfType<NavigationViewItem>())
         {
-            Debug.WriteLine(item);
             // Get the container (StackPanel) of the menu item
             var container = navView.ContainerFromMenuItem(item) as FrameworkElement;
             if (container != null)
@@ -136,7 +135,6 @@ public sealed partial class ShellPage : Page
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {
             var child = VisualTreeHelper.GetChild(parent, i) as FrameworkElement;
-            Debug.WriteLine(child.Name);
             if (child != null && child is T target && child.Name == name)
             {
                 return target;

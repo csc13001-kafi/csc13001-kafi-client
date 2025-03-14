@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
-    <Grid Padding="100">
+    <Grid x:Name="Container" Padding="100">
         <Grid.Background>
             <ImageBrush ImageSource="/Assets/Bg.png" />
         </Grid.Background>
@@ -67,7 +67,8 @@
         <StackPanel
             Grid.Column="1"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+            VerticalAlignment="Center"
+            Orientation="Vertical">
             <TextBlock
                 Margin="0,0,0,100"
                 HorizontalAlignment="Center"
@@ -80,37 +81,31 @@
                 <TextBox
                     x:Name="Username"
                     Width="480"
-                    Height="44"
+                    Height="40"
+                    Padding="10,8,0,0"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
                     Background="Transparent"
                     BorderBrush="Black"
                     BorderThickness="2"
                     CornerRadius="18"
-                    FontSize="20"
-                    PlaceholderText="Tên đăng nhập" />
-                <Grid VerticalAlignment="Center">
-                    <PasswordBox
-                        x:Name="Password"
-                        Width="480"
-                        Height="44"
-                        Background="Transparent"
-                        BorderBrush="Black"
-                        BorderThickness="2"
-                        CornerRadius="18"
-                        FontSize="20"
-                        IsPasswordRevealButtonEnabled="False"
-                        PasswordRevealMode="Hidden"
-                        PlaceholderText="Mật khẩu" />
-                    <Button
-                        Margin="0,0,10,0"
-                        HorizontalAlignment="Right"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Click="TogglePasswordButton_Click">
-                        <FontIcon x:Name="TogglePasswordIcon" Glyph="&#xED1A;" />
-                    </Button>
-                </Grid>
+                    FontSize="16"
+                    PlaceholderText="Tên đăng nhập"
+                    Text="{x:Bind ViewModel.UserName, Mode=TwoWay}"
+                    TextChanged="Username_TextChanged" />
+                <PasswordBox
+                    Width="480"
+                    Height="40"
+                    Padding="10,8,0,0"
+                    Background="Transparent"
+                    BorderBrush="Black"
+                    BorderThickness="2"
+                    CornerRadius="18"
+                    FontFamily="{StaticResource Lexend}"
+                    FontSize="16"
+                    Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
+                    PasswordChanged="PasswordBox_PasswordChanged"
+                    PlaceholderText="Mật khẩu" />
             </StackPanel>
             <Button
                 Margin="0,0,0,50"
@@ -121,12 +116,20 @@
                 Foreground="#4F4F4F">
                 Quên mật khẩu ?
             </Button>
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                FontFamily="{StaticResource LexendSemiBold}"
+                FontSize="16"
+                FontWeight="SemiBold"
+                Foreground="Red"
+                Text="{x:Bind ViewModel.ErrorMessage, Mode=TwoWay}" />
             <Button
                 x:Name="LoginButton"
                 Width="200"
                 Height="50"
-                Margin="0,-20,0,0"
                 HorizontalAlignment="Center"
+                Command="{x:Bind ViewModel.LoginCommand}"
                 CornerRadius="20"
                 FontSize="20"
                 Foreground="White"

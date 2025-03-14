@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -11,9 +13,11 @@ namespace kafi.Views
     /// </summary>
     public sealed partial class LoginPage : Page
     {
+        public LoginViewModel ViewModel { get; }
         public LoginPage()
         {
             this.InitializeComponent();
+            ViewModel = App.Services.GetService(typeof(LoginViewModel)) as LoginViewModel;
         }
         private void LoginButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
@@ -25,18 +29,14 @@ namespace kafi.Views
             LoginButtonText.Foreground = new SolidColorBrush(Colors.White);
         }
 
-        private void TogglePasswordButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void PasswordBox_PasswordChanged(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            if (Password.PasswordRevealMode == PasswordRevealMode.Visible)
-            {
-                Password.PasswordRevealMode = PasswordRevealMode.Hidden;
-                TogglePasswordIcon.Glyph = "\uED1A";
-            }
-            else
-            {
-                Password.PasswordRevealMode = PasswordRevealMode.Visible;
-                TogglePasswordIcon.Glyph = "\uF78D";
-            }
+            Debug.WriteLine($"Password changed: {ViewModel.Password}");
+        }
+
+        private void Username_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Debug.WriteLine($"Username changed: {ViewModel.UserName}");
         }
     }
 }

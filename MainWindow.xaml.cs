@@ -15,8 +15,7 @@ public sealed partial class MainWindow : Window
     {
         this.InitializeComponent();
         this.Title = "Kafi";
-        this.Content = new Views.ShellPage();
         AppWindow.SetIcon("/Assets/WindowIcon.ico");
-        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+        //   AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
     }
 }
