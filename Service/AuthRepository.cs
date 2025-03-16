@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using kafi.Contracts;
@@ -17,17 +19,28 @@ namespace kafi.Service
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
         {
-            var jsonPayload = JsonConvert.SerializeObject(request);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("auth/sign-in", content);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
-                return loginResponse;
+                var jsonPayload = JsonConvert.SerializeObject(request);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("auth/sign-in", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+                    return loginResponse;
+
+                }
+                else
+                {
+                    Debug.WriteLine($"Login failed. Status code: {response.StatusCode}");
+                    return null;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Exception during login: {ex}");
                 return null;
             }
         }

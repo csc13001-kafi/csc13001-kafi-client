@@ -15,9 +15,9 @@
   <ItemGroup>
     <None Remove="Controls\HeaderControl.xaml" />
     <None Remove="Controls\LoginImage.xaml" />
+    <None Remove="LoginWindow.xaml" />
     <None Remove="Styles\TextBlock.xaml" />
     <None Remove="Views\InventoryPage.xaml" />
-    <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\TablePage.xaml" />
   </ItemGroup>
 
@@ -78,6 +78,9 @@
     <Content Update="Assets\Fonts\Lexend-SemiBold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="Assets\WindowIcon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\InventoryPage.xaml">
@@ -96,11 +99,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Styles\Image.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -137,6 +135,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="C:\Users\Admin\OneDrive - VNU-HCMUS\College\Year 3\Sem2\Windows Prog\csc13001-kafi-client\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Styles\TextBlock.xaml">

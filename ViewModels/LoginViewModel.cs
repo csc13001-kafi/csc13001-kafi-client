@@ -1,9 +1,12 @@
 ﻿using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using kafi.Contracts;
+using kafi.Messages;
 using kafi.Models.Authentication;
 using kafi.Views;
+using Microsoft.UI.Xaml.Controls;
 namespace kafi.ViewModels;
 
 public partial class LoginViewModel : ObservableObject
@@ -20,6 +23,8 @@ public partial class LoginViewModel : ObservableObject
     private string password;
     [ObservableProperty]
     private string errorMessage;
+    [ObservableProperty]
+    private bool isBusy;
 
     public LoginViewModel(IAuthRepository authRepository, ISecureTokenStorage tokenStorage, INavigationService navigationService)
     {
@@ -28,26 +33,51 @@ public partial class LoginViewModel : ObservableObject
         _navigationService = navigationService;
     }
 
-    private bool CanLogin() => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password);
+    private bool CanLogin() => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanLogin))]
     private async Task LoginAsync()
     {
         ErrorMessage = string.Empty;
-        var loginRequest = new LoginRequest
+        IsBusy = true;
+        try
         {
-            username = UserName,
-            password = Password
-        };
-        var loginResponse = await _authRepository.LoginAsync(loginRequest);
-        if (loginResponse is null)
-        {
-            ErrorMessage = "Invalid username or password";
+            var loginRequest = new LoginRequest
+            {
+                username = UserName,
+                password = Password
+            };
+
+            var loginResponse = await _authRepository.LoginAsync(loginRequest);
+            if (loginResponse is null)
+            {
+                ErrorMessage = "Invalid username or password. Please try again.";
+            }
+            else
+            {
+                _tokenStorage.SaveTokens(loginResponse.accessToken, loginResponse.refreshToken);
+
+                var mainWindow = new MainWindow();
+                Frame frame = mainWindow.Content as Frame;
+                if (frame == null)
+                {
+                    frame = new Frame();
+                    mainWindow.Content = frame;
+                }
+                _navigationService.Frame = frame;
+                _navigationService.NavigateTo(typeof(ShellPage));
+                mainWindow.Activate();
+
+                WeakReferenceMessenger.Default.Send(new CloseLoginWindowMessage());
+            }
         }
-        else
+        catch (System.Exception ex)
         {
-            _tokenStorage.SaveTokens(loginResponse.accessToken, loginResponse.refreshToken);
-            _navigationService.NavigateTo(typeof(ShellPage));
+            ErrorMessage = "An error occurred during login. Please check your network and try again.";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 }

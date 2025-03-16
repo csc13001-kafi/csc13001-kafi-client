@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Page
-    x:Class="kafi.Views.LoginPage"
+<Window
+    x:Class="kafi.LoginWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:kafi.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:kafi.Views"
+    xmlns:local="using:kafi"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Title="kafi"
     mc:Ignorable="d">
     <Grid x:Name="Container" Padding="100">
         <Grid.Background>
@@ -91,8 +91,7 @@
                     CornerRadius="18"
                     FontSize="16"
                     PlaceholderText="Tên đăng nhập"
-                    Text="{x:Bind ViewModel.UserName, Mode=TwoWay}"
-                    TextChanged="Username_TextChanged" />
+                    Text="{x:Bind ViewModel.UserName, Mode=TwoWay}" />
                 <PasswordBox
                     Width="480"
                     Height="40"
@@ -104,7 +103,6 @@
                     FontFamily="{StaticResource Lexend}"
                     FontSize="16"
                     Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
-                    PasswordChanged="PasswordBox_PasswordChanged"
                     PlaceholderText="Mật khẩu" />
             </StackPanel>
             <Button
@@ -154,4 +152,4 @@
             </Button>
         </StackPanel>
     </Grid>
-</Page>
+</Window>

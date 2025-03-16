@@ -16,8 +16,6 @@ namespace kafi;
 public partial class App : Application
 {
     public static IServiceProvider Services { get; private set; }
-    private static Window _mainWindow;
-    public static Window MainWindow => _mainWindow;
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -56,8 +54,6 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        _mainWindow = new MainWindow();
-        Services.GetRequiredService<ISecureTokenStorage>().ClearTokens();
         var activationService = Services.GetRequiredService<IActivationService>();
         await activationService.ActivateAsync(args);
     }

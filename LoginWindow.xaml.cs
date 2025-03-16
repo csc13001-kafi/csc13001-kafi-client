@@ -1,23 +1,30 @@
-using System.Diagnostics;
+using CommunityToolkit.Mvvm.Messaging;
+using kafi.Messages;
 using kafi.ViewModels;
 using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace kafi.Views
+namespace kafi
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class LoginPage : Page
+    public sealed partial class LoginWindow : Window
     {
         public LoginViewModel ViewModel { get; }
-        public LoginPage()
+        public LoginWindow()
         {
             this.InitializeComponent();
+            AppWindow.SetIcon("/Assets/WindowIcon.ico");
             ViewModel = App.Services.GetService(typeof(LoginViewModel)) as LoginViewModel;
+            WeakReferenceMessenger.Default.Register<CloseLoginWindowMessage>(this, (r, m) =>
+            {
+                this.Close();
+            });
         }
         private void LoginButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
@@ -27,16 +34,6 @@ namespace kafi.Views
         private void LoginButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
             LoginButtonText.Foreground = new SolidColorBrush(Colors.White);
-        }
-
-        private void PasswordBox_PasswordChanged(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            Debug.WriteLine($"Password changed: {ViewModel.Password}");
-        }
-
-        private void Username_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Debug.WriteLine($"Username changed: {ViewModel.UserName}");
         }
     }
 }
