@@ -44,6 +44,7 @@ public partial class App : Application
 
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
+        services.AddTransient<MenuViewModel>();
 
         Services = services.BuildServiceProvider();
     }
