@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace kafi.Contracts
+namespace kafi.Contracts.Services
 {
     public interface IActivationService
     {

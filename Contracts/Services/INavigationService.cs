@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.UI.Xaml.Controls;
 
-namespace kafi.Contracts
+namespace kafi.Contracts.Services
 {
     public interface INavigationService
     {

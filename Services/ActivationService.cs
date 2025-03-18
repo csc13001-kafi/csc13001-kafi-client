@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using kafi.Contracts;
+using kafi.Contracts.Services;
 using kafi.Views;
 using Microsoft.UI.Xaml.Controls;
 

@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using kafi.Models.Authentication;
 
-namespace kafi.Contracts
+namespace kafi.Contracts.Services
 {
-    public interface IAuthRepository
+    public interface IAuthService
     {
         Task<LoginResponse?> LoginAsync(LoginRequest request);
     }

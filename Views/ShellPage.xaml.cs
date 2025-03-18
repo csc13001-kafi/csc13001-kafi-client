@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
@@ -110,14 +109,12 @@ public sealed partial class ShellPage : Page
 
     private void UpdateTextVisibility(NavigationView navView, Visibility visibility)
     {
-        Debug.WriteLine(navView.MenuItems.Count);
         foreach (var item in navView.MenuItems.OfType<NavigationViewItem>())
         {
             // Get the container (StackPanel) of the menu item
             var container = navView.ContainerFromMenuItem(item) as FrameworkElement;
             if (container != null)
             {
-                Debug.WriteLine(container.Name);
                 // Find the TextBlock named "ItemContent" inside the container
                 var textBlock = FindVisualChildByName<TextBlock>(container, "ItemContent");
                 if (textBlock != null)

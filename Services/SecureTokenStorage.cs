@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using kafi.Contracts;
+using kafi.Contracts.Services;
 using Windows.Security.Credentials;
 
 namespace kafi.Service

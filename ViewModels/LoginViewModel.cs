@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using kafi.Contracts;
+using kafi.Contracts.Services;
 using kafi.Messages;
 using kafi.Models.Authentication;
 using kafi.Views;
@@ -11,7 +11,7 @@ namespace kafi.ViewModels;
 
 public partial class LoginViewModel : ObservableObject
 {
-    private readonly IAuthRepository _authRepository;
+    private readonly IAuthService _authRepository;
     private readonly ISecureTokenStorage _tokenStorage;
     private readonly INavigationService _navigationService;
 
@@ -26,7 +26,7 @@ public partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
-    public LoginViewModel(IAuthRepository authRepository, ISecureTokenStorage tokenStorage, INavigationService navigationService)
+    public LoginViewModel(IAuthService authRepository, ISecureTokenStorage tokenStorage, INavigationService navigationService)
     {
         _authRepository = authRepository;
         _tokenStorage = tokenStorage;

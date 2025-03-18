@@ -1,5 +1,5 @@
 ﻿using System;
-using kafi.Contracts;
+using kafi.Contracts.Services;
 using Microsoft.UI.Xaml.Controls;
 
 namespace kafi.Service

@@ -1,5 +1,7 @@
 ﻿using System;
-using kafi.Contracts;
+using kafi.Contracts.Services;
+using kafi.Data;
+using kafi.Repositories;
 using kafi.Service;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,12 +37,15 @@ public partial class App : Application
         services.AddSingleton<IActivationService, ActivationService>();
 
         services.AddTransient<AuthMessageHandler>();
-        services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
+        services.AddHttpClient<IAuthService, AuthService>(client =>
         {
             client.BaseAddress = new Uri("http://localhost:8080/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         })
         .AddHttpMessageHandler<AuthMessageHandler>();
+
+        services.AddSingleton<ICategoryDao, CategoryMockDao>();
+        services.AddSingleton<ICategoryRepository, CategoryRepository>();
 
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();

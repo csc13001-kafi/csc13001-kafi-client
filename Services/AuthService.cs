@@ -3,16 +3,16 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using kafi.Contracts;
+using kafi.Contracts.Services;
 using kafi.Models.Authentication;
 using Newtonsoft.Json;
 
 namespace kafi.Service
 {
-    public class AuthRepository : IAuthRepository
+    public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
-        public AuthRepository(HttpClient httpClient)
+        public AuthService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
