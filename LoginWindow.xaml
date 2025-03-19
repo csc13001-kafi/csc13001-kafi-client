@@ -105,15 +105,6 @@
                     Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
                     PlaceholderText="Mật khẩu" />
             </StackPanel>
-            <Button
-                Margin="0,0,0,50"
-                HorizontalAlignment="Right"
-                Background="Transparent"
-                BorderThickness="0"
-                FontSize="18"
-                Foreground="#4F4F4F">
-                Quên mật khẩu ?
-            </Button>
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
