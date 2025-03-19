@@ -5,7 +5,7 @@ namespace kafi.Contracts.Services
 {
     public interface INavigationService
     {
-        Frame Frame { get; set; }
+        void Initialize(Frame frame);
         void NavigateTo(Type sourcePage);
         void NavigateTo(Type sourcePage, object parameter);
         void GoBack();

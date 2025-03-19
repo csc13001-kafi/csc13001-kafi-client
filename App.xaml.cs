@@ -1,8 +1,7 @@
 ﻿using System;
 using kafi.Contracts.Services;
-using kafi.Data;
-using kafi.Repositories;
 using kafi.Service;
+using kafi.Services;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -32,24 +31,27 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
+        services.AddTransient<LoginWindow>();
+        services.AddTransient<MainWindow>();
+
         services.AddSingleton<ISecureTokenStorage, SecureTokenStorage>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IActivationService, ActivationService>();
+        services.AddSingleton<IWindowService, WindowService>();
 
         services.AddTransient<AuthMessageHandler>();
-        services.AddHttpClient<IAuthService, AuthService>(client =>
+        services.AddHttpClient<AuthService>(client =>
         {
             client.BaseAddress = new Uri("http://localhost:8080/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         })
         .AddHttpMessageHandler<AuthMessageHandler>();
-
-        services.AddSingleton<ICategoryDao, CategoryMockDao>();
-        services.AddSingleton<ICategoryRepository, CategoryRepository>();
+        services.AddSingleton<IAuthService>(sp => sp.GetRequiredService<AuthService>());
 
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
         services.AddTransient<MenuViewModel>();
+
 
         Services = services.BuildServiceProvider();
     }

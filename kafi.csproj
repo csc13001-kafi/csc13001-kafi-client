@@ -52,6 +52,7 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Assets\Background.png">
@@ -147,6 +148,8 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Messages\" />
   </ItemGroup>
 </Project>

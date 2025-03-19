@@ -68,9 +68,9 @@
             Grid.Column="1"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Orientation="Vertical">
+            Orientation="Vertical"
+            Spacing="60">
             <TextBlock
-                Margin="0,0,0,100"
                 HorizontalAlignment="Center"
                 FontSize="70"
                 Text="Đăng Nhập" />
@@ -105,42 +105,45 @@
                     Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
                     PlaceholderText="Mật khẩu" />
             </StackPanel>
-            <TextBlock
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                FontFamily="{StaticResource LexendSemiBold}"
-                FontSize="16"
-                FontWeight="SemiBold"
-                Foreground="Red"
-                Text="{x:Bind ViewModel.ErrorMessage, Mode=TwoWay}" />
-            <Button
-                x:Name="LoginButton"
-                Width="200"
-                Height="50"
-                HorizontalAlignment="Center"
-                Command="{x:Bind ViewModel.LoginCommand}"
-                CornerRadius="20"
-                FontSize="20"
-                Foreground="White"
-                PointerEntered="LoginButton_PointerEntered"
-                PointerExited="LoginButton_PointerExited">
-                <Button.Background>
-                    <LinearGradientBrush x:Name="LoginButtonBackground" StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Offset="0" Color="#1E2742" />
-                        <GradientStop Offset="1" Color="#458353" />
-                    </LinearGradientBrush>
-                </Button.Background>
-                <StackPanel
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal"
-                    Spacing="10">
-                    <TextBlock
-                        x:Name="LoginButtonText"
-                        Foreground="White"
-                        Text="Bắt đầu" />
-                    <FontIcon x:Name="LoginButtonIcon" Glyph="&#xE970;" />
-                </StackPanel>
-            </Button>
+            <StackPanel Orientation="Vertical" Spacing="10">
+                <TextBlock
+                    Height="20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontFamily="{StaticResource LexendSemiBold}"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Foreground="Red"
+                    Text="{x:Bind ViewModel.ErrorMessage, Mode=TwoWay}" />
+                <Button
+                    x:Name="LoginButton"
+                    Width="200"
+                    Height="50"
+                    HorizontalAlignment="Center"
+                    Command="{x:Bind ViewModel.LoginCommand}"
+                    CornerRadius="20"
+                    FontSize="20"
+                    Foreground="White"
+                    PointerEntered="LoginButton_PointerEntered"
+                    PointerExited="LoginButton_PointerExited">
+                    <Button.Background>
+                        <LinearGradientBrush x:Name="LoginButtonBackground" StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Offset="0" Color="#1E2742" />
+                            <GradientStop Offset="1" Color="#458353" />
+                        </LinearGradientBrush>
+                    </Button.Background>
+                    <StackPanel
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="10">
+                        <TextBlock
+                            x:Name="LoginButtonText"
+                            Foreground="White"
+                            Text="Bắt đầu" />
+                        <FontIcon x:Name="LoginButtonIcon" Glyph="&#xE970;" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

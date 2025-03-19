@@ -6,20 +6,26 @@ namespace kafi.Service
 {
     public class NavigationService : INavigationService
     {
-        public Frame Frame { get; set; }
+        private Frame _frame;
+
+        public void Initialize(Frame frame)
+        {
+            _frame = frame;
+        }
+
         public void GoBack()
         {
-            Frame.GoBack();
+            _frame.GoBack();
         }
 
         public void NavigateTo(Type sourcePage)
         {
-            Frame.Navigate(sourcePage);
+            _frame.Navigate(sourcePage);
         }
 
         public void NavigateTo(Type sourcePage, object parameter)
         {
-            Frame.Navigate(sourcePage, parameter);
+            _frame.Navigate(sourcePage, parameter);
         }
     }
 }

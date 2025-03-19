@@ -1,20 +1,13 @@
 ﻿using System.Threading.Tasks;
 using kafi.Contracts.Services;
-using kafi.Views;
-using Microsoft.UI.Xaml.Controls;
 
 namespace kafi.Service
 {
-    public class ActivationService : IActivationService
+    public class ActivationService(ISecureTokenStorage tokenStorage, IWindowService windowService, IAuthService authService) : IActivationService
     {
-        private readonly ISecureTokenStorage _tokenStorage;
-        private readonly INavigationService _navigationService;
-
-        public ActivationService(ISecureTokenStorage tokenStorage, INavigationService navigationService)
-        {
-            _tokenStorage = tokenStorage;
-            _navigationService = navigationService;
-        }
+        private readonly ISecureTokenStorage _tokenStorage = tokenStorage;
+        private readonly IWindowService _windowService = windowService;
+        private readonly IAuthService _authService = authService;
 
         public async Task ActivateAsync(object activationArgs)
         {
@@ -22,21 +15,12 @@ namespace kafi.Service
 
             if (string.IsNullOrEmpty(tokens.accessToken))
             {
-                var loginWindow = new LoginWindow();
-                loginWindow.Activate();
+                _windowService.ShowLoginWindow();
             }
             else
             {
-                var mainWindow = new MainWindow();
-                Frame frame = mainWindow.Content as Frame;
-                if (frame == null)
-                {
-                    frame = new Frame();
-                    mainWindow.Content = frame;
-                }
-                _navigationService.Frame = frame;
-                _navigationService.NavigateTo(typeof(ShellPage));
-                mainWindow.Activate();
+                _authService.LoadCurrentUserFromToken(tokens.accessToken);
+                _windowService.ShowMainWindow();
             }
 
             await Task.CompletedTask;

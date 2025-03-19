@@ -7,21 +7,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:kafi.ViewModels"
+    xmlns:models="using:kafi.Models"
     mc:Ignorable="d">
-    <Page.DataContext>
-        <viewmodels:ShellViewModel />
-    </Page.DataContext>
     <NavigationView
         x:Name="NavigationViewControl"
+        FooterMenuItemsSource="{x:Bind ViewModel.FooterItems}"
         IsBackButtonVisible="Collapsed"
         IsPaneToggleButtonVisible="False"
         IsSettingsVisible="False"
-        Loaded="Page_Loaded"
-        MenuItemsSource="{Binding NavItems}"
+        MenuItemsSource="{x:Bind ViewModel.NavItems}"
         OpenPaneLength="280"
-        PaneClosing="NavView_PaneClosing"
-        PaneOpening="NavView_PaneOpening"
         SelectionChanged="OnNavigationViewSelectionChanged">
         <NavigationView.Background>
             <ImageBrush ImageSource="/Assets/Bg.png" />
@@ -60,7 +55,7 @@
             </Grid>
         </NavigationView.PaneCustomContent>
         <NavigationView.MenuItemTemplate>
-            <DataTemplate x:DataType="viewmodels:NavItem">
+            <DataTemplate x:DataType="models:NavItem">
                 <NavigationViewItem
                     Padding="0,10,0,10"
                     Content="{x:Bind Content}"

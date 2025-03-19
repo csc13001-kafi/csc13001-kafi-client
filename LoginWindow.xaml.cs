@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.Messaging;
-using kafi.Messages;
 using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -21,10 +19,6 @@ namespace kafi
             this.InitializeComponent();
             AppWindow.SetIcon("/Assets/WindowIcon.ico");
             ViewModel = App.Services.GetService(typeof(LoginViewModel)) as LoginViewModel;
-            WeakReferenceMessenger.Default.Register<CloseLoginWindowMessage>(this, (r, m) =>
-            {
-                this.Close();
-            });
         }
         private void LoginButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {

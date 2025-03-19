@@ -1,19 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using kafi.Contracts.Services;
-using kafi.Messages;
 using kafi.Models.Authentication;
-using kafi.Views;
-using Microsoft.UI.Xaml.Controls;
 namespace kafi.ViewModels;
 
-public partial class LoginViewModel : ObservableObject
+public partial class LoginViewModel(IAuthService authRepository, ISecureTokenStorage tokenStorage, IWindowService windowService, INavigationService navigationService) : ObservableObject
 {
-    private readonly IAuthService _authRepository;
-    private readonly ISecureTokenStorage _tokenStorage;
-    private readonly INavigationService _navigationService;
+    private readonly IAuthService _authRepository = authRepository;
+    private readonly ISecureTokenStorage _tokenStorage = tokenStorage;
+    private readonly IWindowService _windowService = windowService;
+    private readonly INavigationService _navigationService = navigationService;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
@@ -25,13 +23,6 @@ public partial class LoginViewModel : ObservableObject
     private string errorMessage;
     [ObservableProperty]
     private bool isBusy;
-
-    public LoginViewModel(IAuthService authRepository, ISecureTokenStorage tokenStorage, INavigationService navigationService)
-    {
-        _authRepository = authRepository;
-        _tokenStorage = tokenStorage;
-        _navigationService = navigationService;
-    }
 
     private bool CanLogin() => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !IsBusy;
 
@@ -56,22 +47,10 @@ public partial class LoginViewModel : ObservableObject
             else
             {
                 _tokenStorage.SaveTokens(loginResponse.accessToken, loginResponse.refreshToken);
-
-                var mainWindow = new MainWindow();
-                Frame frame = mainWindow.Content as Frame;
-                if (frame == null)
-                {
-                    frame = new Frame();
-                    mainWindow.Content = frame;
-                }
-                _navigationService.Frame = frame;
-                _navigationService.NavigateTo(typeof(ShellPage));
-                mainWindow.Activate();
-
-                WeakReferenceMessenger.Default.Send(new CloseLoginWindowMessage());
+                _windowService.ShowMainWindow();
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             ErrorMessage = "An error occurred during login. Please check your network and try again.";
         }
