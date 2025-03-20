@@ -1,7 +1,10 @@
-﻿namespace kafi.Models.Authentication
+﻿using System.Text.Json.Serialization;
+
+namespace kafi.Models.Authentication
 {
     public class RefreshTokenRequest
     {
-        public required string refreshToken { get; set; }
+        [JsonPropertyName("refreshToken")]
+        public required string RefreshToken { get; set; }
     }
 }

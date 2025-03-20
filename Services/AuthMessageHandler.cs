@@ -2,11 +2,11 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using kafi.Contracts.Services;
 using kafi.Models.Authentication;
-using Newtonsoft.Json;
 
 namespace kafi.Service
 {
@@ -49,8 +49,8 @@ namespace kafi.Service
 
         private async Task<bool> TryRefreshTokenAsync(string refreshToken)
         {
-            var refreshRequest = new RefreshTokenRequest { refreshToken = refreshToken };
-            var jsonPayload = JsonConvert.SerializeObject(refreshRequest);
+            var refreshRequest = new RefreshTokenRequest { RefreshToken = refreshToken };
+            var jsonPayload = JsonSerializer.Serialize(refreshRequest);
             var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             using (var client = new HttpClient())
@@ -60,9 +60,8 @@ namespace kafi.Service
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var refreshResponse = JsonConvert.DeserializeObject<RefreshTokenResponse>(responseContent);
-                    // Save new tokens securely.
-                    _tokenStorage.SaveTokens(refreshResponse.accessToken, refreshResponse.refreshToken);
+                    var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent);
+                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshResponse.RefreshToken);
                     return true;
                 }
             }

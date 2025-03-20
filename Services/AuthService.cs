@@ -5,22 +5,19 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using kafi.Contracts.Services;
 using kafi.Models;
 using kafi.Models.Authentication;
-using Newtonsoft.Json;
 
 namespace kafi.Service
 {
-    public class AuthService : IAuthService
+    public class AuthService(HttpClient httpClient) : IAuthService
     {
-        private readonly HttpClient _httpClient;
-        public AuthService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-        public User CurrentUser { get; private set; }
+        private readonly HttpClient _httpClient = httpClient;
+
+        public User? CurrentUser { get; private set; }
 
         public bool IsInRole(Role role)
         {
@@ -30,6 +27,8 @@ namespace kafi.Service
         public void LoadCurrentUserFromToken(string accessToken)
         {
             var (id, username, role) = getUserFromToken(accessToken);
+            if (role != "Manager" && role != "Employee")
+                throw new InvalidOperationException("Invalid role in token");
             CurrentUser = new User
             {
                 Id = id,
@@ -42,16 +41,16 @@ namespace kafi.Service
         {
             try
             {
-                var jsonPayload = JsonConvert.SerializeObject(request);
+                var jsonPayload = JsonSerializer.Serialize(request);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync("auth/sign-in", content);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(responseContent);
+                    var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
 
-                    LoadCurrentUserFromToken(loginResponse.accessToken);
+                    LoadCurrentUserFromToken(loginResponse.AccessToken);
 
                     return loginResponse;
                 }
@@ -87,7 +86,7 @@ namespace kafi.Service
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var logoutResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseContent);
+                    var logoutResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     var message = logoutResponse!["message"].ToString();
                     CurrentUser = null;
                     return message;
