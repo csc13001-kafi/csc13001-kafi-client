@@ -15,9 +15,9 @@
   <ItemGroup>
     <None Remove="Controls\HeaderControl.xaml" />
     <None Remove="Controls\LoginImage.xaml" />
+    <None Remove="LoginWindow.xaml" />
     <None Remove="Styles\TextBlock.xaml" />
     <None Remove="Views\InventoryPage.xaml" />
-    <None Remove="Views\LoginPage.xaml" />
     <None Remove="Views\TablePage.xaml" />
   </ItemGroup>
 
@@ -44,10 +44,14 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.1.240916" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" Version="7.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Assets\Background.png">
@@ -74,6 +78,9 @@
     <Content Update="Assets\Fonts\Lexend-SemiBold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="Assets\WindowIcon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\InventoryPage.xaml">
@@ -92,11 +99,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Styles\Image.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -135,8 +137,18 @@
     <None Include="C:\Users\Admin\OneDrive - VNU-HCMUS\College\Year 3\Sem2\Windows Prog\csc13001-kafi-client\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Styles\TextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Messages\" />
   </ItemGroup>
 </Project>

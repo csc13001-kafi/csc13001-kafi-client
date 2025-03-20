@@ -1,41 +1,59 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using kafi.Contracts.Services;
+using kafi.Models;
 
 namespace kafi.ViewModels;
-
-public class NavItem
+public partial class ShellViewModel : ObservableObject
 {
-    public string Icon
-    {
-        get; set;
-    }
-    public string Content
-    {
-        get; set;
-    }
-    public string Tag
-    {
-        get; set;
-    }
-}
+    private readonly IAuthService _authService;
+    private readonly IWindowService _windowService;
+    private readonly ISecureTokenStorage _secureTokenStorage;
 
-public partial class ShellViewModel
-{
-    public ObservableCollection<NavItem> NavItems
-    {
-        get; set;
-    }
+    public bool IsManager => _authService.IsInRole(Role.Manager);
+    public bool IsEmployee => _authService.IsInRole(Role.Employee);
+    public ObservableCollection<NavItem> NavItems;
+    public ObservableCollection<NavItem> FooterItems;
 
-    public ShellViewModel()
+    public ShellViewModel(IAuthService authService, IWindowService windowService, ISecureTokenStorage secureTokenStorage)
     {
-        NavItems = new ObservableCollection<NavItem>
+        _authService = authService;
+        _windowService = windowService;
+        _secureTokenStorage = secureTokenStorage;
+
+        NavItems = [];
+        FooterItems =
+        [
+            new() { Icon = "/Assets/NavLogoutIcon.svg", Content = "Đăng xuất", Tag = "Logout" },
+        ];
+
+        if (IsManager)
         {
-            new() { Icon = "/Assets/IconDashboard.svg", Content = "Tổng quan", Tag = "MainPage" },
-            new() { Icon = "/Assets/IconFoodMenu.svg", Content = "Menu", Tag = "MenuPage" },
-            new() { Icon = "/Assets/IconTeaTime.svg", Content = "Bàn", Tag = "TablePage" },
-            new() { Icon = "/Assets/IconNotepad.svg", Content = "Đơn hàng", Tag = "OrderPage" },
-            new() { Icon = "/Assets/IconInventory.svg", Content = "Kho hàng", Tag = "InventoryPage" },
-            new() { Icon = "/Assets/IconSetting.svg", Content = "Thông tin", Tag = "InfoPage" },
-            new() { Icon = "/Assets/IconLogOut.svg", Content = "Đăng xuất", Tag = "LogOut" },
-        };
+            NavItems.Add(new() { Icon = "/Assets/NavMainIcon.svg", Content = "Tổng quan", Tag = "MainPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavMenuIcon.svg", Content = "Quản lý menu", Tag = "MenuPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavEmployeeIcon.svg", Content = "Quản lý nhân viên", Tag = "EmployeePage" });
+            NavItems.Add(new() { Icon = "/Assets/NavOrderIcon.svg", Content = "Quản lý đơn hàng", Tag = "OrderPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavInventoryIcon.svg", Content = "Quản lý kho", Tag = "InventoryPage" });
+        }
+        else if (IsEmployee)
+        {
+            NavItems.Add(new() { Icon = "/Assets/NavMainIcon.svg", Content = "Tổng quan", Tag = "MainPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavMenuIcon.svg", Content = "Menu", Tag = "MenuPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavTableIcon.svg", Content = "Bàn", Tag = "TablePage" });
+            NavItems.Add(new() { Icon = "/Assets/NavOrderIcon.svg", Content = "Đơn hàng", Tag = "OrderPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavInventoryIcon.svg", Content = "Kho hàng", Tag = "InventoryPage" });
+            FooterItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
+        }
     }
+
+    [RelayCommand]
+    private async Task LogoutAsync()
+    {
+        var message = await _authService.LogoutAsync();
+        _secureTokenStorage.ClearTokens();
+        _windowService.ShowLoginWindow();
+    }
+
 }

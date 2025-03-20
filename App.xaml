@@ -22,7 +22,7 @@
             <FontFamily x:Key="LexendBold">/Assets/Fonts/Lexend-Bold.ttf#Lexend</FontFamily>
 
             <!--  ClimateCrisis Font  -->
-            <FontFamily x:Key="ClimateCrisis">/Assets/Fonts/ClimateCrisis-Regular.ttf#Climate Crisis</FontFamily>
+            <FontFamily x:Key="ClimateCrisis">/Assets/Fonts/ClimateCrisis.ttf#Climate Crisis</FontFamily>
 
             <!--  SeoulHangangCL Font  -->
             <FontFamily x:Key="SeoulHangangCL">/Assets/Fonts/SeoulHangang CL Regular.ttf#SeoulHangang CL</FontFamily>

@@ -12,4 +12,10 @@ public sealed partial class MenuPage : Page
     {
         this.InitializeComponent();
     }
+
+    private void Category_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
+    {
+
+    }
+
 }

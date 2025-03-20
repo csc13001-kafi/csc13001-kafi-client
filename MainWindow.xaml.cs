@@ -1,4 +1,3 @@
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
 
@@ -14,9 +13,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         this.InitializeComponent();
-        this.Title = "Kafi";
-        this.Content = new Views.ShellPage();
         AppWindow.SetIcon("/Assets/WindowIcon.ico");
-        AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+        //   AppWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
     }
 }
