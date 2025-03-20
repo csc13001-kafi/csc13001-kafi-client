@@ -35,8 +35,8 @@ public partial class LoginViewModel(IAuthService authRepository, ISecureTokenSto
         {
             var loginRequest = new LoginRequest
             {
-                username = UserName,
-                password = Password
+                UserName = UserName,
+                Password = Password
             };
 
             var loginResponse = await _authRepository.LoginAsync(loginRequest);
@@ -46,7 +46,7 @@ public partial class LoginViewModel(IAuthService authRepository, ISecureTokenSto
             }
             else
             {
-                _tokenStorage.SaveTokens(loginResponse.accessToken, loginResponse.refreshToken);
+                _tokenStorage.SaveTokens(loginResponse.AccessToken, loginResponse.RefreshToken);
                 _windowService.ShowMainWindow();
             }
         }

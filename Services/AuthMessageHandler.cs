@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,19 +48,16 @@ namespace kafi.Service
 
         private async Task<bool> TryRefreshTokenAsync(string refreshToken)
         {
-            var refreshRequest = new RefreshTokenRequest { RefreshToken = refreshToken };
-            var jsonPayload = JsonSerializer.Serialize(refreshRequest);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri("http://localhost:8080/");
-                var response = await client.PostAsync("auth/refresh-token", content);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshToken);
+                var response = await client.GetAsync("auth/refresh-token");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent);
-                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshResponse.RefreshToken);
+                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshToken);
                     return true;
                 }
             }

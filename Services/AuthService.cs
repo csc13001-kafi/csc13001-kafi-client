@@ -13,9 +13,9 @@ using kafi.Models.Authentication;
 
 namespace kafi.Service
 {
-    public class AuthService(HttpClient httpClient) : IAuthService
+    public class AuthService(IHttpClientFactory httpClientFactory) : IAuthService
     {
-        private readonly HttpClient _httpClient = httpClient;
+        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Common");
 
         public User? CurrentUser { get; private set; }
 

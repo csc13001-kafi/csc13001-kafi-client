@@ -31,22 +31,28 @@ public partial class App : Application
     {
         var services = new ServiceCollection();
 
+        // Windows
         services.AddTransient<LoginWindow>();
         services.AddTransient<MainWindow>();
 
-        services.AddSingleton<ISecureTokenStorage, SecureTokenStorage>();
-        services.AddSingleton<INavigationService, NavigationService>();
-        services.AddSingleton<IActivationService, ActivationService>();
-        services.AddSingleton<IWindowService, WindowService>();
-
+        // HttpClient
         services.AddTransient<AuthMessageHandler>();
-        services.AddHttpClient<AuthService>(client =>
+        services.AddHttpClient("Common", client =>
         {
             client.BaseAddress = new Uri("http://localhost:8080/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         })
         .AddHttpMessageHandler<AuthMessageHandler>();
-        services.AddSingleton<IAuthService>(sp => sp.GetRequiredService<AuthService>());
+
+        // Services
+        services.AddSingleton<ISecureTokenStorage, SecureTokenStorage>();
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IActivationService, ActivationService>();
+        services.AddSingleton<IWindowService, WindowService>();
+        services.AddSingleton<IAuthService, AuthService>();
+
+
+
 
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
