@@ -1,5 +1,7 @@
 ﻿using System;
 using kafi.Contracts.Services;
+using kafi.Data;
+using kafi.Repositories;
 using kafi.Service;
 using kafi.Services;
 using kafi.ViewModels;
@@ -51,13 +53,15 @@ public partial class App : Application
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IAuthService, AuthService>();
 
+        // Repositories and Daos
+        services.AddSingleton<IEmployeeDao, RestEmployeeDao>();
+        services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
 
-
-
+        // Viewmodels
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
         services.AddTransient<MenuViewModel>();
-
+        services.AddTransient<EmployeeViewModel>();
 
         Services = services.BuildServiceProvider();
     }
