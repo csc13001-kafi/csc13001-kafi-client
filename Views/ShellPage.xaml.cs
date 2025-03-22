@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using kafi.Models;
@@ -49,10 +48,11 @@ public sealed partial class ShellPage : Page
                 case "InventoryPage":
                     ContentFrame.Navigate(typeof(InventoryPage));
                     break;
+                case "EmployeePage":
+                    ContentFrame.Navigate(typeof(EmployeePage));
+                    break;
                 case "Logout":
-                    Debug.WriteLine("logout");
                     ViewModel.LogoutCommand.Execute(null);
-                    Debug.WriteLine("done");
                     break;
             }
             ShowOrHideHeader(selectedTag);
@@ -61,7 +61,7 @@ public sealed partial class ShellPage : Page
 
     private async void ShowOrHideHeader(string pageTag)
     {
-        var pagesWithoutHeader = new string[] { "LoginPage" };
+        var pagesWithoutHeader = new string[] { };
         var shouldShowHeader = !pagesWithoutHeader.Contains(pageTag);
 
         var header = FindName("PageHeader") as UIElement;
