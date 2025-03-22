@@ -1,0 +1,41 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using kafi.Contracts.Repository;
+using kafi.Data;
+using kafi.Models;
+
+namespace kafi.Repositories
+{
+    public interface IEmployeeRepository : IRepository<User>
+    {
+    }
+
+    public class EmployeeRepository(IEmployeeDao dao) : IEmployeeRepository
+    {
+        private readonly IEmployeeDao _dao = dao;
+        public async Task Add(object entity)
+        {
+            await _dao.Add(entity);
+        }
+
+        public async Task Delete(string id)
+        {
+            await _dao.Delete(id);
+        }
+
+        public async Task<IEnumerable<User>> GetAll()
+        {
+            return await _dao.GetAll();
+        }
+
+        public Task<User>? GetById(string id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public async Task Update(string id, object entity)
+        {
+            await _dao.Update(id, entity);
+        }
+    }
+}

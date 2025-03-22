@@ -7,9 +7,9 @@ namespace kafi.Contracts.Data
         where T : class
     {
         Task<IEnumerable<T>> GetAll();
-        Task Add(T entity);
-        Task Update(T entity);
-        Task Delete(T entity);
-        Task<T>? GetById(int id);
+        Task Add(object entity);
+        Task Update(string id, object entity);
+        Task Delete(string id);
+        Task<T>? GetById(string id);
     }
 }

@@ -4,4 +4,8 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
     <Color x:Key="SecondaryColor">#1F3E26</Color>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
+    <SolidColorBrush
+        x:Key="PopupLightDismissOverlayBackground"
+        Opacity="0.2"
+        Color="Black" />
 </ResourceDictionary>
