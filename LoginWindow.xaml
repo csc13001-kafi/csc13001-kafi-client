@@ -106,15 +106,7 @@
                     PlaceholderText="Mật khẩu" />
             </StackPanel>
             <StackPanel Orientation="Vertical" Spacing="10">
-                <TextBlock
-                    Height="20"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Top"
-                    FontFamily="{StaticResource LexendSemiBold}"
-                    FontSize="16"
-                    FontWeight="SemiBold"
-                    Foreground="Red"
-                    Text="{x:Bind ViewModel.ErrorMessage, Mode=TwoWay}" />
+                <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=TwoWay}" />
                 <Button
                     x:Name="LoginButton"
                     Width="200"

@@ -82,7 +82,7 @@ namespace kafi.Service
         {
             try
             {
-                var response = await _httpClient.PostAsync("auth/sign-out", null);
+                var response = await _httpClient.DeleteAsync("auth/sign-out");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
