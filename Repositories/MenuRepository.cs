@@ -1,6 +1,6 @@
 using kafi.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace kafi.Data
@@ -46,8 +46,7 @@ namespace kafi.Data
 
         public async Task<IEnumerable<Product>> GetMenuItemsByCategory(int categoryId)
         {
-            var response = await _menuDao.GetCategoriesAndProducts();
-            return response.Products.Where(p => p.OptionGroups.Any(og => og.ProductId == categoryId));
+            throw new NotImplementedException();
         }
     }
 }
