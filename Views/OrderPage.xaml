@@ -11,14 +11,13 @@
     xmlns:viewmodels="using:kafi.ViewModels"
     xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
-    <Page.DataContext>
-        <viewmodels:OrderViewModel />
-    </Page.DataContext>
     <Page.Resources>
         <converters:PaymentTypeToBackgroundConverter x:Key="PaymentTypeToBackgroundConverter" />
         <converters:PaymentTypeToForegroundConverter x:Key="PaymentTypeToForegroundConverter" />
+        <converters:IdToTextConverter x:Key="IdToTextConverter" />
     </Page.Resources>
     <StackPanel Padding="0,0,10,0" Spacing="40">
+
         <TextBlock Style="{StaticResource PageTitleStyle}" Text="Đơn hàng" />
         <StackPanel
             Padding="40"
@@ -39,7 +38,7 @@
                 GridLinesVisibility="Horizontal"
                 HorizontalScrollBarVisibility="Hidden"
                 IsReadOnly="True"
-                ItemsSource="{Binding Orders}"
+                ItemsSource="{x:Bind ViewModel.Orders}"
                 RowHeight="50">
                 <controls:DataGrid.ColumnHeaderStyle>
                     <Style TargetType="wctprimitives:DataGridColumnHeader">
@@ -57,8 +56,8 @@
                     </Style>
                 </controls:DataGrid.ColumnHeaderStyle>
                 <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Binding="{Binding Id}" Header="Mã đơn" />
-                    <controls:DataGridTextColumn Binding="{Binding OrderDate}" Header="Thời gian" />
+                    <controls:DataGridTextColumn Binding="{Binding Id, Converter={StaticResource IdToTextConverter}}" Header="Mã đơn" />
+                    <controls:DataGridTextColumn Binding="{Binding Time}" Header="Thời gian" />
                     <controls:DataGridTextColumn Binding="{Binding EmployeeName}" Header="Nhân viên" />
                     <controls:DataGridTemplateColumn Header="Phương thức thanh toán">
                         <controls:DataGridTemplateColumn.CellTemplate>
@@ -66,19 +65,24 @@
                                 <Border
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    Background="{Binding Payment.PaymentType, Converter={StaticResource PaymentTypeToBackgroundConverter}}"
+                                    Background="{Binding PaymentMethod, Converter={StaticResource PaymentTypeToBackgroundConverter}}"
                                     CornerRadius="14">
                                     <TextBlock
                                         Padding="30,6"
-                                        Foreground="{Binding Payment.PaymentType, Converter={StaticResource PaymentTypeToForegroundConverter}}"
-                                        Text="{Binding Payment.PaymentType}" />
+                                        Foreground="{Binding PaymentMethod, Converter={StaticResource PaymentTypeToForegroundConverter}}"
+                                        Text="{Binding PaymentMethod}" />
                                 </Border>
                             </DataTemplate>
                         </controls:DataGridTemplateColumn.CellTemplate>
                     </controls:DataGridTemplateColumn>
-                    <controls:DataGridTextColumn Binding="{Binding Total}" Header="Tổng tiền" />
+                    <controls:DataGridTextColumn Binding="{Binding Price}" Header="Tổng tiền" />
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
+            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                   Width="50" Height="50"
+                   Grid.RowSpan="3"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"/>
             <StackPanel
                 Margin="0,30,0,0"
                 HorizontalAlignment="Center"

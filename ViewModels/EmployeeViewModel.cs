@@ -67,6 +67,9 @@ namespace kafi.ViewModels
         [ObservableProperty]
         private int totalEmployees = 0;
 
+        [ObservableProperty]
+        private bool isLoading;
+
         private List<User> _fullEmployeeList = [];
         public ObservableCollection<User> Employees { get; } = new ObservableCollection<User>();
 
@@ -114,11 +117,19 @@ namespace kafi.ViewModels
 
         private bool CanLoadEmployees => !Employees.Any();
         [RelayCommand(CanExecute = nameof(CanLoadEmployees))]
+        
         private async Task LoadEmployeesAsync()
         {
-            _fullEmployeeList = [.. await _repository.GetAll()];
-            TotalEmployees = _fullEmployeeList.Count;
-            UpdatePagedView();
+            IsLoading = true;
+            try {
+                _fullEmployeeList = [.. await _repository.GetAll()];
+                TotalEmployees = _fullEmployeeList.Count;
+                UpdatePagedView();
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+            } finally {
+                IsLoading = false;
+            }
         }
 
         [RelayCommand]

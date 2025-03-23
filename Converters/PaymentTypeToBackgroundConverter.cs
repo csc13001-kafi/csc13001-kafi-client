@@ -11,18 +11,14 @@ namespace kafi.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is PaymentType paymentType)
+            switch (value)
             {
-                switch (paymentType)
-                {
-                    case PaymentType.Cash:
-                        return new SolidColorBrush(Color.FromArgb(255, 230, 246, 233));
-                    case PaymentType.Banking:
-                        return new SolidColorBrush(Color.FromArgb(38, 255, 176, 116));
-                    case PaymentType.Momo:
-                        return new SolidColorBrush(Color.FromArgb(255, 246, 230, 240));
-                }
+                case "Cash":
+                    return new SolidColorBrush(Color.FromArgb(255, 230, 246, 233));
+                case "QR":
+                    return new SolidColorBrush(Color.FromArgb(38, 255, 176, 116));
             }
+            
             return new SolidColorBrush(Colors.Transparent);
         }
 

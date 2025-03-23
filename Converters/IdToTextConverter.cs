@@ -8,13 +8,12 @@ namespace kafi.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            string id = (string)value;
-            if (!id.Contains('-'))
+            if (value is Guid id)
             {
-                return id;
+                string idString = id.ToString().ToUpper();
+                return idString.Length > 5 ? idString.Substring(0, 5) : idString;
             }
-            string[] splits = id.Split('-');
-            return splits.Last();
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
