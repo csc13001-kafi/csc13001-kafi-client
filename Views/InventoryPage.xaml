@@ -10,10 +10,8 @@
     xmlns:viewmodels="using:kafi.ViewModels"
     xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
-    <Page.DataContext>
-        <viewmodels:InventoryViewModel />
-    </Page.DataContext>
     <Page.Resources>
+        
         <!--  Storyboard để hiển thị bảng (sheet)  -->
         <Storyboard x:Name="ShowSheetStoryboard">
             <DoubleAnimation
@@ -117,8 +115,10 @@
                 GridLinesVisibility="Horizontal"
                 HorizontalScrollBarVisibility="Hidden"
                 IsReadOnly="True"
-                ItemsSource="{Binding Inventories}"
-                RowHeight="50">
+                ItemsSource="{x:Bind ViewModel.Inventories, Mode=OneWay}"
+                RowHeight="50"
+                SelectionMode="Single"
+                SelectionChanged="DataGrid_SelectionChanged">
                 <controls:DataGrid.ColumnHeaderStyle>
                     <Style TargetType="wctprimitives:DataGridColumnHeader">
                         <Setter Property="Template">
@@ -135,15 +135,24 @@
                     </Style>
                 </controls:DataGrid.ColumnHeaderStyle>
                 <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Binding="{Binding Id}" Header="ID" />
-                    <controls:DataGridTextColumn Binding="{Binding QuantityInStock}" Header="Tồn kho" />
-                    <controls:DataGridTextColumn Binding="{Binding ReorderLevel}" Header="Ngưỡng" />
-                    <controls:DataGridTextColumn Binding="{Binding LastUpdated}" Header="Cập nhật lần cuối" />
-                    <controls:DataGridTextColumn Binding="{Binding ExpireDate}" Header="Hạn sử dụng" />
-                    <controls:DataGridTextColumn Binding="{Binding Unit}" Header="Đơn vị" />
-                    <controls:DataGridTextColumn Binding="{Binding UnitPrice}" Header="Giá" />
+                    <controls:DataGridTextColumn Binding="{Binding Name}" Header="Sản phẩm" />
+                    <controls:DataGridTextColumn Binding="{Binding OriginalStock}" Header="Số lượng nhập kho" />
+                    <controls:DataGridTextColumn Binding="{Binding CurrentStock}" Header="Trạng thái" />
+                    <controls:DataGridTextColumn Binding="{Binding ExpiredDate}" Header="Hạn sử dụng" />
+                    <controls:DataGridTextColumn Binding="{Binding Unit}" Header="Đơn vị đo" />
+                    <controls:DataGridTextColumn Binding="{Binding Price}" Header="Giá nhập" />
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
+            
+            <!-- Loading indicator -->
+            <ProgressRing 
+                IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                Width="50" 
+                Height="50"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"/>
+                
             <StackPanel
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
@@ -162,8 +171,9 @@
                     Trang trước
                 </Button>
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <TextBlock x:Name="CurrentDataPage" Text="1" />
-                    <TextBlock x:Name="TotalDataPage" Text="/5" />
+                    <TextBlock Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}" />
+                    <TextBlock Text="/" />
+                    <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" />
                 </StackPanel>
                 <Button x:Name="NextButton">
                     Trang sau
