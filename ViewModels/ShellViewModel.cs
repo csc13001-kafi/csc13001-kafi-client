@@ -36,6 +36,7 @@ public partial class ShellViewModel : ObservableObject
             NavItems.Add(new() { Icon = "/Assets/NavEmployeeIcon.svg", Content = "Quản lý nhân viên", Tag = "EmployeePage" });
             NavItems.Add(new() { Icon = "/Assets/NavOrderIcon.svg", Content = "Quản lý đơn hàng", Tag = "OrderPage" });
             NavItems.Add(new() { Icon = "/Assets/NavInventoryIcon.svg", Content = "Quản lý kho", Tag = "InventoryPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
         }
         else if (IsEmployee)
         {
