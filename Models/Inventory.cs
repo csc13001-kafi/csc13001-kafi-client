@@ -1,16 +1,35 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace kafi.Models
 {
     public class Inventory
     {
-        public int Id { get; set; }
-        public int ProductId { get; set; }
-        public int QuantityInStock { get; set; }
-        public int ReorderLevel { get; set; }
-        public DateTime LastUpdated { get; set; }
-        public DateTime ExpireDate { get; set; }
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("orginalStock")]
+        public decimal OriginalStock { get; set; }
+
+        [JsonPropertyName("currentStock")]
+        public decimal CurrentStock { get; set; }
+
+        [JsonPropertyName("unit")]
         public string Unit { get; set; }
-        public decimal UnitPrice { get; set; }
+
+        [JsonPropertyName("expiredDate")]
+        public DateTime ExpiredDate { get; set; }
+
+        [JsonPropertyName("price")]
+        public decimal Price { get; set; }
+
+        [JsonPropertyName("createdAt")]
+        public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("updatedAt")]
+        public DateTime UpdatedAt { get; set; }
     }
 }

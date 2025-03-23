@@ -60,6 +60,8 @@ public partial class App : Application
         services.AddSingleton<IMenuRepository, MenuRepository>();
         services.AddSingleton<IOrderDao, RestOrderDao>();
         services.AddSingleton<IOrderRepository, OrderRepository>();
+        services.AddSingleton<IInventoryDao, RestInventoryDao>();
+        services.AddSingleton<IInventoryRepository, InventoryRepository>();
 
         // Viewmodels
         services.AddTransient<LoginViewModel>();
@@ -68,6 +70,7 @@ public partial class App : Application
         services.AddTransient<EmployeeViewModel>();
         services.AddTransient<InfoViewModel>();
         services.AddTransient<OrderViewModel>();
+        services.AddTransient<InventoryViewModel>();
 
         Services = services.BuildServiceProvider();
     }

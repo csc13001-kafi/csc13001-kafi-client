@@ -22,8 +22,14 @@ namespace kafi.Views
 
         public InventoryPage()
         {
-            ViewModel = new InventoryViewModel();
+            ViewModel = App.Services.GetService(typeof(InventoryViewModel)) as InventoryViewModel;
             this.InitializeComponent();
+            Loaded += InventoryPage_Loaded;
+        }
+
+        private async void InventoryPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            await ViewModel.LoadDataCommand.ExecuteAsync(null);
         }
 
         private void AddInventoryButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -64,6 +70,14 @@ namespace kafi.Views
         private void Overlay_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             CloseSheetButton_Click(sender, e);
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is Models.Inventory selectedInventory)
+            {
+                _ = ViewModel.SelectInventoryCommand.ExecuteAsync(selectedInventory);
+            }
         }
     }
 }
