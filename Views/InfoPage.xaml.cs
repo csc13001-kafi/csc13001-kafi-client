@@ -1,3 +1,4 @@
+using kafi.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -11,9 +12,21 @@ namespace kafi.Views
     /// </summary>
     public sealed partial class InfoPage : Page
     {
+        public InfoViewModel ViewModel { get; }
+
         public InfoPage()
         {
+            ViewModel = App.Services.GetService(typeof(InfoViewModel)) as InfoViewModel;
             this.InitializeComponent();
+            
+            this.DataContext = ViewModel;
+            
+            Loaded += InfoPage_Loaded;
+        }
+
+        private async void InfoPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            await ViewModel.LoadUserInfoAsync();
         }
 
         private void ChangeProfilePictureButton_Click(object sender, RoutedEventArgs e)
