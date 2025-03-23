@@ -1,5 +1,7 @@
 using kafi.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -16,7 +18,13 @@ public sealed partial class OrderPage : Page
     }
     public OrderPage()
     {
-        ViewModel = new OrderViewModel();
+        ViewModel = App.Services.GetService(typeof(OrderViewModel)) as OrderViewModel;
         this.InitializeComponent();
+        Loaded += OrderPage_Loaded;
+    }
+
+    private async void OrderPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.LoadDataCommand.ExecuteAsync(null);
     }
 }

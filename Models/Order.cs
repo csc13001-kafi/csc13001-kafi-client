@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace kafi.Models
 {
-    public enum OrderStatus
-    {
-        New = 0,
-        InProgress = 1,
-        Completed = 2,
-        Canceled = 3
-    }
     public class Order
     {
-        public int Id { get; set; }
-        public DateTime OrderDate { get; set; } = DateTime.Now;
-        public OrderStatus Status { get; set; } = OrderStatus.New;
-        public int? EmployeeId { get; set; }
-        public string? EmployeeName { get; set; }
-        public int? CustomerId { get; set; }
-        public int? TableId { get; set; }
-        public ICollection<OrderItem> Items { get; set; } = [];
-        public decimal Total => Items.Sum(item => item.Total);
-        public Payment Payment { get; set; }
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
+        [JsonPropertyName("time")]
+        public DateTime Time { get; set; }
+
+        [JsonPropertyName("employeeName")]
+        public string EmployeeName { get; set; }
+
+        [JsonPropertyName("paymentMethod")]
+        public string PaymentMethod { get; set; }
+
+        [JsonPropertyName("price")]
+        public decimal Price { get; set; }
     }
 }
