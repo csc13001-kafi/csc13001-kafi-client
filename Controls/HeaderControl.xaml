@@ -81,11 +81,18 @@
                     Width="40"
                     Height="40"
                     Fill="Gray" />
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontFamily="{StaticResource LexendBold}"
-                    FontWeight="Bold"
-                    Text="Duy Hoàng" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock
+                        x:Name="UsernameTextBlock"
+                        FontFamily="{StaticResource LexendBold}"
+                        FontWeight="Bold"
+                        Text="Unknown User" />
+                    <TextBlock
+                        x:Name="RoleTextBlock"
+                        FontSize="12"
+                        Foreground="#707070"
+                        Text="Unknown Role" />
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>
