@@ -1,53 +1,89 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using kafi.Models;
+using kafi.Data;
 
-namespace kafi.ViewModels;
-
-public partial class MenuViewModel
+namespace kafi.ViewModels
 {
-    public ObservableCollection<Category> Categories
+    public partial class MenuViewModel : ObservableObject
     {
-        get; set;
-    }
-    public ObservableCollection<Product> MenuItems
-    {
-        get; set;
-    }
+        private readonly IMenuRepository _menuRepository;
 
-    public MenuViewModel()
-    {
-        Categories = new ObservableCollection<Category>
+        [ObservableProperty]
+        private ObservableCollection<Category> categories;
+
+        [ObservableProperty]
+        private ObservableCollection<Product> allProducts;
+
+        [ObservableProperty]
+        private ObservableCollection<Product> filteredProducts;
+
+        [ObservableProperty]
+        private Category selectedCategory;
+
+        [ObservableProperty]
+        private bool isLoading;
+
+        public MenuViewModel(IMenuRepository menuRepository)
         {
-            new () { Name = "Đá Xay", Image = "/Assets/Cup.png" },
-            new () { Name = "Trà", Image = "/Assets/Cup.png" },
-            new () { Name = "Matcha", Image = "/Assets/Cup.png" },
-            new () { Name = "Cà Phê", Image = "/Assets/Cup.png" },
-            new () { Name = "Bánh Ngọt", Image = "/Assets/Cup.png" }
-        };
+            _menuRepository = menuRepository;
+            categories = new ObservableCollection<Category>();
+            allProducts = new ObservableCollection<Product>();
+            filteredProducts = new ObservableCollection<Product>();
+        }
 
-        MenuItems = new ObservableCollection<Product>
+        [RelayCommand]
+        private async Task LoadData()
         {
-            new () { Name = "Trà sen nóng", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà vải", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen đá", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà dâu", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà đào cam sả", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen nóng", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà vải", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen đá", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà dâu", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà đào cam sả", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen nóng", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà vải", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen đá", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà dâu", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà đào cam sả", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen nóng", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà vải", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà sen đá", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà dâu", Price = 40, Image = "/Assets/TraSenNong.png" },
-            new () { Name = "Trà đào cam sả", Price = 40, Image = "/Assets/TraSenNong.png" },
-        };
+            IsLoading = true;
 
+            try
+            {
+                var response = await _menuRepository.GetCategoriesAndProducts();
+                var categoriesList = response.Categories.ToList();
+                var productsList = response.Products.ToList();
+
+                Categories = new ObservableCollection<Category>(categoriesList);
+                AllProducts = new ObservableCollection<Product>(productsList);
+                if (Categories.Count > 0)
+                {
+                    FilterByCategory(Categories[0]);
+                }
+                else
+                {
+                    FilteredProducts = new ObservableCollection<Product>(productsList);
+                }            
+            }
+            catch (System.Exception ex)
+            {
+                // Handle error
+                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private void FilterByCategory(Category category)
+        {
+            if (category == null) return;
+
+            if (category.Id == "0") // "All Products" category
+            {
+                FilteredProducts = new ObservableCollection<Product>(AllProducts);
+            }
+            else
+            {
+                var filtered = AllProducts.Where(p => p.CategoryId == category.Id);
+                FilteredProducts = new ObservableCollection<Product>(filtered);
+            }
+
+            SelectedCategory = category;
+        }
     }
 }
