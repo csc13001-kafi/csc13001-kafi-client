@@ -1,12 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace kafi.Models
 {
     public class Category
     {
-        public int Id { get; set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+        
+        [JsonPropertyName("name")]
         public string Name { get; set; }
+        
+        [JsonPropertyName("image")]
         public string Image { get; set; }
-        public List<Product> Products { get; set; }
+        
+        [JsonPropertyName("createdAt")]
+        public DateTime CreatedAt { get; set; }
+        
+        [JsonPropertyName("updatedAt")]
+        public DateTime UpdatedAt { get; set; }
     }
 }

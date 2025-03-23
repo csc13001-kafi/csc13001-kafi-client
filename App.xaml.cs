@@ -56,6 +56,8 @@ public partial class App : Application
         // Repositories and Daos
         services.AddSingleton<IEmployeeDao, RestEmployeeDao>();
         services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
+        services.AddSingleton<IMenuDao, RestMenuDao>();
+        services.AddSingleton<IMenuRepository, MenuRepository>();
 
         // Viewmodels
         services.AddTransient<LoginViewModel>();
