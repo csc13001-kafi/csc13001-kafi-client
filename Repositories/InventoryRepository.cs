@@ -11,46 +11,33 @@ namespace kafi.Repositories
     {
     }
 
-    public class InventoryRepository : IInventoryRepository
+    public class InventoryRepository(IInventoryDao inventoryDao) : IInventoryRepository
     {
-        private readonly IInventoryDao _inventoryDao;
-
-        public InventoryRepository(IInventoryDao inventoryDao)
-        {
-            _inventoryDao = inventoryDao;
-        }
+        private readonly IInventoryDao _inventoryDao = inventoryDao;
 
         public async Task<IEnumerable<Inventory>> GetAll()
         {
-            var tmp = await _inventoryDao.GetAll();
-            foreach (var item in tmp)
-            {
-                System.Diagnostics.Trace.WriteLine(item.Name);
-                System.Diagnostics.Trace.WriteLine(item.OriginalStock);
-                System.Diagnostics.Trace.WriteLine(item.CurrentStock);
-                System.Diagnostics.Trace.WriteLine(item.Unit);
-            }
-            return tmp;
+            return await _inventoryDao.GetAll();
         }
 
-        public async Task<Inventory>? GetById(string id)
+        public async Task<Inventory>? GetById(Guid id)
         {
-            throw new NotImplementedException();
+            return await _inventoryDao.GetById(id);
         }
 
-        public async Task Add(object inventory)
+        public async Task<object> Add(object inventory)
         {
-            throw new NotImplementedException();
+            return await _inventoryDao.Add(inventory);
         }
 
-        public async Task Update(string id, object inventory)
+        public async Task Update(Guid id, object inventory)
         {
-            throw new NotImplementedException();
+            await _inventoryDao.Update(id, inventory);
         }
 
-        public async Task Delete(string id)
+        public async Task Delete(Guid id)
         {
-            throw new NotImplementedException();
+            await _inventoryDao.Delete(id);
         }
     }
 }
