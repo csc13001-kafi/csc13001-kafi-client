@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace kafi.Contracts.Data
@@ -7,9 +8,9 @@ namespace kafi.Contracts.Data
         where T : class
     {
         Task<IEnumerable<T>> GetAll();
-        Task Add(object entity);
-        Task Update(string id, object entity);
-        Task Delete(string id);
-        Task<T>? GetById(string id);
+        Task<object> Add(object entity);
+        Task Update(Guid id, object entity);
+        Task Delete(Guid id);
+        Task<T>? GetById(Guid id);
     }
 }

@@ -12,7 +12,7 @@ namespace kafi.Models
     public class User
     {
         [JsonPropertyName("id")]
-        public string? Id { get; set; }
+        public Guid Id { get; set; }
 
         [JsonPropertyName("username")]
         public string? Name { get; set; }

@@ -73,7 +73,11 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <controls:HeaderControl x:Name="PageHeader" Grid.Row="0" />
+            <controls:HeaderControl
+                x:Name="PageHeader"
+                Grid.Row="0"
+                IsManager="{x:Bind ViewModel.IsManager, Mode=OneWay}"
+                Username="{x:Bind ViewModel.Username, Mode=OneWay}" />
             <Frame x:Name="ContentFrame" Grid.Row="1" />
         </Grid>
         <VisualStateManager.VisualStateGroups>

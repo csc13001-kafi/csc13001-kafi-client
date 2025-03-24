@@ -12,6 +12,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly ISecureTokenStorage _secureTokenStorage;
 
+    public string Username => _authService.CurrentUser?.Name ?? "Unknown User";
     public bool IsManager => _authService.IsInRole(Role.Manager);
     public bool IsEmployee => _authService.IsInRole(Role.Employee);
     public ObservableCollection<NavItem> NavItems;

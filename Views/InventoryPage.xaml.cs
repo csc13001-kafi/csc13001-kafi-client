@@ -1,9 +1,11 @@
-﻿using kafi.ViewModels;
+﻿using System;
+using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Navigation;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -15,21 +17,19 @@ namespace kafi.Views
     /// </summary>
     public sealed partial class InventoryPage : Page
     {
-        public InventoryViewModel ViewModel
-        {
-            get;
-        }
+        public InventoryViewModel ViewModel { get; }
 
         public InventoryPage()
         {
-            ViewModel = App.Services.GetService(typeof(InventoryViewModel)) as InventoryViewModel;
+            ViewModel = (InventoryViewModel)App.Services.GetService(typeof(InventoryViewModel))!;
+            this.NavigationCacheMode = NavigationCacheMode.Enabled;
             this.InitializeComponent();
-            Loaded += InventoryPage_Loaded;
         }
-
-        private async void InventoryPage_Loaded(object sender, RoutedEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            await ViewModel.LoadDataCommand.ExecuteAsync(null);
+            base.OnNavigatedTo(e);
+            if (ViewModel.LoadDataCommand.CanExecute(null))
+                await ViewModel.LoadDataCommand.ExecuteAsync(null);
         }
 
         private void AddInventoryButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -44,40 +44,55 @@ namespace kafi.Views
 
         private void AddInventoryButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            Overlay.Visibility = Visibility.Visible;
-            var showOverlay = (Storyboard)Resources["ShowOverlayStoryboard"];
-            showOverlay.Begin();
+            AddInventoryPopup.Height = XamlRoot.Size.Height - 20;
+            AddInventoryPopup.IsOpen = true;
 
-            var showSheet = (Storyboard)Resources["ShowSheetStoryboard"];
-            showSheet.Begin();
-        }
-
-        private void CloseSheetButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            var hideSheet = (Storyboard)Resources["HideSheetStoryboard"];
-            hideSheet.Completed += (s, args) =>
+            var storyboard = new Storyboard();
+            var animation = new DoubleAnimation
             {
-                var hideOverlay = (Storyboard)Resources["HideOverlayStoryboard"];
-                hideOverlay.Completed += (s2, args2) =>
-                {
-                    Overlay.Visibility = Visibility.Collapsed;
-                };
-                hideOverlay.Begin();
+                From = 300,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
-            hideSheet.Begin();
+
+            Storyboard.SetTarget(animation, PopupTranslateTransform);
+            Storyboard.SetTargetProperty(animation, "X");
+            storyboard.Children.Add(animation);
+            storyboard.Begin();
         }
 
-        private void Overlay_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+        private void ClosePopupButton_Click(object sender, RoutedEventArgs e)
         {
-            CloseSheetButton_Click(sender, e);
-        }
-
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count > 0 && e.AddedItems[0] is Models.Inventory selectedInventory)
+            var closeStoryboard = new Storyboard();
+            var closeAnimation = new DoubleAnimation
             {
-                _ = ViewModel.SelectInventoryCommand.ExecuteAsync(selectedInventory);
-            }
+                From = 0,
+                To = 300,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            Storyboard.SetTarget(closeAnimation, PopupTranslateTransform);
+            Storyboard.SetTargetProperty(closeAnimation, "X");
+            closeStoryboard.Children.Add(closeAnimation);
+
+            closeStoryboard.Completed += (s, e) =>
+            {
+                AddInventoryPopup.IsOpen = false;
+            };
+
+            closeStoryboard.Begin();
+        }
+
+        private void DeleteAllInputsButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            DeleteAllText.Foreground = (SolidColorBrush)App.Current.Resources["PrimaryBrush"];
+        }
+
+        private void DeleteAllInputsButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            DeleteAllText.Foreground = new SolidColorBrush(Colors.Black);
         }
     }
 }
