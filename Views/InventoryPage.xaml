@@ -15,6 +15,10 @@
     <Page.Resources>
         <helpers:BindingProxy x:Key="InventoryProxy" Data="{x:Bind ViewModel}" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
+        <converters:ExpiredDateToStringConverter x:Key="ExpiredDateToStringConverter" />
+        <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter" />
+        <converters:StatusToForegroundConverter x:Key="StatusToForegroundConverter" />
+        <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -22,6 +26,13 @@
         <SolidColorBrush x:Key="NumberBoxControlBorderBrushPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent" />
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="ContentPresenter">
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="FontFamily" Value="{StaticResource LexendBold}" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
     </Page.Resources>
     <Grid>
         <Grid Padding="0,0,10,0">
@@ -76,6 +87,8 @@
                     AutoGenerateColumns="False"
                     Background="White"
                     CanUserReorderColumns="True"
+                    CellStyle="{StaticResource CenterDataGridCellStyle}"
+                    ColumnHeaderStyle="{StaticResource CenterDataGridColumnHeaderStyle}"
                     ColumnWidth="*"
                     Foreground="#71747D"
                     FrozenColumnCount="1"
@@ -85,29 +98,56 @@
                     ItemsSource="{x:Bind ViewModel.Inventories, Mode=OneWay}"
                     RowHeight="50"
                     VerticalScrollBarVisibility="Auto">
-                    <controls:DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="wctprimitives:DataGridColumnHeader">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
-                                        <ContentPresenter
-                                            Background="White"
-                                            FontFamily="{StaticResource LexendBold}"
-                                            FontSize="15"
-                                            FontWeight="Bold"
-                                            Foreground="Black" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </controls:DataGrid.ColumnHeaderStyle>
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTextColumn Binding="{Binding Name}" Header="Sản phẩm" />
+                        <controls:DataGridTextColumn
+                            Binding="{Binding Name}"
+                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            Header="Sản phẩm"
+                            HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}" />
                         <controls:DataGridTextColumn Binding="{Binding OriginalStock}" Header="Số lượng nhập" />
-                        <controls:DataGridTextColumn Binding="{Binding CurrentStock}" Header="Trạng thái" />
-                        <controls:DataGridTextColumn Binding="{Binding ExpiredDate}" Header="Hạn sử dụng" />
+                        <controls:DataGridTemplateColumn Header="Trạng thái">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Margin="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{Binding CurrentStock, Converter={StaticResource StatusToBackgroundConverter}}"
+                                        CornerRadius="14">
+                                        <TextBlock
+                                            Padding="30,6"
+                                            FontFamily="{StaticResource LexendMedium}"
+                                            FontWeight="Medium"
+                                            Foreground="{Binding CurrentStock, Converter={StaticResource StatusToForegroundConverter}}"
+                                            Text="{Binding CurrentStock}" />
+                                    </Border>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTemplateColumn Header="Hạn sử dụng">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Padding="10"
+                                        VerticalAlignment="Center"
+                                        Foreground="#71747D"
+                                        Text="{Binding ExpiredDate, Converter={StaticResource ExpiredDateToStringConverter}}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip
+                                                Content="{Binding ExpiredDate}"
+                                                Placement="top"
+                                                VerticalOffset="10" />
+                                        </ToolTipService.ToolTip>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
                         <controls:DataGridTextColumn Binding="{Binding Unit}" Header="Đơn vị đo" />
-                        <controls:DataGridTextColumn Binding="{Binding Price}" Header="Giá nhập" />
+                        <controls:DataGridTextColumn
+                            Binding="{Binding Price, Converter={StaticResource PriceToStringConverter}}"
+                            CellStyle="{StaticResource RightDataGridCellStyle}"
+                            Header="Giá mua"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}" />
                         <controls:DataGridTemplateColumn
                             MaxWidth="150"
                             CanUserReorder="False"
