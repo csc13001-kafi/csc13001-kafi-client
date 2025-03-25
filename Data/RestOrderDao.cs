@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -18,10 +19,20 @@ namespace kafi.Data
 
         public async Task<IEnumerable<Order>> GetAll()
         {
-            var response = await _httpClient.GetAsync("/orders");
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<IEnumerable<Order>>(json);
+            try {
+                var response = await _httpClient.GetAsync("/orders");
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<IEnumerable<Order>>(json);
+            }
+            catch (HttpRequestException ex)
+            {
+                return Enumerable.Empty<Order>();
+            }
+            catch (JsonException ex)
+            {
+                return Enumerable.Empty<Order>();
+            }
         }
 
         public Task Add(object entity)

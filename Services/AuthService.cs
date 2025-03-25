@@ -26,7 +26,7 @@ namespace kafi.Service
 
         public void LoadCurrentUserFromToken(string accessToken)
         {
-            var (id, username, role) = getUserFromToken(accessToken);
+            var (id, username, role) = GetUserFromToken(accessToken);
             if (role != "Manager" && role != "Employee")
                 throw new InvalidOperationException("Invalid role in token");
             CurrentUser = new User
@@ -64,14 +64,14 @@ namespace kafi.Service
             }
         }
 
-        private (string, string, string) getUserFromToken(string token)
+        private static (Guid, string, string) GetUserFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 
             var claims = jwtToken.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
 
-            var id = claims.GetValueOrDefault("id", "");
+            var id = Guid.Parse(claims.GetValueOrDefault("id", ""));
             var username = claims.GetValueOrDefault("username", "");
             var role = claims.GetValueOrDefault("role", "");
 
