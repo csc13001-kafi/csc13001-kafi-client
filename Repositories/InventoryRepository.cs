@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using kafi.Contracts.Repository;
 using kafi.Data;
-using kafi.Models;
+using kafi.Models.Inventory;
 
 namespace kafi.Repositories
 {

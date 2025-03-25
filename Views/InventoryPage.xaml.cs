@@ -1,4 +1,6 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -28,8 +30,21 @@ namespace kafi.Views
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this, (recipient, message) =>
+            {
+                if (message.Value == "")
+                {
+                    ClosePopupButton_Click(null, null);
+                }
+            });
             if (ViewModel.LoadDataCommand.CanExecute(null))
                 await ViewModel.LoadDataCommand.ExecuteAsync(null);
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string>>(this);
         }
 
         private void AddInventoryButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -87,12 +102,30 @@ namespace kafi.Views
 
         private void DeleteAllInputsButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            DeleteAllText.Foreground = (SolidColorBrush)App.Current.Resources["PrimaryBrush"];
+            if (sender is Button button)
+            {
+                var textBlock = (TextBlock)button.Content;
+                textBlock.Foreground = (SolidColorBrush)App.Current.Resources["PrimaryBrush"];
+            }
         }
 
         private void DeleteAllInputsButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            DeleteAllText.Foreground = new SolidColorBrush(Colors.Black);
+            if (sender is Button button)
+            {
+                var textBlock = (TextBlock)button.Content;
+                textBlock.Foreground = new SolidColorBrush(Colors.Black);
+            }
+        }
+
+        private void AddInventoryPopup_Closed(object sender, object e)
+        {
+            if (ViewModel.IsEditing)
+            {
+                ViewModel.IsEditing = false;
+                ViewModel.DeleteAllInputCommand.Execute(null);
+            }
+
         }
     }
 }

@@ -14,7 +14,7 @@
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:BindingProxy x:Key="InventoryProxy" Data="{x:Bind ViewModel}" />
-        <converters:IdToTextConverter x:Key="IdToTextConverter" />
+        <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -117,23 +117,25 @@
                                     <StackPanel
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Orientation="Horizontal">
+                                        Orientation="Horizontal"
+                                        Spacing="10">
                                         <StackPanel.Resources>
                                             <Style TargetType="Button">
                                                 <Setter Property="FontWeight" Value="Bold" />
                                                 <Setter Property="HorizontalAlignment" Value="Center" />
                                                 <Setter Property="VerticalAlignment" Value="Center" />
                                                 <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="CornerRadius" Value="10" />
                                             </Style>
                                         </StackPanel.Resources>
-                                        <Button>
+                                        <Button
+                                            Click="AddInventoryButton_Click"
+                                            Command="{Binding Data.TurnOnEditingCommand, Source={StaticResource InventoryProxy}}"
+                                            CommandParameter="{Binding Id}">
                                             <FontIcon Glyph="&#xEC88;" />
                                         </Button>
-                                        <Button
-                                            Command="{Binding Data.DeleteInventoryCommand, Source={StaticResource InventoryProxy}}"
-                                            CommandParameter="{Binding Id}"
-                                            Foreground="Red">
-                                            <FontIcon Glyph="&#xE74D;" />
+                                        <Button Command="{Binding Data.DeleteInventoryCommand, Source={StaticResource InventoryProxy}}" CommandParameter="{Binding Id}">
+                                            <FontIcon Foreground="Red" Glyph="&#xE74D;" />
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
@@ -188,6 +190,7 @@
                 x:Name="AddInventoryPopup"
                 Width="500"
                 Height="200"
+                Closed="AddInventoryPopup_Closed"
                 IsLightDismissEnabled="True"
                 IsOpen="False"
                 LightDismissOverlayMode="On"
@@ -329,25 +332,46 @@
                             Orientation="Horizontal"
                             Spacing="20">
                             <Button
-                                x:Name="DeleteAllInputsButton"
                                 BorderThickness="0"
                                 Command="{x:Bind ViewModel.DeleteAllInputCommand}"
                                 PointerEntered="DeleteAllInputsButton_PointerEntered"
-                                PointerExited="DeleteAllInputsButton_PointerExited">
-                                <TextBlock x:Name="DeleteAllText">
+                                PointerExited="DeleteAllInputsButton_PointerExited"
+                                Visibility="{x:Bind ViewModel.IsEditing, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                                <TextBlock>
                                     <Underline>
                                         Xóa
                                     </Underline>
                                 </TextBlock>
                             </Button>
                             <Button
-                                x:Name="SubmitAddInventoryButton"
+                                BorderThickness="0"
+                                Command="{x:Bind ViewModel.DeleteAllInputCommand}"
+                                PointerEntered="DeleteAllInputsButton_PointerEntered"
+                                PointerExited="DeleteAllInputsButton_PointerExited"
+                                Visibility="{x:Bind ViewModel.IsEditing, Mode=OneWay}">
+                                <TextBlock>
+                                    <Underline>
+                                        Reset
+                                    </Underline>
+                                </TextBlock>
+                            </Button>
+                            <Button
                                 Padding="40,10,40,10"
                                 Background="{StaticResource SecondaryBrush}"
                                 Command="{x:Bind ViewModel.AddInventoryCommand}"
                                 CornerRadius="20"
-                                Foreground="White">
+                                Foreground="White"
+                                Visibility="{x:Bind ViewModel.IsEditing, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
                                 Lưu
+                            </Button>
+                            <Button
+                                Padding="40,10,40,10"
+                                Background="{StaticResource SecondaryBrush}"
+                                Command="{x:Bind ViewModel.UpdateInventoryCommand}"
+                                CornerRadius="20"
+                                Foreground="White"
+                                Visibility="{x:Bind ViewModel.IsEditing, Mode=OneWay}">
+                                Cập nhật
                             </Button>
                         </StackPanel>
                     </StackPanel>
