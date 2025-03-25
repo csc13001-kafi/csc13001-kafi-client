@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace kafi.Models
+namespace kafi.Models.Inventory
 {
     public class Inventory
     {
@@ -12,10 +12,10 @@ namespace kafi.Models
         public string Name { get; set; }
 
         [JsonPropertyName("orginalStock")]
-        public decimal OriginalStock { get; set; }
+        public int OriginalStock { get; set; }
 
         [JsonPropertyName("currentStock")]
-        public decimal CurrentStock { get; set; }
+        public int CurrentStock { get; set; }
 
         [JsonPropertyName("unit")]
         public string Unit { get; set; }
@@ -24,7 +24,7 @@ namespace kafi.Models
         public DateTime ExpiredDate { get; set; }
 
         [JsonPropertyName("price")]
-        public decimal Price { get; set; }
+        public int Price { get; set; }
 
         [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }

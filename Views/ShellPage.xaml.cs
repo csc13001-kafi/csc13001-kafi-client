@@ -19,7 +19,7 @@ public sealed partial class ShellPage : Page
     public ShellPage()
     {
         this.InitializeComponent();
-        ViewModel = App.Services.GetService(typeof(ShellViewModel)) as ShellViewModel;
+        ViewModel = (ShellViewModel)App.Services.GetService(typeof(ShellViewModel))!;
         ContentFrame.Navigate(typeof(MainPage));
     }
 

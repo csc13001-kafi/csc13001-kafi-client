@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using kafi.Contracts.Data;
-using kafi.Models;
+using kafi.Models.Inventory;
 
 namespace kafi.Data
 {
@@ -19,117 +18,50 @@ namespace kafi.Data
         private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Common");
         private readonly JsonSerializerOptions _options = new()
         {
-            Converters = { new JsonStringEnumConverter() },
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         };
 
         public async Task<IEnumerable<Inventory>> GetAll()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync("/materials");
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-                var inventories = JsonSerializer.Deserialize<IEnumerable<Inventory>>(json, _options);
-                return inventories ?? [];
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-                return [];
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON deserialization failed: {ex.Message}");
-                return [];
-            }
+            var response = await _httpClient.GetAsync("/materials");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            var inventories = JsonSerializer.Deserialize<IEnumerable<Inventory>>(json, _options);
+            return inventories ?? [];
         }
 
         public async Task<Inventory>? GetById(Guid id)
         {
-            try
-            {
-                var response = await _httpClient.GetAsync($"/materials/{id}");
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-                var inventory = JsonSerializer.Deserialize<Inventory>(json, _options);
-                return inventory;
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-                return null;
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON deserialization failed: {ex.Message}");
-                return null;
-            }
+            var response = await _httpClient.GetAsync($"/materials/{id}");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            var inventory = JsonSerializer.Deserialize<Inventory>(json, _options);
+            return inventory;
         }
 
         public async Task<object> Add(object inventory)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(inventory, _options);
-                var response = await _httpClient.PostAsync("/materials", new StringContent(json));
-                response.EnsureSuccessStatusCode();
-                return inventory;
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-                return null;
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON serialization failed: {ex.Message}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred: {ex.Message}");
-                return null;
-            }
+            var json = JsonSerializer.Serialize(inventory, _options);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/materials", content);
+            var payload = await response.Content.ReadAsStringAsync();
+            var newInventory = JsonSerializer.Deserialize<Inventory>(payload, _options);
+            response.EnsureSuccessStatusCode();
+            return newInventory;
         }
 
         public async Task Update(Guid id, object inventory)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(inventory, _options);
-                var response = await _httpClient.PutAsync($"/materials/{id}", new StringContent(json));
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON serialization failed: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred: {ex.Message}");
-            }
+            var json = JsonSerializer.Serialize(inventory, _options);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PatchAsync($"/materials/{id}", content);
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task Delete(Guid id)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"/materials/{id}");
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"An error occurred: {ex.Message}");
-            }
+            var response = await _httpClient.DeleteAsync($"/materials/{id}");
+            response.EnsureSuccessStatusCode();
         }
     }
 }

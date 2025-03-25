@@ -6,21 +6,28 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using kafi.Contracts.Services;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Models;
+using kafi.Models.Inventory;
 using kafi.Repositories;
 
 namespace kafi.ViewModels
 {
-    public partial class InventoryViewModel(IInventoryRepository repository, IAuthService authService) : ObservableValidator
+    [ObservableRecipient]
+    public partial class InventoryViewModel(IInventoryRepository repository) : ObservableValidator
     {
         private readonly IInventoryRepository _repository = repository;
-        private readonly IAuthService _authService = authService;
         private const int DefaultPageSize = 10;
-        public bool IsManager => _authService.IsInRole(Role.Manager);
 
         [ObservableProperty]
         private bool isLoading;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(TurnOnEditingCommand))]
+        private bool isEditing = false;
+
+        public Guid EditingId { get; private set; } = Guid.Empty;
 
         [ObservableProperty]
         [Required]
@@ -97,11 +104,10 @@ namespace kafi.ViewModels
                 return;
             }
 
-            var inventory = new Inventory
+            var inventory = new InventoryRequest
             {
                 Name = Name,
                 OriginalStock = OriginalStock,
-                CurrentStock = CurrentStock,
                 Unit = Unit,
                 ExpiredDate = ExpiredDate.DateTime,
                 Price = Price
@@ -109,22 +115,83 @@ namespace kafi.ViewModels
 
             try
             {
-                await _repository.Add(inventory);
-                _fullInventoryList.Add(inventory);
+                Inventory newInventory = (Inventory)await _repository.Add(inventory) ?? throw new Exception();
+                _fullInventoryList.Add(newInventory);
                 UpdatePagedView();
                 Message = "Inventory added successfully.";
                 DeleteAllInput();
             }
             catch (Exception ex)
             {
-                Message = $"Error adding inventory: {ex.Message}";
+                Message = $"Error adding inventory";
             }
         }
 
-        [RelayCommand]
+        private bool CanTurnOnEditing(Guid id) => id != Guid.Empty && !IsEditing;
+        [RelayCommand(CanExecute = nameof(CanTurnOnEditing))]
+        private void TurnOnEditing(Guid id)
+        {
+            var inventory = _fullInventoryList.FirstOrDefault(u => u.Id == id);
+            if (inventory == null)
+            {
+                return;
+            }
+            Name = inventory.Name;
+            OriginalStock = inventory.OriginalStock;
+            CurrentStock = inventory.CurrentStock;
+            Unit = inventory.Unit;
+            ExpiredDate = inventory.ExpiredDate;
+            Price = inventory.Price;
+
+            IsEditing = true;
+            EditingId = id;
+            UpdateInventoryCommand.NotifyCanExecuteChanged();
+        }
+
+        private bool CanUpdateInventory() => IsEditing && EditingId != Guid.Empty;
+        [RelayCommand(CanExecute = nameof(CanUpdateInventory))]
         private async Task UpdateInventoryAsync()
         {
-            throw new NotImplementedException();
+            ValidateAllProperties();
+            if (HasErrors)
+            {
+                Message = "Please fix the errors above.";
+                return;
+            }
+            var inventory = new InventoryRequest
+            {
+                Name = Name,
+                OriginalStock = OriginalStock,
+                Unit = Unit,
+                ExpiredDate = ExpiredDate.DateTime,
+                Price = Price
+            };
+            try
+            {
+                await _repository.Update(EditingId, inventory);
+                var index = _fullInventoryList.FindIndex(u => u.Id == EditingId);
+                if (index != -1)
+                {
+                    _fullInventoryList[index] = new Inventory
+                    {
+                        Id = EditingId,
+                        Name = Name,
+                        OriginalStock = OriginalStock,
+                        CurrentStock = _fullInventoryList[index].CurrentStock,
+                        Unit = Unit,
+                        ExpiredDate = ExpiredDate.DateTime,
+                        Price = Price,
+                        CreatedAt = _fullInventoryList[index].CreatedAt,
+                        UpdatedAt = DateTimeOffset.Now.DateTime
+                    };
+                }
+                UpdatePagedView();
+                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
+            }
+            catch (Exception ex)
+            {
+                Message = $"Error updating inventory";
+            }
         }
 
         [RelayCommand]
@@ -150,13 +217,31 @@ namespace kafi.ViewModels
         [RelayCommand]
         private void DeleteAllInput()
         {
-            Name = string.Empty;
-            Price = 0;
-            Unit = string.Empty;
-            OriginalStock = 0;
-            ExpiredDate = DateTimeOffset.Now.AddYears(1);
-            Message = string.Empty;
+            if (IsEditing)
+            {
+                var inventory = _fullInventoryList.FirstOrDefault(u => u.Id == EditingId);
+                if (inventory == null)
+                {
+                    return;
+                }
+                Name = inventory.Name;
+                OriginalStock = inventory.OriginalStock;
+                CurrentStock = inventory.CurrentStock;
+                Unit = inventory.Unit;
+                ExpiredDate = inventory.ExpiredDate;
+                Price = inventory.Price;
+            }
+            else
+            {
+                Name = string.Empty;
+                Price = 0;
+                Unit = string.Empty;
+                OriginalStock = 0;
+                ExpiredDate = DateTimeOffset.Now.AddYears(1);
+                Message = string.Empty;
+            }
         }
+
         private void UpdatePagedView()
         {
             TotalItems = _fullInventoryList.Count;
