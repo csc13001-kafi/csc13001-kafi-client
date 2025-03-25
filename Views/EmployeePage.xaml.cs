@@ -1,5 +1,4 @@
 using System;
-using kafi.Models;
 using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -7,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
+using Windows.UI;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -86,37 +86,22 @@ namespace kafi.Views
             closeStoryboard.Begin();
         }
 
-        private async void DataGrid_CellEditEnded(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridCellEditEndedEventArgs e)
-        {
-            if (e.EditAction != CommunityToolkit.WinUI.UI.Controls.DataGridEditAction.Commit)
-                return;
-
-            var editedEmployee = (User)e.Row.DataContext;
-            if (editedEmployee == null) return;
-            try
-            {
-                if (ViewModel.UpdateEmployeeCommand.CanExecute(editedEmployee))
-                    await ViewModel.UpdateEmployeeCommand.ExecuteAsync(editedEmployee);
-            }
-            catch (Exception ex)
-            {
-                await new ContentDialog
-                {
-                    Title = "Error",
-                    Content = $"Failed to update employee: {ex.Message}",
-                    CloseButtonText = "OK"
-                }.ShowAsync();
-            }
-        }
-
         private void DeleteAllInputsButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            DeleteAllText.Foreground = (SolidColorBrush)App.Current.Resources["PrimaryBrush"];
+            if (sender is Button button)
+            {
+                var textBlock = (TextBlock)button.Content;
+                textBlock.Foreground = (SolidColorBrush)App.Current.Resources["PrimaryBrush"];
+            }
         }
 
         private void DeleteAllInputsButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            DeleteAllText.Foreground = new SolidColorBrush(Colors.Black);
+            if (sender is Button button)
+            {
+                var textBlock = (TextBlock)button.Content;
+                textBlock.Foreground = new SolidColorBrush(Colors.Black);
+            }
         }
 
         private void BirthdatePicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
@@ -127,6 +112,99 @@ namespace kafi.Views
             {
                 sender.Date = currentDate;
             }
+        }
+
+        private void ViewEmployeeButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            ViewEmployeePopup.Height = XamlRoot.Size.Height - 120;
+            ViewEmployeePopup.Width = this.ActualWidth - 80;
+            ViewEmployeePopup.IsOpen = true;
+
+            var storyboard = new Storyboard();
+            var animation = new DoubleAnimation
+            {
+                From = -600,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            Storyboard.SetTarget(animation, PopupTranslateYTransform);
+            Storyboard.SetTargetProperty(animation, "Y");
+            storyboard.Children.Add(animation);
+            storyboard.Begin();
+        }
+
+        private void CloseViewPopupButton_Click(object sender, RoutedEventArgs e)
+        {
+            var closeStoryboard = new Storyboard();
+            var closeAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = -600,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            Storyboard.SetTarget(closeAnimation, PopupTranslateYTransform);
+            Storyboard.SetTargetProperty(closeAnimation, "Y");
+            closeStoryboard.Children.Add(closeAnimation);
+
+            closeStoryboard.Completed += (s, e) =>
+            {
+                ViewEmployeePopup.IsOpen = false;
+            };
+
+            closeStoryboard.Begin();
+        }
+
+        private void EditEmployeeButton_Click(object sender, RoutedEventArgs e)
+        {
+            TurnOffIsReadOnlyTextBoxes(PersonalInfoGrid);
+            TurnOffIsReadOnlyTextBoxes(JobInfoGrid);
+            EditBirthdatePicker.IsHitTestVisible = true;
+            EditBirthdatePicker.Background = new SolidColorBrush(Color.FromArgb(255, 240, 240, 240));
+            EditEmployeeButton.Visibility = Visibility.Collapsed;
+            PostEditGrid.Visibility = Visibility.Visible;
+        }
+        private void TurnOnIsReadOnlyTextBoxes(Grid grid)
+        {
+            foreach (var child in grid.Children)
+            {
+                if (child is not TextBox textBox)
+                    continue;
+
+                if (textBox.Name == "RoleTextBox")
+                    continue;
+
+                textBox.IsReadOnly = true;
+                textBox.Background = new SolidColorBrush(Colors.Transparent);
+            }
+        }
+        private void TurnOffIsReadOnlyTextBoxes(Grid grid)
+        {
+            foreach (var child in grid.Children)
+            {
+                if (child is not TextBox textBox)
+                    continue;
+
+                if (textBox.Name == "RoleTextBox")
+                    continue;
+
+                textBox.IsReadOnly = false;
+                textBox.Background = new SolidColorBrush(Color.FromArgb(255, 240, 240, 240));
+            }
+        }
+
+        private void ViewEmployeePopup_Closed(object sender, object e)
+        {
+            TurnOnIsReadOnlyTextBoxes(PersonalInfoGrid);
+            TurnOnIsReadOnlyTextBoxes(JobInfoGrid);
+            EditBirthdatePicker.IsHitTestVisible = false;
+            EditBirthdatePicker.Background = new SolidColorBrush(Colors.Transparent);
+            EditEmployeeButton.Visibility = Visibility.Visible;
+            PostEditGrid.Visibility = Visibility.Collapsed;
         }
     }
 }

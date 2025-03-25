@@ -70,64 +70,28 @@ namespace kafi.ViewModels
         [ObservableProperty]
         private bool isLoading;
 
+        [ObservableProperty]
+        private User selectedUser;
+
         private List<User> _fullEmployeeList = [];
         public ObservableCollection<User> Employees { get; } = new ObservableCollection<User>();
 
-        private void UpdatePagedView()
-        {
-            CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
-
-            TotalPages = (int)Math.Ceiling((double)_fullEmployeeList.Count / PageSize);
-            TotalPages = TotalPages == 0 ? 1 : TotalPages;
-
-            var pagedItems = _fullEmployeeList
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize);
-
-            Employees.Clear();
-            foreach (var item in pagedItems)
-            {
-                Employees.Add(item);
-            }
-
-            GoToPreviousPageCommand.NotifyCanExecuteChanged();
-            GoToNextPageCommand.NotifyCanExecuteChanged();
-        }
-
-        private bool CanGoToPreviousPage => CurrentPage > 1;
-        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
-        private void GoToPreviousPage()
-        {
-            CurrentPage--;
-            UpdatePagedView();
-        }
-
-        private bool CanGoToNextPage => CurrentPage < TotalPages;
-        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
-        private void GoToNextPage()
-        {
-            CurrentPage++;
-            UpdatePagedView();
-        }
-
-        partial void OnPageSizeChanged(int value)
-        {
-            UpdatePagedView();
-        }
-
         private bool CanLoadEmployees => !Employees.Any();
         [RelayCommand(CanExecute = nameof(CanLoadEmployees))]
-        
         private async Task LoadEmployeesAsync()
         {
             IsLoading = true;
-            try {
+            try
+            {
                 _fullEmployeeList = [.. await _repository.GetAll()];
-                TotalEmployees = _fullEmployeeList.Count;
                 UpdatePagedView();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
-            } finally {
+            }
+            finally
+            {
                 IsLoading = false;
             }
         }
@@ -156,8 +120,20 @@ namespace kafi.ViewModels
 
             try
             {
-                await _repository.Add(employee);
-                await LoadEmployeesAsync();
+                UserResponse newUserInfo = (UserResponse)await _repository.Add(employee);
+                _fullEmployeeList.Add(new User
+                {
+                    Id = newUserInfo.Id,
+                    Name = UserName,
+                    Email = Email,
+                    Phone = Phone,
+                    Address = Address,
+                    Salary = Salary,
+                    Birthdate = Birthdate.DateTime,
+                    StartShift = StartShift,
+                    EndShift = EndShift
+                });
+                UpdatePagedView();
                 DeleteAllInput();
             }
             catch (Exception)
@@ -211,7 +187,7 @@ namespace kafi.ViewModels
         }
 
         [RelayCommand]
-        private async Task DeleteEmployeeAsync(string id)
+        private async Task DeleteEmployeeAsync(Guid id)
         {
             try
             {
@@ -242,6 +218,67 @@ namespace kafi.ViewModels
             Address = string.Empty;
             Birthdate = DateTimeOffset.Now;
             Message = string.Empty;
+        }
+
+        [RelayCommand]
+        private void TurnOnEditing(Guid id)
+        {
+            User user = _fullEmployeeList.FirstOrDefault(u => u.Id == id)!;
+            SelectedUser = new User
+            {
+                Id = id,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Salary = user.Salary,
+                Birthdate = user.Birthdate,
+                StartShift = user.StartShift,
+                EndShift = user.EndShift
+            };
+        }
+
+        private void UpdatePagedView()
+        {
+            TotalEmployees = _fullEmployeeList.Count;
+            CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
+
+            TotalPages = (int)Math.Ceiling((double)TotalEmployees / PageSize);
+            TotalPages = TotalPages == 0 ? 1 : TotalPages;
+
+            var pagedItems = _fullEmployeeList
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize);
+
+            Employees.Clear();
+            foreach (var item in pagedItems)
+            {
+                Employees.Add(item);
+            }
+
+            GoToPreviousPageCommand.NotifyCanExecuteChanged();
+            GoToNextPageCommand.NotifyCanExecuteChanged();
+        }
+
+        private bool CanGoToPreviousPage => CurrentPage > 1;
+        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+        private void GoToPreviousPage()
+        {
+            CurrentPage--;
+            UpdatePagedView();
+        }
+
+        private bool CanGoToNextPage => CurrentPage < TotalPages;
+        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+        private void GoToNextPage()
+        {
+            CurrentPage++;
+            UpdatePagedView();
+        }
+
+        partial void OnPageSizeChanged(int value)
+        {
+            UpdatePagedView();
         }
     }
 }
