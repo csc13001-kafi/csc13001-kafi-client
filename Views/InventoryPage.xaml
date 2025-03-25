@@ -149,14 +149,14 @@
                             Header="Giá mua"
                             HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}" />
                         <controls:DataGridTemplateColumn
-                            MaxWidth="150"
+                            Width="Auto"
                             CanUserReorder="False"
-                            CanUserResize="False">
+                            CanUserResize="False"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
+                                        Margin="10,0"
                                         Orientation="Horizontal"
                                         Spacing="10">
                                         <StackPanel.Resources>
