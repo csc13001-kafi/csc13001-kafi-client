@@ -16,6 +16,7 @@
     <None Remove="Controls\HeaderControl.xaml" />
     <None Remove="Controls\LoginImage.xaml" />
     <None Remove="LoginWindow.xaml" />
+    <None Remove="Styles\DataGrid.xaml" />
     <None Remove="Styles\TextBlock.xaml" />
     <None Remove="Views\InventoryPage.xaml" />
     <None Remove="Views\TablePage.xaml" />
@@ -149,5 +150,10 @@
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Messages\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Styles\DataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>
