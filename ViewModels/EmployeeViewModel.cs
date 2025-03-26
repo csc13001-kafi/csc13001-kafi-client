@@ -6,14 +6,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using kafi.Contracts.Services;
 using kafi.Models;
 using kafi.Repositories;
 
 namespace kafi.ViewModels
 {
-    public partial class EmployeeViewModel(IEmployeeRepository repository) : ObservableValidator
+    public partial class EmployeeViewModel(IEmployeeRepository repository, IAuthService authService) : ObservableValidator
     {
         private readonly IEmployeeRepository _repository = repository;
+        private readonly IAuthService _authService = authService;
         private const int DefaultPageSize = 10;
 
         [ObservableProperty]
@@ -71,6 +75,7 @@ namespace kafi.ViewModels
         private bool isLoading;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(UpdateEmployeeCommand))]
         private User selectedUser;
 
         private List<User> _fullEmployeeList = [];
@@ -142,47 +147,48 @@ namespace kafi.ViewModels
             }
         }
 
-        private bool CanUpdateEmployee(User user)
+        private bool CanUpdateEmployee()
         {
-            if (user == null)
+            if (SelectedUser == null)
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(SelectedUser.Name) ||
+                string.IsNullOrEmpty(SelectedUser.Email) ||
+                string.IsNullOrEmpty(SelectedUser.Phone) ||
+                string.IsNullOrEmpty(SelectedUser.Address) ||
+                SelectedUser.Salary == 0)
             {
                 return false;
             }
 
-            ValidateProperty(user.Name, nameof(UserName));
-            ValidateProperty(user.Email, nameof(Email));
-            ValidateProperty(user.Phone, nameof(Phone));
-            ValidateProperty(user.Address, nameof(Address));
-            ValidateProperty(user.Salary, nameof(Salary));
-            ValidateProperty(
-                DateTimeOffset.Parse(user.Birthdate.ToString()), nameof(Birthdate));
-
-            return !HasErrors;
+            return true;
         }
         [RelayCommand(CanExecute = nameof(CanUpdateEmployee))]
-        private async Task UpdateEmployeeAsync(User user)
+        private async Task UpdateEmployeeAsync()
         {
-            var updatedUser = Employees.FirstOrDefault(e => e.Id == user.Id)!;
-
             UserRequest updatedRequest = new()
             {
-                Name = user.Name,
-                Email = user.Email,
-                Phone = user.Phone,
-                Address = user.Address,
-                Salary = user.Salary,
-                Birthdate = user.Birthdate,
-                StartShift = updatedUser.StartShift,
-                EndShift = updatedUser.EndShift,
+                Name = SelectedUser.Name,
+                Email = SelectedUser.Email,
+                Phone = SelectedUser.Phone,
+                Address = SelectedUser.Address,
+                Salary = SelectedUser.Salary,
+                Birthdate = SelectedUser.Birthdate,
+                StartShift = SelectedUser.StartShift,
+                EndShift = SelectedUser.EndShift,
             };
 
             try
             {
-                await _repository.Update(user.Id!, updatedRequest);
+                await _repository.Update(SelectedUser.Id, updatedRequest);
+                _fullEmployeeList[_fullEmployeeList.FindIndex(u => u.Id == SelectedUser.Id)] = SelectedUser;
+                UpdatePagedView();
+                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
             }
             catch (Exception)
             {
-                await LoadEmployeesAsync();
+                Message = "Failed to update employee";
             }
         }
 
@@ -221,7 +227,7 @@ namespace kafi.ViewModels
         }
 
         [RelayCommand]
-        private void TurnOnEditing(Guid id)
+        private void ViewEmployee(Guid id)
         {
             User user = _fullEmployeeList.FirstOrDefault(u => u.Id == id)!;
             SelectedUser = new User
@@ -236,6 +242,11 @@ namespace kafi.ViewModels
                 StartShift = user.StartShift,
                 EndShift = user.EndShift
             };
+        }
+
+        public async Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword)
+        {
+            return await _authService.ChangePasswordAsync(oldPassword, newPassword, confirmPassword);
         }
 
         private void UpdatePagedView()

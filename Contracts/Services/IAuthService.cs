@@ -11,5 +11,6 @@ namespace kafi.Contracts.Services
         void LoadCurrentUserFromToken(string accessToken);
         Task<LoginResponse?> LoginAsync(LoginRequest request);
         Task<string> LogoutAsync();
+        Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword);
     }
 }

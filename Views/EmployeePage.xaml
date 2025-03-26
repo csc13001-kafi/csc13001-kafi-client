@@ -25,7 +25,6 @@
         <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent" />
         <DataTemplate x:Key="TextBoxHeaderTemplate">
             <TextBlock
-                Margin="0,0,0,-6"
                 FontFamily="{StaticResource LexendLight}"
                 FontSize="14"
                 FontWeight="Light"
@@ -170,7 +169,7 @@
                                         <Button
                                             x:Name="ViewEmployeeButton"
                                             Click="ViewEmployeeButton_Click"
-                                            Command="{Binding Data.TurnOnEditingCommand, Source={StaticResource EmployeeProxy}}"
+                                            Command="{Binding Data.ViewEmployeeCommand, Source={StaticResource EmployeeProxy}}"
                                             CommandParameter="{Binding Id}">
                                             <FontIcon Glyph="&#xE890;" />
                                         </Button>
@@ -523,6 +522,8 @@
                                     HorizontalAlignment="Stretch"
                                     BorderBrush="{StaticResource SecondaryBrush}"
                                     Click="ViewEmployeePopup_Closed"
+                                    Command="{x:Bind ViewModel.ViewEmployeeCommand}"
+                                    CommandParameter="{x:Bind ViewModel.SelectedUser.Id, Mode=OneWay}"
                                     CornerRadius="10"
                                     FontFamily="{StaticResource Lexend}"
                                     Foreground="{StaticResource SecondaryBrush}">
@@ -533,6 +534,7 @@
                                     Padding="10,9"
                                     HorizontalAlignment="Stretch"
                                     Background="{StaticResource SecondaryBrush}"
+                                    Command="{x:Bind ViewModel.UpdateEmployeeCommand}"
                                     CornerRadius="10"
                                     FontFamily="{StaticResource Lexend}"
                                     Foreground="White">
@@ -544,6 +546,7 @@
                                 Padding="10,9"
                                 HorizontalAlignment="Stretch"
                                 Background="{StaticResource SecondaryBrush}"
+                                Click="ChangeEmployeePasswordButton_Click"
                                 CornerRadius="10"
                                 FontFamily="{StaticResource Lexend}"
                                 Foreground="White">
@@ -624,8 +627,7 @@
                                         Foreground="Black"
                                         Header="Ngày sinh"
                                         HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
-                                        IsHitTestVisible="False"
-                                        UseLayoutRounding="True" />
+                                        IsHitTestVisible="False" />
                                     <TextBox
                                         Grid.Row="2"
                                         Header="Địa chỉ"
@@ -672,15 +674,39 @@
                                         Grid.Column="1"
                                         Header="Lương"
                                         Text="{x:Bind ViewModel.SelectedUser.Salary, Mode=TwoWay}" />
-                                    <TextBox
+                                    <TimePicker
+                                        x:Name="StartShiftTimePicker"
                                         Grid.Row="1"
+                                        HorizontalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ClockIdentifier="24HourClock"
+                                        CornerRadius="10"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
                                         Header="Ca bắt đầu"
-                                        Text="{x:Bind ViewModel.SelectedUser.StartShift, Converter={StaticResource TimeToStringConverter}, Mode=TwoWay}" />
-                                    <TextBox
+                                        HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
+                                        IsHitTestVisible="False"
+                                        MinuteIncrement="15"
+                                        Time="{x:Bind ViewModel.SelectedUser.StartShift, Mode=TwoWay}" />
+                                    <TimePicker
+                                        x:Name="EndShiftTimePicker"
                                         Grid.Row="1"
                                         Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ClockIdentifier="24HourClock"
+                                        CornerRadius="10"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
                                         Header="Ca kết thúc"
-                                        Text="{x:Bind ViewModel.SelectedUser.EndShift, Converter={StaticResource TimeToStringConverter}, Mode=TwoWay}" />
+                                        HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
+                                        IsHitTestVisible="False"
+                                        MinuteIncrement="15"
+                                        Time="{x:Bind ViewModel.SelectedUser.EndShift, Mode=TwoWay}" />
                                 </Grid>
                             </StackPanel>
                         </ScrollViewer>
