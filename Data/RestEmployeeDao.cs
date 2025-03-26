@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,75 +21,47 @@ namespace kafi.Data
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        public async Task Add(object employee)
+        public async Task<object> Add(object employee)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(employee, _options);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("users/employee", content);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-            }
+            var json = JsonSerializer.Serialize(employee, _options);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("users/employee", content);
+            response.EnsureSuccessStatusCode();
+            var payload = await response.Content.ReadAsStringAsync();
+            var user = JsonSerializer.Deserialize<UserResponse>(payload, _options);
+            return user;
         }
 
-        public async Task Delete(string id)
+        public async Task Delete(Guid id)
         {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"users/employee/{id}");
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-            }
+            var response = await _httpClient.DeleteAsync($"users/employee/{id}");
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            try
-            {
-                var response = await _httpClient.GetAsync("users?role=Employee");
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-
-                var users = JsonSerializer.Deserialize<IEnumerable<User>>(json, _options);
-                return users;
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-                return Enumerable.Empty<User>();
-            }
-            catch (JsonException ex)
-            {
-                Debug.WriteLine($"JSON deserialization failed: {ex.Message}");
-                return Enumerable.Empty<User>();
-            }
+            var response = await _httpClient.GetAsync("users?role=Employee");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            var users = JsonSerializer.Deserialize<IEnumerable<User>>(json, _options);
+            return users ?? [];
         }
 
-        public async Task<User>? GetById(string id)
+        public async Task<User>? GetById(Guid id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"users/employee/{id}");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonSerializer.Deserialize<User>(json, _options);
+            return user;
         }
 
-        public async Task Update(string id, object entity)
+        public async Task Update(Guid id, object entity)
         {
-            try
-            {
-                var json = JsonSerializer.Serialize(entity, _options);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var response = await _httpClient.PatchAsync($"users/employee/{id}", content);
-                response.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                Debug.WriteLine($"HTTP request failed: {ex.Message}");
-            }
+            var json = JsonSerializer.Serialize(entity, _options);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PatchAsync($"users/employee/{id}", content);
+            response.EnsureSuccessStatusCode();
         }
     }
 }

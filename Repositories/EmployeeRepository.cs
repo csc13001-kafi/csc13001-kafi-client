@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using kafi.Contracts.Repository;
 using kafi.Data;
@@ -13,12 +14,12 @@ namespace kafi.Repositories
     public class EmployeeRepository(IEmployeeDao dao) : IEmployeeRepository
     {
         private readonly IEmployeeDao _dao = dao;
-        public async Task Add(object entity)
+        public async Task<object> Add(object entity)
         {
-            await _dao.Add(entity);
+            return await _dao.Add(entity);
         }
 
-        public async Task Delete(string id)
+        public async Task Delete(Guid id)
         {
             await _dao.Delete(id);
         }
@@ -28,12 +29,12 @@ namespace kafi.Repositories
             return await _dao.GetAll();
         }
 
-        public Task<User>? GetById(string id)
+        public Task<User>? GetById(Guid id)
         {
             throw new System.NotImplementedException();
         }
 
-        public async Task Update(string id, object entity)
+        public async Task Update(Guid id, object entity)
         {
             await _dao.Update(id, entity);
         }

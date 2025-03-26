@@ -12,14 +12,25 @@
     xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
-        <helpers:BindingProxy x:Key="BindingProxy" Data="{x:Bind ViewModel}" />
+        <helpers:BindingProxy x:Key="EmployeeProxy" Data="{x:Bind ViewModel}" />
         <converters:BirthdateToAgeConverter x:Key="BirthdateToAgeConverter" />
         <converters:IdToTextConverter x:Key="IdToTextConverter" />
+        <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
+        <converters:TimeToStringConverter x:Key="TimeToStringConverter" />
+        <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
         <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent" />
+        <DataTemplate x:Key="TextBoxHeaderTemplate">
+            <TextBlock
+                FontFamily="{StaticResource LexendLight}"
+                FontSize="14"
+                FontWeight="Light"
+                Foreground="Black"
+                Text="{Binding}" />
+        </DataTemplate>
     </Page.Resources>
     <Grid>
         <Grid Padding="0,0,10,0">
@@ -27,7 +38,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid Margin="0,0,0,40">
+            <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -61,7 +72,7 @@
             </Grid>
             <Grid
                 Grid.Row="1"
-                Padding="40"
+                Padding="40,20"
                 Background="White"
                 CornerRadius="10"
                 RowSpacing="10">
@@ -70,78 +81,114 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <controls:DataGrid
-                    x:Name="EmployeeDataGrid"
-                    MaxHeight="Infinity"
                     VerticalAlignment="Stretch"
                     AutoGenerateColumns="False"
                     Background="White"
                     CanUserReorderColumns="True"
-                    CellEditEnded="DataGrid_CellEditEnded"
+                    CellStyle="{StaticResource CenterDataGridCellStyle}"
+                    ColumnHeaderStyle="{StaticResource CenterDataGridColumnHeaderStyle}"
                     ColumnWidth="*"
                     Foreground="#71747D"
                     FrozenColumnCount="1"
                     GridLinesVisibility="Horizontal"
                     HorizontalScrollBarVisibility="Hidden"
+                    IsReadOnly="True"
                     ItemsSource="{x:Bind ViewModel.Employees, Mode=OneWay}"
                     RowHeight="50"
                     VerticalScrollBarVisibility="Auto">
-                    <controls:DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="wctprimitives:DataGridColumnHeader">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
-                                        <ContentPresenter
-                                            Background="White"
-                                            FontFamily="{StaticResource LexendBold}"
-                                            FontSize="15"
-                                            FontWeight="Bold"
-                                            Foreground="Black" />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </controls:DataGrid.ColumnHeaderStyle>
                     <controls:DataGrid.Columns>
                         <controls:DataGridTextColumn
-                            Binding="{Binding Id, Converter={StaticResource IdToTextConverter}}"
-                            Header="ID"
-                            IsReadOnly="True" />
-                        <controls:DataGridTextColumn Binding="{Binding Name}" Header="Tên" />
-                        <controls:DataGridTextColumn Binding="{Binding Email}" Header="Email" />
-                        <controls:DataGridTextColumn Binding="{Binding Phone}" Header="Số điện thoại" />
-                        <controls:DataGridTextColumn
-                            MaxWidth="50"
-                            Binding="{Binding Birthdate, Converter={StaticResource BirthdateToAgeConverter}}"
-                            Header="Tuổi" />
-                        <controls:DataGridTextColumn Binding="{Binding Salary}" Header="Lương" />
-                        <controls:DataGridTextColumn Header="Thời gian làm việc" />
+                            Binding="{Binding Name}"
+                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            Header="Tên"
+                            HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}" />
                         <controls:DataGridTemplateColumn
-                            MaxWidth="50"
-                            CanUserReorder="False"
-                            CanUserResize="False"
-                            IsReadOnly="True">
+                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            Header="Email"
+                            HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button
+                                    <TextBlock
+                                        Padding="10"
+                                        VerticalAlignment="Center"
+                                        Foreground="#71747D"
+                                        Text="{Binding Email}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip
+                                                Content="{Binding Email}"
+                                                Placement="Top"
+                                                VerticalOffset="10" />
+                                        </ToolTipService.ToolTip>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Binding="{Binding Phone}" Header="Số điện thoại" />
+                        <controls:DataGridTextColumn Binding="{Binding Birthdate, Converter={StaticResource BirthdateToAgeConverter}}" Header="Tuổi" />
+                        <controls:DataGridTemplateColumn Header="Thời gian làm việc">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Margin="10,0"
+                                        VerticalAlignment="Center"
+                                        Foreground="#71747D">
+                                        <Run Text="{Binding StartShift, Converter={StaticResource TimeToStringConverter}}" />
+                                        <Run Text="-" />
+                                        <Run Text="{Binding EndShift, Converter={StaticResource TimeToStringConverter}}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn
+                            Binding="{Binding Salary, Converter={StaticResource PriceToStringConverter}}"
+                            CellStyle="{StaticResource RightDataGridCellStyle}"
+                            Header="Lương"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}" />
+                        <controls:DataGridTemplateColumn
+                            Width="Auto"
+                            CanUserReorder="False"
+                            CanUserResize="False"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel
+                                        Margin="10,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        BorderThickness="0"
-                                        Command="{Binding Data.DeleteEmployeeCommand, Source={StaticResource BindingProxy}}"
-                                        CommandParameter="{Binding Id}"
-                                        FontWeight="Bold"
-                                        Foreground="Red">
-                                        <FontIcon Glyph="&#xE74D;" />
-                                    </Button>
+                                        Orientation="Horizontal"
+                                        Spacing="10">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="Button">
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                                <Setter Property="HorizontalAlignment" Value="Center" />
+                                                <Setter Property="VerticalAlignment" Value="Center" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="CornerRadius" Value="10" />
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <Button
+                                            x:Name="ViewEmployeeButton"
+                                            Click="ViewEmployeeButton_Click"
+                                            Command="{Binding Data.ViewEmployeeCommand, Source={StaticResource EmployeeProxy}}"
+                                            CommandParameter="{Binding Id}">
+                                            <FontIcon Glyph="&#xE890;" />
+                                        </Button>
+                                        <Button Command="{Binding Data.DeleteEmployeeCommand, Source={StaticResource EmployeeProxy}}" CommandParameter="{Binding Id}">
+                                            <FontIcon Foreground="Red" Glyph="&#xE74D;" />
+                                        </Button>
+                                    </StackPanel>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
-                <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
-                   Width="50" Height="50"
-                   Grid.RowSpan="3"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"/>
+                <ProgressRing
+                    Grid.RowSpan="3"
+                    Width="50"
+                    Height="50"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
                 <StackPanel
                     Grid.Row="1"
                     HorizontalAlignment="Center"
@@ -385,5 +432,287 @@
                 </Grid>
             </Popup>
         </RelativePanel>
+        <Grid Margin="0,-75,0,0" Padding="20">
+            <Popup
+                x:Name="ViewEmployeePopup"
+                Width="1000"
+                Height="200"
+                Closed="ViewEmployeePopup_Closed"
+                IsLightDismissEnabled="True"
+                IsOpen="False"
+                LightDismissOverlayMode="On">
+                <Grid
+                    Width="{Binding ElementName=ViewEmployeePopup, Path=Width}"
+                    Height="{Binding ElementName=ViewEmployeePopup, Path=Height}"
+                    Padding="30,20"
+                    Background="White"
+                    Canvas.ZIndex="2"
+                    CornerRadius="20"
+                    RowSpacing="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="PopupTranslateYTransform" Y="-600" />
+                    </Grid.RenderTransform>
+                    <StackPanel
+                        Margin="-6,0,0,0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="10">
+                        <Button
+                            x:Name="CloseViewPopupButton"
+                            Width="30"
+                            Height="30"
+                            Padding="-2,0,0,0"
+                            HorizontalAlignment="left"
+                            Background="{StaticResource PrimaryBrush}"
+                            Click="CloseViewPopupButton_Click"
+                            CornerRadius="100">
+                            <FontIcon FontSize="12" Glyph="&#xE96F;" />
+                        </Button>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource LexendMedium}"
+                            FontSize="18"
+                            FontWeight="Medium"
+                            Text="Vi" />
+                    </StackPanel>
+                    <Grid Grid.Row="1" ColumnSpacing="40">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="20">
+                            <TextBlock
+                                FontFamily="{StaticResource LexendMedium}"
+                                FontSize="17"
+                                FontWeight="Medium"
+                                Text="Ảnh" />
+                            <PersonPicture
+                                Width="200"
+                                Height="200"
+                                Background="#D19F9F"
+                                CornerRadius="0"
+                                DisplayName="{Binding Name}"
+                                Initials="{Binding Name}" />
+                            <Button
+                                x:Name="EditEmployeeButton"
+                                Padding="10,9"
+                                HorizontalAlignment="Stretch"
+                                Background="{StaticResource SecondaryBrush}"
+                                Click="EditEmployeeButton_Click"
+                                CornerRadius="10"
+                                FontFamily="{StaticResource Lexend}"
+                                Foreground="White">
+                                Chỉnh sửa profile
+                            </Button>
+                            <Grid
+                                x:Name="PostEditGrid"
+                                ColumnSpacing="10"
+                                Visibility="Collapsed">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    x:Name="CancelEditEmployeeButton"
+                                    Padding="10,8"
+                                    HorizontalAlignment="Stretch"
+                                    BorderBrush="{StaticResource SecondaryBrush}"
+                                    Click="ViewEmployeePopup_Closed"
+                                    Command="{x:Bind ViewModel.ViewEmployeeCommand}"
+                                    CommandParameter="{x:Bind ViewModel.SelectedUser.Id, Mode=OneWay}"
+                                    CornerRadius="10"
+                                    FontFamily="{StaticResource Lexend}"
+                                    Foreground="{StaticResource SecondaryBrush}">
+                                    Hủy
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Padding="10,9"
+                                    HorizontalAlignment="Stretch"
+                                    Background="{StaticResource SecondaryBrush}"
+                                    Command="{x:Bind ViewModel.UpdateEmployeeCommand}"
+                                    CornerRadius="10"
+                                    FontFamily="{StaticResource Lexend}"
+                                    Foreground="White">
+                                    Lưu
+                                </Button>
+                            </Grid>
+                            <Button
+                                x:Name="ChangeEmployeePasswordButton"
+                                Padding="10,9"
+                                HorizontalAlignment="Stretch"
+                                Background="{StaticResource SecondaryBrush}"
+                                Click="ChangeEmployeePasswordButton_Click"
+                                CornerRadius="10"
+                                FontFamily="{StaticResource Lexend}"
+                                Foreground="White">
+                                Đổi mật khẩu
+                            </Button>
+                            <Button
+                                Padding="10,8"
+                                HorizontalAlignment="Stretch"
+                                BorderBrush="{StaticResource SecondaryBrush}"
+                                Click="CloseViewPopupButton_Click"
+                                Command="{x:Bind ViewModel.DeleteEmployeeCommand}"
+                                CommandParameter="{x:Bind ViewModel.SelectedUser.Id, Mode=OneWay}"
+                                CornerRadius="10"
+                                FontFamily="{StaticResource Lexend}"
+                                Foreground="{StaticResource SecondaryBrush}">
+                                Xóa profile
+                            </Button>
+                        </StackPanel>
+                        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Padding="0,0,14,0" Spacing="20">
+                                <TextBlock
+                                    FontFamily="{StaticResource LexendMedium}"
+                                    FontSize="17"
+                                    FontWeight="Medium"
+                                    Text="Thông tin cá nhân" />
+                                <Grid
+                                    x:Name="PersonalInfoGrid"
+                                    Padding="20"
+                                    HorizontalAlignment="Stretch"
+                                    Background="{StaticResource PrimaryBrush}"
+                                    ColumnSpacing="20"
+                                    CornerRadius="10"
+                                    RowSpacing="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.Resources>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="IsReadOnly" Value="True" />
+                                            <Setter Property="HeaderTemplate" Value="{StaticResource TextBoxHeaderTemplate}" />
+                                            <Setter Property="FontFamily" Value="{StaticResource LexendMedium}" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="FontSize" Value="16" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                            <Setter Property="CornerRadius" Value="10" />
+                                        </Style>
+                                    </Grid.Resources>
+                                    <TextBox Header="Tên" Text="{x:Bind ViewModel.SelectedUser.Name, Mode=TwoWay}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Header="Email"
+                                        Text="{x:Bind ViewModel.SelectedUser.Email, Mode=TwoWay}" />
+                                    <TextBox
+                                        Grid.Row="1"
+                                        Header="Số điện thoại"
+                                        Text="{x:Bind ViewModel.SelectedUser.Phone, Mode=TwoWay}" />
+                                    <CalendarDatePicker
+                                        x:Name="EditBirthdatePicker"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CornerRadius="10"
+                                        Date="{x:Bind ViewModel.SelectedUser.Birthdate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}, Mode=TwoWay}"
+                                        DateFormat="{}{day.integer}/{month.integer}/{year.full}"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
+                                        Foreground="Black"
+                                        Header="Ngày sinh"
+                                        HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
+                                        IsHitTestVisible="False" />
+                                    <TextBox
+                                        Grid.Row="2"
+                                        Header="Địa chỉ"
+                                        Text="{x:Bind ViewModel.SelectedUser.Address, Mode=TwoWay}" />
+                                </Grid>
+                                <TextBlock
+                                    FontFamily="{StaticResource LexendMedium}"
+                                    FontSize="17"
+                                    FontWeight="Medium"
+                                    Text="Chi tiết công việc" />
+                                <Grid
+                                    x:Name="JobInfoGrid"
+                                    Padding="20"
+                                    HorizontalAlignment="Stretch"
+                                    Background="{StaticResource PrimaryBrush}"
+                                    ColumnSpacing="20"
+                                    CornerRadius="10"
+                                    RowSpacing="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.Resources>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="IsReadOnly" Value="True" />
+                                            <Setter Property="HeaderTemplate" Value="{StaticResource TextBoxHeaderTemplate}" />
+                                            <Setter Property="FontFamily" Value="{StaticResource LexendMedium}" />
+                                            <Setter Property="FontWeight" Value="Medium" />
+                                            <Setter Property="FontSize" Value="16" />
+                                            <Setter Property="CornerRadius" Value="10" />
+                                        </Style>
+                                    </Grid.Resources>
+                                    <TextBox
+                                        x:Name="RoleTextBox"
+                                        Header="Vai trò"
+                                        Text="{x:Bind ViewModel.SelectedUser.Role, Mode=TwoWay}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Header="Lương"
+                                        Text="{x:Bind ViewModel.SelectedUser.Salary, Mode=TwoWay}" />
+                                    <TimePicker
+                                        x:Name="StartShiftTimePicker"
+                                        Grid.Row="1"
+                                        HorizontalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ClockIdentifier="24HourClock"
+                                        CornerRadius="10"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
+                                        Header="Ca bắt đầu"
+                                        HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
+                                        IsHitTestVisible="False"
+                                        MinuteIncrement="15"
+                                        Time="{x:Bind ViewModel.SelectedUser.StartShift, Mode=TwoWay}" />
+                                    <TimePicker
+                                        x:Name="EndShiftTimePicker"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Stretch"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ClockIdentifier="24HourClock"
+                                        CornerRadius="10"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
+                                        Header="Ca kết thúc"
+                                        HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
+                                        IsHitTestVisible="False"
+                                        MinuteIncrement="15"
+                                        Time="{x:Bind ViewModel.SelectedUser.EndShift, Mode=TwoWay}" />
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Grid>
+            </Popup>
+        </Grid>
     </Grid>
 </Page>

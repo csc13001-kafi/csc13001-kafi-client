@@ -6,14 +6,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using kafi.Contracts.Services;
 using kafi.Models;
 using kafi.Repositories;
 
 namespace kafi.ViewModels
 {
-    public partial class EmployeeViewModel(IEmployeeRepository repository) : ObservableValidator
+    public partial class EmployeeViewModel(IEmployeeRepository repository, IAuthService authService) : ObservableValidator
     {
         private readonly IEmployeeRepository _repository = repository;
+        private readonly IAuthService _authService = authService;
         private const int DefaultPageSize = 10;
 
         [ObservableProperty]
@@ -70,14 +74,187 @@ namespace kafi.ViewModels
         [ObservableProperty]
         private bool isLoading;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(UpdateEmployeeCommand))]
+        private User selectedUser;
+
         private List<User> _fullEmployeeList = [];
         public ObservableCollection<User> Employees { get; } = new ObservableCollection<User>();
 
+        private bool CanLoadEmployees => !Employees.Any();
+        [RelayCommand(CanExecute = nameof(CanLoadEmployees))]
+        private async Task LoadEmployeesAsync()
+        {
+            IsLoading = true;
+            try
+            {
+                _fullEmployeeList = [.. await _repository.GetAll()];
+                UpdatePagedView();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddEmployeeAsync()
+        {
+            ValidateAllProperties();
+            if (HasErrors)
+            {
+                Message = "Please fill all the fields";
+                return;
+            }
+
+            UserRequest employee = new()
+            {
+                Name = UserName,
+                Email = Email,
+                Phone = Phone,
+                Address = Address,
+                Salary = Salary,
+                Birthdate = Birthdate.DateTime,
+                StartShift = StartShift,
+                EndShift = EndShift,
+            };
+
+            try
+            {
+                UserResponse newUserInfo = (UserResponse)await _repository.Add(employee);
+                _fullEmployeeList.Add(new User
+                {
+                    Id = newUserInfo.Id,
+                    Name = UserName,
+                    Email = Email,
+                    Phone = Phone,
+                    Address = Address,
+                    Salary = Salary,
+                    Birthdate = Birthdate.DateTime,
+                    StartShift = StartShift,
+                    EndShift = EndShift
+                });
+                UpdatePagedView();
+                DeleteAllInput();
+            }
+            catch (Exception)
+            {
+                Message = "Failed to add employee";
+            }
+        }
+
+        private bool CanUpdateEmployee()
+        {
+            if (SelectedUser == null)
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(SelectedUser.Name) ||
+                string.IsNullOrEmpty(SelectedUser.Email) ||
+                string.IsNullOrEmpty(SelectedUser.Phone) ||
+                string.IsNullOrEmpty(SelectedUser.Address) ||
+                SelectedUser.Salary == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        [RelayCommand(CanExecute = nameof(CanUpdateEmployee))]
+        private async Task UpdateEmployeeAsync()
+        {
+            UserRequest updatedRequest = new()
+            {
+                Name = SelectedUser.Name,
+                Email = SelectedUser.Email,
+                Phone = SelectedUser.Phone,
+                Address = SelectedUser.Address,
+                Salary = SelectedUser.Salary,
+                Birthdate = SelectedUser.Birthdate,
+                StartShift = SelectedUser.StartShift,
+                EndShift = SelectedUser.EndShift,
+            };
+
+            try
+            {
+                await _repository.Update(SelectedUser.Id, updatedRequest);
+                _fullEmployeeList[_fullEmployeeList.FindIndex(u => u.Id == SelectedUser.Id)] = SelectedUser;
+                UpdatePagedView();
+                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
+            }
+            catch (Exception)
+            {
+                Message = "Failed to update employee";
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteEmployeeAsync(Guid id)
+        {
+            try
+            {
+                await _repository.Delete(id);
+                var removedCount = _fullEmployeeList.RemoveAll(u => u.Id == id);
+
+                if (removedCount > 0 &&
+                    Employees.Count == 1 &&
+                    CurrentPage > 1)
+                {
+                    CurrentPage--;
+                }
+
+                UpdatePagedView();
+            }
+            catch (Exception) { }
+        }
+
+        [RelayCommand]
+        private void DeleteAllInput()
+        {
+            UserName = string.Empty;
+            Email = string.Empty;
+            Phone = string.Empty;
+            Salary = 0;
+            StartShift = TimeSpan.Zero;
+            EndShift = TimeSpan.Zero;
+            Address = string.Empty;
+            Birthdate = DateTimeOffset.Now;
+            Message = string.Empty;
+        }
+
+        [RelayCommand]
+        private void ViewEmployee(Guid id)
+        {
+            User user = _fullEmployeeList.FirstOrDefault(u => u.Id == id)!;
+            SelectedUser = new User
+            {
+                Id = id,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Salary = user.Salary,
+                Birthdate = user.Birthdate,
+                StartShift = user.StartShift,
+                EndShift = user.EndShift
+            };
+        }
+
+        public async Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword)
+        {
+            return await _authService.ChangePasswordAsync(oldPassword, newPassword, confirmPassword);
+        }
+
         private void UpdatePagedView()
         {
+            TotalEmployees = _fullEmployeeList.Count;
             CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
 
-            TotalPages = (int)Math.Ceiling((double)_fullEmployeeList.Count / PageSize);
+            TotalPages = (int)Math.Ceiling((double)TotalEmployees / PageSize);
             TotalPages = TotalPages == 0 ? 1 : TotalPages;
 
             var pagedItems = _fullEmployeeList
@@ -113,135 +290,6 @@ namespace kafi.ViewModels
         partial void OnPageSizeChanged(int value)
         {
             UpdatePagedView();
-        }
-
-        private bool CanLoadEmployees => !Employees.Any();
-        [RelayCommand(CanExecute = nameof(CanLoadEmployees))]
-        
-        private async Task LoadEmployeesAsync()
-        {
-            IsLoading = true;
-            try {
-                _fullEmployeeList = [.. await _repository.GetAll()];
-                TotalEmployees = _fullEmployeeList.Count;
-                UpdatePagedView();
-            } catch (Exception ex) {
-                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
-            } finally {
-                IsLoading = false;
-            }
-        }
-
-        [RelayCommand]
-        private async Task AddEmployeeAsync()
-        {
-            ValidateAllProperties();
-            if (HasErrors)
-            {
-                Message = "Please fill all the fields";
-                return;
-            }
-
-            UserRequest employee = new()
-            {
-                Name = UserName,
-                Email = Email,
-                Phone = Phone,
-                Address = Address,
-                Salary = Salary,
-                Birthdate = Birthdate.DateTime,
-                StartShift = StartShift,
-                EndShift = EndShift,
-            };
-
-            try
-            {
-                await _repository.Add(employee);
-                await LoadEmployeesAsync();
-                DeleteAllInput();
-            }
-            catch (Exception)
-            {
-                Message = "Failed to add employee";
-            }
-        }
-
-        private bool CanUpdateEmployee(User user)
-        {
-            if (user == null)
-            {
-                return false;
-            }
-
-            ValidateProperty(user.Name, nameof(UserName));
-            ValidateProperty(user.Email, nameof(Email));
-            ValidateProperty(user.Phone, nameof(Phone));
-            ValidateProperty(user.Address, nameof(Address));
-            ValidateProperty(user.Salary, nameof(Salary));
-            ValidateProperty(
-                DateTimeOffset.Parse(user.Birthdate.ToString()), nameof(Birthdate));
-
-            return !HasErrors;
-        }
-        [RelayCommand(CanExecute = nameof(CanUpdateEmployee))]
-        private async Task UpdateEmployeeAsync(User user)
-        {
-            var updatedUser = Employees.FirstOrDefault(e => e.Id == user.Id)!;
-
-            UserRequest updatedRequest = new()
-            {
-                Name = user.Name,
-                Email = user.Email,
-                Phone = user.Phone,
-                Address = user.Address,
-                Salary = user.Salary,
-                Birthdate = user.Birthdate,
-                StartShift = updatedUser.StartShift,
-                EndShift = updatedUser.EndShift,
-            };
-
-            try
-            {
-                await _repository.Update(user.Id!, updatedRequest);
-            }
-            catch (Exception)
-            {
-                await LoadEmployeesAsync();
-            }
-        }
-
-        [RelayCommand]
-        private async Task DeleteEmployeeAsync(string id)
-        {
-            try
-            {
-                await _repository.Delete(id);
-                var removedCount = _fullEmployeeList.RemoveAll(u => u.Id == id);
-
-                if (removedCount > 0 &&
-                    Employees.Count == 1 &&
-                    CurrentPage > 1)
-                {
-                    CurrentPage--;
-                }
-
-                UpdatePagedView();
-            }
-            catch (Exception) { }
-        }
-
-        [RelayCommand]
-        private void DeleteAllInput()
-        {
-            UserName = string.Empty;
-            Email = string.Empty;
-            Phone = string.Empty;
-            Salary = 0;
-            StartShift = TimeSpan.Zero;
-            EndShift = TimeSpan.Zero;
-            Address = string.Empty;
-            Birthdate = DateTimeOffset.Now;
-            Message = string.Empty;
         }
     }
 }

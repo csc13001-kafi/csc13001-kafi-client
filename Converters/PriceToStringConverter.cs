@@ -17,7 +17,16 @@ namespace kafi.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            throw new NotImplementedException();
+            if (value is string priceString)
+            {
+                priceString = priceString.Replace("₫", "").Trim();
+
+                if (int.TryParse(priceString, NumberStyles.Number, new CultureInfo("vi-VN"), out int result))
+                {
+                    return result;
+                }
+            }
+            return 0;
         }
     }
 }
