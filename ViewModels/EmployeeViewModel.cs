@@ -8,16 +8,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using kafi.Contracts.Services;
 using kafi.Models;
 using kafi.Repositories;
 
 namespace kafi.ViewModels
 {
-    public partial class EmployeeViewModel(IEmployeeRepository repository, IAuthService authService) : ObservableValidator
+    public partial class EmployeeViewModel(IEmployeeRepository repository) : ObservableValidator
     {
         private readonly IEmployeeRepository _repository = repository;
-        private readonly IAuthService _authService = authService;
         private const int DefaultPageSize = 10;
 
         [ObservableProperty]
@@ -242,11 +240,6 @@ namespace kafi.ViewModels
                 StartShift = user.StartShift,
                 EndShift = user.EndShift
             };
-        }
-
-        public async Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword)
-        {
-            return await _authService.ChangePasswordAsync(oldPassword, newPassword, confirmPassword);
         }
 
         private void UpdatePagedView()
