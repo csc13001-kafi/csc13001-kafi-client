@@ -494,9 +494,7 @@
                                 Width="200"
                                 Height="200"
                                 Background="#D19F9F"
-                                CornerRadius="0"
-                                DisplayName="{x:Bind ViewModel.SelectedUser.Name}"
-                                Initials="{x:Bind ViewModel.SelectedUser.Name}" />
+                                DisplayName="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}" />
                             <Button
                                 x:Name="EditEmployeeButton"
                                 Padding="10,9"
