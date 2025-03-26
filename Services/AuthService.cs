@@ -100,5 +100,35 @@ namespace kafi.Service
                 return "An error occurred while logging out.";
             }
         }
+
+        public async Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword)
+        {
+            try
+            {
+                var payload = new
+                {
+                    oldPassword,
+                    newPassword,
+                    confirmPassword
+                };
+                var jsonPayload = JsonSerializer.Serialize(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("auth/change-password", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var changePasswordResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var message = changePasswordResponse!["message"].ToString();
+                    return message;
+                }
+                Debug.WriteLine($"Change password failed. Status code: {response.StatusCode}");
+                return "An error occurred while changing the password.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception during change password: {ex}");
+                return "An error occurred while changing the password.";
+            }
+        }
     }
 }
