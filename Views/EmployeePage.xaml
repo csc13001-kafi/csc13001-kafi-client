@@ -494,9 +494,7 @@
                                 Width="200"
                                 Height="200"
                                 Background="#D19F9F"
-                                CornerRadius="0"
-                                DisplayName="{Binding Name}"
-                                Initials="{Binding Name}" />
+                                DisplayName="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}" />
                             <Button
                                 x:Name="EditEmployeeButton"
                                 Padding="10,9"
@@ -541,17 +539,6 @@
                                     Lưu
                                 </Button>
                             </Grid>
-                            <Button
-                                x:Name="ChangeEmployeePasswordButton"
-                                Padding="10,9"
-                                HorizontalAlignment="Stretch"
-                                Background="{StaticResource SecondaryBrush}"
-                                Click="ChangeEmployeePasswordButton_Click"
-                                CornerRadius="10"
-                                FontFamily="{StaticResource Lexend}"
-                                Foreground="White">
-                                Đổi mật khẩu
-                            </Button>
                             <Button
                                 Padding="10,8"
                                 HorizontalAlignment="Stretch"
