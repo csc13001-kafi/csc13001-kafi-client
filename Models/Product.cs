@@ -29,8 +29,5 @@ namespace kafi.Models
         
         [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; }
-        
-        [JsonIgnore]
-        public List<ProductOptionGroup> OptionGroups { get; set; } = new List<ProductOptionGroup>();
     }
 }

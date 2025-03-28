@@ -101,7 +101,7 @@
                     <controls:DataGrid.Columns>
                         <controls:DataGridTextColumn
                             Binding="{Binding Name}"
-                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            CellStyle="{StaticResource LeftDataGridCellStyle}"
                             Header="Sản phẩm"
                             HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}" />
                         <controls:DataGridTextColumn Binding="{Binding OriginalStock}" Header="Số lượng nhập" />

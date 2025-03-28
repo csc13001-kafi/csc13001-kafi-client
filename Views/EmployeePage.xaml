@@ -99,11 +99,11 @@
                     <controls:DataGrid.Columns>
                         <controls:DataGridTextColumn
                             Binding="{Binding Name}"
-                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            CellStyle="{StaticResource LeftDataGridCellStyle}"
                             Header="Tên"
                             HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}" />
                         <controls:DataGridTemplateColumn
-                            CellStyle="{StaticResource LeftRightDataGridCellStyle}"
+                            CellStyle="{StaticResource LeftDataGridCellStyle}"
                             Header="Email"
                             HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}">
                             <controls:DataGridTemplateColumn.CellTemplate>
