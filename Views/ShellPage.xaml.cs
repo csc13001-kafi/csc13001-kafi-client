@@ -21,6 +21,7 @@ public sealed partial class ShellPage : Page
         this.InitializeComponent();
         ViewModel = (ShellViewModel)App.Services.GetService(typeof(ShellViewModel))!;
         ContentFrame.Navigate(typeof(MainPage));
+        PageHeader.NavigateToPage = new Action<Type>((pageType) => ContentFrame.Navigate(pageType));
     }
 
     private void OnNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
