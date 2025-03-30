@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using kafi.Contracts.Services;
 using kafi.Models;
@@ -24,17 +23,31 @@ namespace kafi.Service
             return CurrentUser != null && CurrentUser.Role == role;
         }
 
-        public void LoadCurrentUserFromToken(string accessToken)
+        public async Task LoadCurrentUserFromToken(string accessToken)
         {
-            var (id, username, role) = GetUserFromToken(accessToken);
-            if (role != "Manager" && role != "Employee")
-                throw new InvalidOperationException("Invalid role in token");
-            CurrentUser = new User
+            try
             {
-                Id = id,
-                Name = username,
-                Role = role == "Manager" ? Role.Manager : Role.Employee
-            };
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                var response = await _httpClient.GetAsync("/users/user");
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    JsonSerializerOptions options = new()
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+                    var user = JsonSerializer.Deserialize<User>(responseContent, options);
+                    CurrentUser = user;
+                }
+                else
+                {
+                    Debug.WriteLine($"Load current user failed. Status code: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception during load current user: {ex}");
+            }
         }
 
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
@@ -50,7 +63,7 @@ namespace kafi.Service
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
 
-                    LoadCurrentUserFromToken(loginResponse.AccessToken);
+                    await LoadCurrentUserFromToken(loginResponse.AccessToken);
 
                     return loginResponse;
                 }
@@ -62,20 +75,6 @@ namespace kafi.Service
                 Debug.WriteLine($"Exception during login: {ex}");
                 return null;
             }
-        }
-
-        private static (Guid, string, string) GetUserFromToken(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-
-            var claims = jwtToken.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
-
-            var id = Guid.Parse(claims.GetValueOrDefault("id", ""));
-            var username = claims.GetValueOrDefault("username", "");
-            var role = claims.GetValueOrDefault("role", "");
-
-            return (id, username, role);
         }
 
         public async Task<string> LogoutAsync()
@@ -113,7 +112,7 @@ namespace kafi.Service
                 };
                 var jsonPayload = JsonSerializer.Serialize(payload);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("auth/change-password", content);
+                var response = await _httpClient.PutAsync("auth/change-password", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();

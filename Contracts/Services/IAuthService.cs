@@ -8,7 +8,7 @@ namespace kafi.Contracts.Services
     {
         bool IsInRole(Role role);
         User? CurrentUser { get; }
-        void LoadCurrentUserFromToken(string accessToken);
+        Task LoadCurrentUserFromToken(string accessToken);
         Task<LoginResponse?> LoginAsync(LoginRequest request);
         Task<string> LogoutAsync();
         Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword);

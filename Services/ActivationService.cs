@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using kafi.Contracts.Services;
 
 namespace kafi.Service
@@ -19,7 +20,7 @@ namespace kafi.Service
             }
             else
             {
-                _authService.LoadCurrentUserFromToken(tokens.accessToken);
+                await _authService.LoadCurrentUserFromToken(tokens.accessToken);
                 _windowService.ShowMainWindow();
             }
 
