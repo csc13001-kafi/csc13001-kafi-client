@@ -39,7 +39,8 @@ namespace kafi.ViewModels
         [ObservableProperty]
         private Order selectedOrder;
 
-        [RelayCommand]
+        private bool CanLoadData => !Orders.Any();
+        [RelayCommand(CanExecute = nameof(CanLoadData))]
         private async Task LoadDataAsync()
         {
             IsLoading = true;
