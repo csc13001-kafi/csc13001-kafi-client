@@ -41,7 +41,8 @@ namespace kafi.Models
         [JsonPropertyName("workEnd")]
         public TimeSpan EndShift { get; set; }
 
-        public string? Avatar { get; set; }
+        [JsonPropertyName("image")]
+        public string? Image { get; set; }
 
         [JsonIgnore]
         public bool IsActive { get; set; }
