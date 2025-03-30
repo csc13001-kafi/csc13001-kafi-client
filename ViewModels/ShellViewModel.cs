@@ -1,9 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Contracts.Services;
 using kafi.Models;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace kafi.ViewModels;
 public partial class ShellViewModel : ObservableObject
@@ -13,6 +17,15 @@ public partial class ShellViewModel : ObservableObject
     private readonly ISecureTokenStorage _secureTokenStorage;
 
     public string Username => _authService.CurrentUser?.Name ?? "Unknown User";
+    public BitmapImage ProfileImage
+    {
+        get
+        {
+            var imageUrl = _authService.CurrentUser?.Image;
+            return imageUrl != null ? new BitmapImage(new Uri(imageUrl)) : null;
+        }
+    }
+
     public bool IsManager => _authService.IsInRole(Role.Manager);
     public bool IsEmployee => _authService.IsInRole(Role.Employee);
     public ObservableCollection<NavItem> NavItems;
@@ -46,8 +59,14 @@ public partial class ShellViewModel : ObservableObject
             NavItems.Add(new() { Icon = "/Assets/NavTableIcon.svg", Content = "Bàn", Tag = "TablePage" });
             NavItems.Add(new() { Icon = "/Assets/NavOrderIcon.svg", Content = "Đơn hàng", Tag = "OrderPage" });
             NavItems.Add(new() { Icon = "/Assets/NavInventoryIcon.svg", Content = "Kho hàng", Tag = "InventoryPage" });
-            FooterItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
+            NavItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
         }
+
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<User>>(this, (r, m) =>
+        {
+            OnPropertyChanged(nameof(Username));
+            OnPropertyChanged(nameof(ProfileImage));
+        });
     }
 
     [RelayCommand]

@@ -1,5 +1,8 @@
+using System;
+using kafi.Views;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -14,6 +17,9 @@ namespace kafi.Controls
         public static readonly DependencyProperty IsManagerProperty =
             DependencyProperty.Register("IsManager", typeof(bool), typeof(HeaderControl), new PropertyMetadata(false));
 
+        public static readonly DependencyProperty ProfileImageProperty =
+            DependencyProperty.Register("ProfileImage", typeof(BitmapImage), typeof(HeaderControl), new PropertyMetadata(null));
+
         public string Username
         {
             get { return (string)GetValue(UsernameProperty); }
@@ -26,9 +32,22 @@ namespace kafi.Controls
             set { SetValue(IsManagerProperty, value); }
         }
 
+        public BitmapImage ProfileImage
+        {
+            get { return (BitmapImage)GetValue(ProfileImageProperty); }
+            set { SetValue(ProfileImageProperty, value); }
+        }
+
+        public Action<Type>? NavigateToPage { get; set; }
+
         public HeaderControl()
         {
             this.InitializeComponent();
+        }
+
+        private void NavigateToMenuPage_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToPage?.Invoke(typeof(TablePage));
         }
     }
 }
