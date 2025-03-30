@@ -50,7 +50,38 @@
         </Setter>
     </Style>
 
-    <Style x:Key="LeftRightDataGridCellStyle" TargetType="control:DataGridCell">
+    <Style x:Key="OrderCenterDataGridColumnHeaderStyle" TargetType="wctprimitives:DataGridColumnHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
+                    <ContentPresenter
+                        Padding="11,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource LexendLight}"
+                        FontSize="15"
+                        FontWeight="Light" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="OrderRightDataGridColumnHeaderStyle" TargetType="wctprimitives:DataGridColumnHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
+                    <ContentPresenter
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        FontFamily="{StaticResource LexendLight}"
+                        FontSize="15"
+                        FontWeight="Light" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="LeftDataGridCellStyle" TargetType="control:DataGridCell">
         <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 

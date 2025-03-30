@@ -20,22 +20,22 @@ namespace kafi.Repositories
             return await _orderDao.GetAll();
         }
 
-        public async Task<Order>? GetById(string id)
+        public async Task<Order>? GetById(Guid id)
+        {
+            return await _orderDao.GetById(id);
+        }
+
+        public async Task Delete(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public async Task Delete(string id)
+        public Task<object> Add(object entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task Add(object entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Update(string id, object entity)
+        public Task Update(Guid id, object entity)
         {
             throw new NotImplementedException();
         }

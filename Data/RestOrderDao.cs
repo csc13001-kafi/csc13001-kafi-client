@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -19,42 +18,33 @@ namespace kafi.Data
 
         public async Task<IEnumerable<Order>> GetAll()
         {
-            try {
-                var response = await _httpClient.GetAsync("/orders");
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<IEnumerable<Order>>(json);
-            }
-            catch (HttpRequestException ex)
-            {
-                return Enumerable.Empty<Order>();
-            }
-            catch (JsonException ex)
-            {
-                return Enumerable.Empty<Order>();
-            }
+            var response = await _httpClient.GetAsync("/orders");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<IEnumerable<Order>>(json);
         }
 
-        public Task Add(object entity)
+        public Task<object> Add(object entity)
         {
             throw new NotImplementedException();
         }
 
-        public Task Delete(string id)
+        public Task Delete(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public Task Update(string id, object entity)
+        public Task Update(Guid id, object entity)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Order>? GetById(string id)
+        public async Task<Order>? GetById(Guid id)
         {
-            throw new NotImplementedException();
+            var response = await _httpClient.GetAsync($"/orders/{id}");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Order>(json);
         }
-
-
     }
 }
