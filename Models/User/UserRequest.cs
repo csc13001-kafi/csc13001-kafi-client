@@ -1,8 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Text.Json.Serialization;
 
 namespace kafi.Models
 {
+    public record ImageRequest
+    (
+        Stream FileStream,
+        string ContentType,
+        string FileName
+    );
+
     public class UserRequest
     {
         [JsonPropertyName("username")]

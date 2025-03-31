@@ -62,13 +62,15 @@ public partial class App : Application
         services.AddSingleton<IOrderRepository, OrderRepository>();
         services.AddSingleton<IInventoryDao, RestInventoryDao>();
         services.AddSingleton<IInventoryRepository, InventoryRepository>();
+        services.AddSingleton<IInfoDao, RestInfoDao>();
+        services.AddSingleton<IInfoRepository, InfoRepository>();
 
         // Viewmodels
         services.AddTransient<LoginViewModel>();
         services.AddTransient<ShellViewModel>();
+        services.AddTransient<InfoViewModel>();
         services.AddTransient<MenuViewModel>();
         services.AddTransient<EmployeeViewModel>();
-        services.AddTransient<InfoViewModel>();
         services.AddTransient<OrderViewModel>();
         services.AddTransient<InventoryViewModel>();
 
