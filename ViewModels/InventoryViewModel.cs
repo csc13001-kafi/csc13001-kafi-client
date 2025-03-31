@@ -120,6 +120,7 @@ namespace kafi.ViewModels
                 UpdatePagedView();
                 Message = "Inventory added successfully.";
                 DeleteAllInput();
+                WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
             }
             catch (Exception ex)
             {
@@ -187,6 +188,7 @@ namespace kafi.ViewModels
                 }
                 UpdatePagedView();
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
+                WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
             }
             catch (Exception ex)
             {
@@ -210,6 +212,7 @@ namespace kafi.ViewModels
                 }
 
                 UpdatePagedView();
+                WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
             }
             catch (Exception) { }
         }
