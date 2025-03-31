@@ -10,6 +10,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Models;
 using kafi.Repositories;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace kafi.ViewModels
 {
@@ -75,6 +77,9 @@ namespace kafi.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(UpdateEmployeeCommand))]
         private User selectedUser;
+
+        [ObservableProperty]
+        private ImageSource selectedUserImage;
 
         private List<User> _fullEmployeeList = [];
         public ObservableCollection<User> Employees { get; } = new ObservableCollection<User>();
@@ -231,6 +236,7 @@ namespace kafi.ViewModels
             SelectedUser = new User
             {
                 Id = id,
+                Image = user.Image,
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
@@ -240,6 +246,7 @@ namespace kafi.ViewModels
                 StartShift = user.StartShift,
                 EndShift = user.EndShift
             };
+            SelectedUserImage = new BitmapImage(new Uri(user.Image));
         }
 
         private void UpdatePagedView()

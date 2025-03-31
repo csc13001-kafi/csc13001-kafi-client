@@ -247,8 +247,8 @@
                     CornerRadius="20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="10*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.RenderTransform>
@@ -282,6 +282,7 @@
                     <Border
                         Grid.Row="1"
                         Height="1"
+                        Margin="0,20"
                         HorizontalAlignment="Stretch"
                         Background="Black" />
                     <Grid
@@ -494,7 +495,8 @@
                                 Width="200"
                                 Height="200"
                                 Background="#D19F9F"
-                                DisplayName="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}" />
+                                DisplayName="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}"
+                                ProfilePicture="{x:Bind ViewModel.SelectedUserImage, Mode=OneWay}" />
                             <Button
                                 x:Name="EditEmployeeButton"
                                 Padding="10,9"
@@ -542,14 +544,14 @@
                             <Button
                                 Padding="10,8"
                                 HorizontalAlignment="Stretch"
-                                BorderBrush="{StaticResource SecondaryBrush}"
+                                BorderBrush="Red"
                                 Click="CloseViewPopupButton_Click"
                                 Command="{x:Bind ViewModel.DeleteEmployeeCommand}"
                                 CommandParameter="{x:Bind ViewModel.SelectedUser.Id, Mode=OneWay}"
                                 CornerRadius="10"
                                 FontFamily="{StaticResource Lexend}"
-                                Foreground="{StaticResource SecondaryBrush}">
-                                Xóa profile
+                                Foreground="red">
+                                Xóa nhân viên
                             </Button>
                         </StackPanel>
                         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
