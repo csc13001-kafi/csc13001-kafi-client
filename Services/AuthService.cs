@@ -12,9 +12,21 @@ using kafi.Models.Authentication;
 
 namespace kafi.Service
 {
-    public class AuthService(IHttpClientFactory httpClientFactory) : IAuthService
+    public class AuthService : IAuthService
     {
-        private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Common");
+        private readonly HttpClient _authHttpClient;
+        private readonly HttpClient _noAuthHttpClient;
+        private readonly ISecureTokenStorage _secureTokenStorage;
+
+        public AuthService(IHttpClientFactory httpClientFactory, ISecureTokenStorage secureTokenStorage)
+        {
+            _authHttpClient = httpClientFactory.CreateClient("Common");
+            _secureTokenStorage = secureTokenStorage;
+            _noAuthHttpClient = new HttpClient
+            {
+                BaseAddress = new Uri("http://localhost:8080/")
+            };
+        }
 
         public User? CurrentUser { get; private set; }
 
@@ -23,12 +35,11 @@ namespace kafi.Service
             return CurrentUser != null && CurrentUser.Role == role;
         }
 
-        public async Task LoadCurrentUserFromToken(string accessToken)
+        public async Task LoadCurrentUserFromToken()
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-                var response = await _httpClient.GetAsync("/users/user");
+                var response = await _authHttpClient.GetAsync("/users/user");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -56,14 +67,15 @@ namespace kafi.Service
             {
                 var jsonPayload = JsonSerializer.Serialize(request);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("auth/sign-in", content);
+                var response = await _noAuthHttpClient.PostAsync("auth/sign-in", content);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent);
 
-                    await LoadCurrentUserFromToken(loginResponse.AccessToken);
+                    _secureTokenStorage.SaveTokens(loginResponse.AccessToken, loginResponse.RefreshToken);
+                    await LoadCurrentUserFromToken();
 
                     return loginResponse;
                 }
@@ -81,13 +93,14 @@ namespace kafi.Service
         {
             try
             {
-                var response = await _httpClient.DeleteAsync("auth/sign-out");
+                var response = await _authHttpClient.DeleteAsync("auth/sign-out");
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var logoutResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     var message = logoutResponse!["message"].ToString();
                     CurrentUser = null;
+                    _secureTokenStorage.ClearTokens();
                     return message;
                 }
                 Debug.WriteLine($"Logout failed. Status code: {response.StatusCode}");
@@ -112,7 +125,7 @@ namespace kafi.Service
                 };
                 var jsonPayload = JsonSerializer.Serialize(payload);
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync("auth/change-password", content);
+                var response = await _authHttpClient.PutAsync("auth/change-password", content);
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -127,6 +140,94 @@ namespace kafi.Service
             {
                 Debug.WriteLine($"Exception during change password: {ex}");
                 return "An error occurred while changing the password.";
+            }
+        }
+
+        public async Task<string> RequestForgotPasswordOtpAsync(string email)
+        {
+            try
+            {
+                var payload = new
+                {
+                    email
+                };
+                var jsonPayload = JsonSerializer.Serialize(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await _noAuthHttpClient.PostAsync("auth/password-recovery", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var forgotPasswordResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var message = forgotPasswordResponse!["message"].ToString();
+                    return message;
+                }
+                Debug.WriteLine($"Request forgot password OTP failed. Status code: {response.StatusCode}");
+                return "An error occurred while requesting the OTP.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception during request forgot password OTP: {ex}");
+                return "An error occurred while requesting the OTP.";
+            }
+        }
+
+        public async Task<string> VerifyOtpAsync(string email, string otp)
+        {
+            try
+            {
+                var payload = new
+                {
+                    email,
+                    otp
+                };
+                var jsonPayload = JsonSerializer.Serialize(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await _noAuthHttpClient.PostAsync("auth/verify-otp", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var verifyOtpResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var message = verifyOtpResponse!["message"].ToString();
+                    return message;
+                }
+                Debug.WriteLine($"Verify OTP failed. Status code: {response.StatusCode}");
+                return "An error occurred while verifying the OTP.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception during verify OTP: {ex}");
+                return "An error occurred while verifying the OTP.";
+            }
+        }
+
+        public async Task<string> ResetPasswordAsync(string email, string otp, string newPassword, string confirmPassword)
+        {
+            try
+            {
+                var payload = new
+                {
+                    email,
+                    otp,
+                    newPassword,
+                    confirmPassword
+                };
+                var jsonPayload = JsonSerializer.Serialize(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                var response = await _noAuthHttpClient.PostAsync("auth/reset-password", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var resetPasswordResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
+                    var message = resetPasswordResponse!["message"].ToString();
+                    return message;
+                }
+                Debug.WriteLine($"Reset password failed. Status code: {response.StatusCode}");
+                return "An error occurred while resetting the password.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception during reset password: {ex}");
+                return "An error occurred while resetting the password.";
             }
         }
     }
