@@ -1,7 +1,4 @@
-using kafi.ViewModels;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
+﻿using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -13,21 +10,11 @@ namespace kafi
     /// </summary>
     public sealed partial class LoginWindow : Window
     {
-        public LoginViewModel ViewModel { get; }
         public LoginWindow()
         {
             this.InitializeComponent();
             AppWindow.SetIcon("/Assets/WindowIcon.ico");
-            ViewModel = App.Services.GetService(typeof(LoginViewModel)) as LoginViewModel;
-        }
-        private void LoginButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-        {
-            LoginButtonText.Foreground = new SolidColorBrush(Colors.Black);
-        }
-
-        private void LoginButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-        {
-            LoginButtonText.Foreground = new SolidColorBrush(Colors.White);
+            this.Content = new Views.LoginPage();
         }
     }
 }

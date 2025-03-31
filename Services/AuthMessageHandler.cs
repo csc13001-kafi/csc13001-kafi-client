@@ -57,7 +57,7 @@ namespace kafi.Service
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent);
-                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshToken);
+                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshResponse.RefreshToken);
                     return true;
                 }
                 return false;

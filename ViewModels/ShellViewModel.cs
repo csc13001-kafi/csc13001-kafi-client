@@ -73,7 +73,6 @@ public partial class ShellViewModel : ObservableObject
     private async Task LogoutAsync()
     {
         var message = await _authService.LogoutAsync();
-        _secureTokenStorage.ClearTokens();
         _windowService.ShowLoginWindow();
     }
 

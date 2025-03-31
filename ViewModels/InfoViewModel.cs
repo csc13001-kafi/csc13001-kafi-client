@@ -126,8 +126,8 @@ namespace kafi.ViewModels
                     var request = new ImageRequest(await _file.OpenStreamForReadAsync(), _file.ContentType, _file.Name);
                     await _repository.UpdateProfileImage(request);
                 }
-                await _authService.LoadCurrentUserFromToken(_secureTokenStorage.GetTokens().accessToken);
-                
+                await _authService.LoadCurrentUserFromToken();
+
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<User>(_authService.CurrentUser));
                 WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
             }

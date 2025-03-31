@@ -20,10 +20,12 @@ namespace kafi.Service
             }
             else
             {
-                await _authService.LoadCurrentUserFromToken(tokens.accessToken);
+                await _authService.LoadCurrentUserFromToken();
                 _windowService.ShowMainWindow();
             }
 
+            Debug.WriteLine($"at: {tokens.accessToken}");
+            Debug.WriteLine($"rt: {tokens.refreshToken}");
             await Task.CompletedTask;
         }
     }

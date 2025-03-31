@@ -7,5 +7,8 @@ namespace kafi.Models.Authentication
     {
         [JsonPropertyName("accessToken")]
         public required string AccessToken { get; set; }
+
+        [JsonPropertyName("refreshToken")]
+        public required string RefreshToken { get; set; }
     }
 }
