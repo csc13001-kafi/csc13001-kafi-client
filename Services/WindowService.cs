@@ -8,11 +8,18 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace kafi.Services
 {
-    public class WindowService(INavigationService navigationService) : IWindowService
+    public class WindowService : IWindowService
     {
-        private readonly INavigationService _navigationService = navigationService;
+        private readonly INavigationService _navigationService;
         private readonly List<Window> _activeWindows = new();
         private readonly object _windowsLock = new();
+        private Window _currentWindow;
+
+        public WindowService(INavigationService navigationService)
+        {
+            _navigationService = navigationService;
+        }
+
         public void ShowMainWindow()
         {
             MainWindow window = App.Services.GetRequiredService<MainWindow>();
@@ -35,6 +42,14 @@ namespace kafi.Services
             CloseWindowOfType<MainWindow>();
         }
 
+        public Window GetCurrentWindow()
+        {
+            lock (_windowsLock)
+            {
+                return _currentWindow;
+            }
+        }
+
         private void ActivateWindow(Window window)
         {
             lock (_windowsLock)
@@ -42,6 +57,7 @@ namespace kafi.Services
                 window.Activate();
                 window.Closed += Window_Closed;
                 _activeWindows.Add(window);
+                _currentWindow = window;
             }
         }
 
@@ -64,9 +80,12 @@ namespace kafi.Services
                 {
                     window.Closed -= Window_Closed;
                     _activeWindows.Remove(window);
+                    if (_currentWindow == window)
+                    {
+                        _currentWindow = _activeWindows.LastOrDefault();
+                    }
                 }
             }
         }
-
     }
 }
