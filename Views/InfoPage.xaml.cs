@@ -23,7 +23,7 @@ namespace kafi.Views
 
         public InfoPage()
         {
-            ViewModel = (InfoViewModel)App.Services.GetService(typeof(InfoViewModel))!;
+            ViewModel = App.Services.GetRequiredService<InfoViewModel>();
             this.InitializeComponent();
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
