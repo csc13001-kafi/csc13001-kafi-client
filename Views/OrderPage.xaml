@@ -6,105 +6,499 @@
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:converters="using:kafi.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:kafi.Helpers"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:kafi.ViewModels"
     xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
-    <Page.DataContext>
-        <viewmodels:OrderViewModel />
-    </Page.DataContext>
     <Page.Resources>
-        <converters:PaymentTypeToBackgroundConverter x:Key="PaymentTypeToBackgroundConverter" />
-        <converters:PaymentTypeToForegroundConverter x:Key="PaymentTypeToForegroundConverter" />
+        <helpers:BindingProxy x:Key="OrderProxy" Data="{x:Bind ViewModel, Mode=OneWay}" />
+        <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
+        <converters:DateTimeToStringConverter x:Key="DateTimeToStringConverter" />
+        <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter" />
+        <converters:IdToTextConverter x:Key="IdToTextConverter" />
+        <converters:StatusToForegroundConverter x:Key="StatusToForegroundConverter" />
+        <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
+        <converters:PaymentTypeToBackground x:Key="PaymentTypeToBackground" />
+        <converters:PaymentTypeToForeground x:Key="PaymentTypeToForeground" />
+        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+        <SolidColorBrush x:Key="NumberBoxControlBorderBrushFocused" Color="Transparent" />
+        <SolidColorBrush x:Key="NumberBoxControlBorderBrushPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="CalendarDatePickerBackgroundPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="CalendarDatePickerBackgroundPressed" Color="Transparent" />
     </Page.Resources>
-    <StackPanel Padding="0,0,10,0" Spacing="40">
-        <TextBlock Style="{StaticResource PageTitleStyle}" Text="Đơn hàng" />
-        <StackPanel
-            Padding="40"
-            Background="White"
-            CornerRadius="10"
-            Spacing="10">
-            <CalendarDatePicker
-                HorizontalAlignment="Right"
-                DateFormat="{}{day.integer} {month.full} {year.full}"
-                PlaceholderText="Hôm nay" />
-            <controls:DataGrid
-                AutoGenerateColumns="False"
+    <Grid>
+        <Grid Padding="0,0,10,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                Margin="0,0,0,20"
+                VerticalAlignment="Top"
+                Style="{StaticResource PageTitleStyle}">
+                <Run Text="Đơn hàng" />
+                <Run Text="(" /><Run Text="{x:Bind ViewModel.TotalItems, Mode=OneWay}" /><Run Text=")" />
+            </TextBlock>
+
+            <Grid
+                Grid.Row="1"
+                Padding="40,20"
                 Background="White"
-                CanUserReorderColumns="True"
-                CanUserResizeColumns="True"
-                ColumnWidth="*"
-                Foreground="#71747D"
-                GridLinesVisibility="Horizontal"
-                HorizontalScrollBarVisibility="Hidden"
-                IsReadOnly="True"
-                ItemsSource="{Binding Orders}"
-                RowHeight="50">
-                <controls:DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="wctprimitives:DataGridColumnHeader">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
-                                    <ContentPresenter
-                                        Padding="10"
-                                        Background="White"
-                                        FontSize="16"
-                                        Foreground="Black" />
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </controls:DataGrid.ColumnHeaderStyle>
-                <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Binding="{Binding Id}" Header="Mã đơn" />
-                    <controls:DataGridTextColumn Binding="{Binding OrderDate}" Header="Thời gian" />
-                    <controls:DataGridTextColumn Binding="{Binding EmployeeName}" Header="Nhân viên" />
-                    <controls:DataGridTemplateColumn Header="Phương thức thanh toán">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Background="{Binding Payment.PaymentType, Converter={StaticResource PaymentTypeToBackgroundConverter}}"
-                                    CornerRadius="14">
+                CornerRadius="10"
+                RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <controls:DataGrid
+                    VerticalAlignment="Stretch"
+                    AutoGenerateColumns="False"
+                    Background="White"
+                    CanUserReorderColumns="True"
+                    CellStyle="{StaticResource CenterDataGridCellStyle}"
+                    ColumnHeaderStyle="{StaticResource CenterDataGridColumnHeaderStyle}"
+                    ColumnWidth="*"
+                    Foreground="#71747D"
+                    FrozenColumnCount="1"
+                    GridLinesVisibility="Horizontal"
+                    HorizontalScrollBarVisibility="Hidden"
+                    IsReadOnly="True"
+                    ItemsSource="{x:Bind ViewModel.Orders, Mode=OneWay}"
+                    RowHeight="50"
+                    VerticalScrollBarVisibility="Auto">
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTextColumn
+                            Binding="{Binding Id, Converter={StaticResource IdToTextConverter}}"
+                            CellStyle="{StaticResource LeftDataGridCellStyle}"
+                            Header="Mã đơn"
+                            HeaderStyle="{StaticResource DefaultDataGridColumnHeaderStyle}" />
+                        <controls:DataGridTemplateColumn Header="Thời gian">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
                                     <TextBlock
-                                        Padding="30,6"
-                                        Foreground="{Binding Payment.PaymentType, Converter={StaticResource PaymentTypeToForegroundConverter}}"
-                                        Text="{Binding Payment.PaymentType}" />
-                                </Border>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
-                    <controls:DataGridTextColumn Binding="{Binding Total}" Header="Tổng tiền" />
-                </controls:DataGrid.Columns>
-            </controls:DataGrid>
-            <StackPanel
-                Margin="0,30,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="50">
-                <StackPanel.Resources>
-                    <Style TargetType="Button">
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Background" Value="#DBDBDB" />
-                        <Setter Property="CornerRadius" Value="10" />
-                        <Setter Property="Height" Value="30" />
-                        <Setter Property="Width" Value="100" />
-                    </Style>
-                </StackPanel.Resources>
-                <Button x:Name="PreviousButton">
-                    Trang trước
-                </Button>
-                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <TextBlock x:Name="CurrentDataPage" Text="1" />
-                    <TextBlock x:Name="TotalDataPage" Text="/5" />
+                                        Padding="10"
+                                        VerticalAlignment="Center"
+                                        Foreground="#71747D"
+                                        Text="{Binding Time, Converter={StaticResource DateTimeToStringConverter}}">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip
+                                                Content="{Binding Time}"
+                                                Placement="top"
+                                                VerticalOffset="10" />
+                                        </ToolTipService.ToolTip>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Binding="{Binding EmployeeName}" Header="Nhân viên" />
+                        <controls:DataGridTemplateColumn Header="Phương thức thanh toán">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Margin="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{Binding PaymentMethod, Converter={StaticResource StatusToBackgroundConverter}}"
+                                        CornerRadius="14">
+                                        <TextBlock
+                                            Padding="30,6"
+                                            FontFamily="{StaticResource LexendMedium}"
+                                            FontWeight="Medium"
+                                            Foreground="{Binding PaymentMethod, Converter={StaticResource StatusToForegroundConverter}}"
+                                            Text="{Binding PaymentMethod}" />
+                                    </Border>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn
+                            Binding="{Binding Price, Converter={StaticResource PriceToStringConverter}}"
+                            CellStyle="{StaticResource RightDataGridCellStyle}"
+                            Header="Giá mua"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}" />
+                        <controls:DataGridTemplateColumn
+                            Width="Auto"
+                            CanUserReorder="False"
+                            CanUserResize="False"
+                            HeaderStyle="{StaticResource RightDataGridColumnHeaderStyle}">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        x:Name="ViewOrderButton"
+                                        Margin="10,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        BorderThickness="0"
+                                        Click="ViewOrderButton_Click"
+                                        Command="{Binding Data.ViewOrderCommand, Source={StaticResource OrderProxy}}"
+                                        CommandParameter="{Binding Id}"
+                                        CornerRadius="10"
+                                        FontWeight="Bold">
+                                        <FontIcon Glyph="&#xE890;" />
+                                    </Button>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
+                <ProgressRing
+                    Grid.RowSpan="2"
+                    Width="50"
+                    Height="50"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                <StackPanel
+                    Grid.Row="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal"
+                    Spacing="50">
+                    <StackPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="#DBDBDB" />
+                            <Setter Property="CornerRadius" Value="10" />
+                            <Setter Property="Height" Value="30" />
+                            <Setter Property="Width" Value="100" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <Button x:Name="PreviousButton" Command="{x:Bind ViewModel.GoToPreviousPageCommand}">
+                        Trang trước
+                    </Button>
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock x:Name="CurrentDataPage" Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}" />
+                        <TextBlock Text="/" />
+                        <TextBlock x:Name="TotalDataPage" Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" />
+                    </StackPanel>
+                    <Button x:Name="NextButton" Command="{x:Bind ViewModel.GoToNextPageCommand}">
+                        Trang sau
+                    </Button>
+                    <ComboBox SelectedValue="{x:Bind ViewModel.PageSize, Mode=TwoWay}">
+                        <x:Int32>5</x:Int32>
+                        <x:Int32>10</x:Int32>
+                        <x:Int32>15</x:Int32>
+                        <x:Int32>20</x:Int32>
+                    </ComboBox>
                 </StackPanel>
-                <Button x:Name="NextButton">
-                    Trang sau
-                </Button>
-            </StackPanel>
-        </StackPanel>
-    </StackPanel>
+            </Grid>
+        </Grid>
+        <RelativePanel Margin="-20,-105,-20,-20" Padding="10">
+            <Popup
+                x:Name="ViewOrderPopup"
+                Width="400"
+                Height="200"
+                IsLightDismissEnabled="True"
+                IsOpen="False"
+                LightDismissOverlayMode="On"
+                RelativePanel.AlignRightWithPanel="True">
+                <Popup.ChildTransitions>
+                    <TransitionCollection>
+                        <PaneThemeTransition Edge="Right" />
+                    </TransitionCollection>
+                </Popup.ChildTransitions>
+                <Grid
+                    Width="{Binding ElementName=ViewOrderPopup, Path=Width}"
+                    Height="{Binding ElementName=ViewOrderPopup, Path=Height}"
+                    Padding="20"
+                    Background="#EAEAEA"
+                    Canvas.ZIndex="2"
+                    CornerRadius="10"
+                    PointerEntered="Grid_PointerEntered"
+                    PointerExited="Grid_PointerExited">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="PopupTranslateTransform" X="300" />
+                    </Grid.RenderTransform>
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontFamily" Value="{StaticResource LexendLight}" />
+                            <Setter Property="FontWeight" Value="Light" />
+                            <Setter Property="FontSize" Value="15" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Resources>
+                    <Button
+                        x:Name="ClosePopupButton"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="{StaticResource PrimaryBrush}"
+                        Canvas.ZIndex="3"
+                        Click="ClosePopupButton_Click"
+                        CornerRadius="100"
+                        Opacity="0">
+                        <FontIcon FontSize="12" Glyph="&#xE970;" />
+                    </Button>
+                    <Grid
+                        Grid.Row="0"
+                        VerticalAlignment="Top"
+                        RowSpacing="15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.RowSpan="2"
+                            Padding="12"
+                            HorizontalAlignment="Left"
+                            Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="4">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{StaticResource LexendMedium}"
+                                FontSize="24"
+                                FontWeight="Medium"
+                                Foreground="#333333"
+                                Text="{x:Bind ViewModel.SelectedOrder.Id, Mode=OneWay, Converter={StaticResource IdToTextConverter}}" />
+                        </Border>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Right">
+                            <Run Text="Nhân viên:" />
+                            <Run Text="{x:Bind ViewModel.SelectedOrder.EmployeeName, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right">
+                            <Run Text="Khách hàng:" />
+                            <Run Text="{x:Bind ViewModel.SelectedOrder.ClientPhoneNumber, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            FontFamily="{StaticResource LexendBold}"
+                            FontSize="17"
+                            FontWeight="Bold">
+                            <Run Text="Bàn" />
+                            <Run Text="{x:Bind ViewModel.SelectedOrder.TableNumber, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{x:Bind ViewModel.SelectedOrder.Time, Mode=OneWay, Converter={StaticResource DateTimeToStringConverter}, ConverterParameter=Day}" />
+                    </Grid>
+                    <Border
+                        Grid.Row="1"
+                        Height="1"
+                        Margin="0,10"
+                        HorizontalAlignment="Stretch"
+                        Background="Black" />
+                    <controls:DataGrid
+                        Grid.Row="2"
+                        HorizontalAlignment="Stretch"
+                        AutoGenerateColumns="False"
+                        ColumnHeaderHeight="30"
+                        GridLinesVisibility="None"
+                        IsReadOnly="True"
+                        ItemsSource="{x:Bind ViewModel.SelectedOrder.Products, Mode=OneWay}">
+                        <controls:DataGrid.Columns>
+                            <controls:DataGridTemplateColumn Width="*" Header="Món hàng">
+                                <controls:DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="wctprimitives:DataGridColumnHeader">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="wctprimitives:DataGridColumnHeader">
+                                                    <ContentPresenter
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="{StaticResource LexendLight}"
+                                                        FontSize="15"
+                                                        FontWeight="Light" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </controls:DataGridTemplateColumn.HeaderStyle>
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            Padding="0,0,10,0"
+                                            FontFamily="{StaticResource LexendLight}"
+                                            FontWeight="Light"
+                                            Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
+                            <controls:DataGridTextColumn
+                                Width="Auto"
+                                Binding="{Binding Quantity}"
+                                CellStyle="{StaticResource CenterDataGridCellStyle}"
+                                FontFamily="{StaticResource LexendLight}"
+                                FontWeight="Light"
+                                Header="SL"
+                                HeaderStyle="{StaticResource OrderCenterDataGridColumnHeaderStyle}" />
+                            <controls:DataGridTemplateColumn
+                                Width="Auto"
+                                CellStyle="{StaticResource RightDataGridCellStyle}"
+                                Header="Giá tiền"
+                                HeaderStyle="{StaticResource OrderRightDataGridColumnHeaderStyle}">
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            Padding="10,0,0,0"
+                                            FontFamily="{StaticResource LexendLight}"
+                                            FontWeight="Light"
+                                            Text="{Binding Price, Converter={StaticResource PriceToStringConverter}}" />
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
+                        </controls:DataGrid.Columns>
+                    </controls:DataGrid>
+                    <Border
+                        Grid.Row="3"
+                        Height="1"
+                        HorizontalAlignment="Stretch"
+                        Background="Black" />
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Số món" />
+                        <TextBlock
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{x:Bind ViewModel.SelectedOrder.DistincProductCount, Mode=OneWay}" />
+                        <TextBlock Grid.Row="1" Text="Tạm tính" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{x:Bind ViewModel.SelectedOrder.TotalPrice, Mode=OneWay, Converter={StaticResource PriceToStringConverter}}" />
+                        <TextBlock Grid.Row="2" Text="Giảm giá" />
+                        <Border
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Padding="10,4"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            BorderBrush="Black"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <TextBlock>
+                                <Run Text="-" /><Run Text="{x:Bind ViewModel.SelectedOrder.DiscountPercentage, Mode=OneWay}" /><Run Text="%" />
+                            </TextBlock>
+                        </Border>
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right">
+                            <Run Text="-" /><Run Text="{x:Bind ViewModel.SelectedOrder.Discount, Mode=OneWay, Converter={StaticResource PriceToStringConverter}}" />
+                        </TextBlock>
+                    </Grid>
+                    <Line
+                        Grid.Row="5"
+                        HorizontalAlignment="Stretch"
+                        Stretch="Fill"
+                        Stroke="#4E2B2B"
+                        StrokeDashArray="3,4"
+                        StrokeThickness="1"
+                        X1="0"
+                        X2="1"
+                        Y1="0"
+                        Y2="0" />
+                    <Grid Grid.Row="6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource LexendBold}"
+                            FontSize="17"
+                            FontWeight="Bold"
+                            Text="Tổng tiền" />
+                        <TextBlock
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource LexendBold}"
+                            FontSize="17"
+                            FontWeight="Bold"
+                            Text="{x:Bind ViewModel.SelectedOrder.FinalPrice, Mode=OneWay, Converter={StaticResource PriceToStringConverter}}" />
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.Resources>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Setter Property="Padding" Value="6" />
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="Width" Value="100" />
+                                    <Setter Property="Spacing" Value="10" />
+                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="CornerRadius" Value="10" />
+                                </Style>
+                            </Grid.Resources>
+                            <StackPanel Background="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToBackground}, ConverterParameter=Cash}">
+                                <FontIcon Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForeground}, ConverterParameter=Cash}" Glyph="&#xE8B7;" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForeground}, ConverterParameter=Cash}"
+                                    Text="Tiền mặt" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Background="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToBackground}, ConverterParameter=QR}">
+                                <FontIcon Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForeground}, ConverterParameter=QR}" Glyph="&#xED14;" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForeground}, ConverterParameter=QR}"
+                                    Text="QR" />
+                            </StackPanel>
+                        </Grid>
+                        <Button
+                            Grid.Row="2"
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Background="#C0C0C0"
+                            BorderThickness="0"
+                            CornerRadius="10"
+                            Foreground="White">
+                            <StackPanel
+                                Padding="10,4"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                                <FontIcon VerticalAlignment="Center" Glyph="&#xE749;" />
+                                <TextBlock VerticalAlignment="Center" Text="In lại hóa đơn" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Popup>
+        </RelativePanel>
+    </Grid>
 </Page>

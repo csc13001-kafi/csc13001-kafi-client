@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using kafi.Models;
+using kafi.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -15,15 +15,18 @@ namespace kafi.Views;
 /// </summary>
 public sealed partial class ShellPage : Page
 {
+    public ShellViewModel ViewModel { get; }
     public ShellPage()
     {
         this.InitializeComponent();
+        ViewModel = (ShellViewModel)App.Services.GetService(typeof(ShellViewModel))!;
         ContentFrame.Navigate(typeof(MainPage));
+        PageHeader.NavigateToPage = new Action<Type>((pageType) => ContentFrame.Navigate(pageType));
     }
 
     private void OnNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is ViewModels.NavItem selectedItem)
+        if (args.SelectedItem is NavItem selectedItem)
         {
             var selectedTag = selectedItem.Tag?.ToString();
             switch (selectedTag)
@@ -46,6 +49,12 @@ public sealed partial class ShellPage : Page
                 case "InventoryPage":
                     ContentFrame.Navigate(typeof(InventoryPage));
                     break;
+                case "EmployeePage":
+                    ContentFrame.Navigate(typeof(EmployeePage));
+                    break;
+                case "Logout":
+                    ViewModel.LogoutCommand.Execute(null);
+                    break;
             }
             ShowOrHideHeader(selectedTag);
         }
@@ -53,7 +62,7 @@ public sealed partial class ShellPage : Page
 
     private async void ShowOrHideHeader(string pageTag)
     {
-        var pagesWithoutHeader = new string[] { "LoginPage" };
+        var pagesWithoutHeader = new string[] { };
         var shouldShowHeader = !pagesWithoutHeader.Contains(pageTag);
 
         var header = FindName("PageHeader") as UIElement;
@@ -96,59 +105,5 @@ public sealed partial class ShellPage : Page
             await Task.Delay(500);
             header.Visibility = Visibility.Collapsed;
         }
-    }
-
-    private void NavView_PaneOpening(NavigationView sender, object args)
-    {
-        UpdateTextVisibility(sender, Visibility.Visible); // Show text
-    }
-
-    private void NavView_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
-    {
-        UpdateTextVisibility(sender, Visibility.Collapsed); // Hide text
-    }
-
-    private void UpdateTextVisibility(NavigationView navView, Visibility visibility)
-    {
-        Debug.WriteLine(navView.MenuItems.Count);
-        foreach (var item in navView.MenuItems.OfType<NavigationViewItem>())
-        {
-            Debug.WriteLine(item);
-            // Get the container (StackPanel) of the menu item
-            var container = navView.ContainerFromMenuItem(item) as FrameworkElement;
-            if (container != null)
-            {
-                Debug.WriteLine(container.Name);
-                // Find the TextBlock named "ItemContent" inside the container
-                var textBlock = FindVisualChildByName<TextBlock>(container, "ItemContent");
-                if (textBlock != null)
-                {
-                    textBlock.Visibility = visibility;
-                }
-            }
-        }
-    }
-
-    // Helper to find a named child in the visual tree
-    private T FindVisualChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
-    {
-        if (parent == null) return null;
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        {
-            var child = VisualTreeHelper.GetChild(parent, i) as FrameworkElement;
-            Debug.WriteLine(child.Name);
-            if (child != null && child is T target && child.Name == name)
-            {
-                return target;
-            }
-            var result = FindVisualChildByName<T>(child, name);
-            if (result != null) return result;
-        }
-        return null;
-    }
-    private void Page_Loaded(object sender, RoutedEventArgs e)
-    {
-        UpdateTextVisibility(NavigationViewControl,
-            NavigationViewControl.IsPaneOpen ? Visibility.Visible : Visibility.Collapsed);
     }
 }
