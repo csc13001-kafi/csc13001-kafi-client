@@ -64,8 +64,6 @@ namespace kafi.Views
             TurnOnIsReadOnlyTextBoxes(PersonalInfoGrid);
             TurnOnIsReadOnlyTextBoxes(JobInfoGrid);
             TurnOffDateOrTimePicker(EditBirthdatePicker);
-            TurnOffDateOrTimePicker(StartShiftTimePicker);
-            TurnOffDateOrTimePicker(EndShiftTimePicker);
             EditInfoButton.Visibility = Visibility.Visible;
             PostEditGrid.Visibility = Visibility.Collapsed;
             ChangeProfileImageButton.Visibility = Visibility.Collapsed;
@@ -106,11 +104,6 @@ namespace kafi.Views
                 datePicker.IsHitTestVisible = true;
                 datePicker.Background = new SolidColorBrush(Color.FromArgb(255, 240, 240, 240));
             }
-            else if (picker is TimePicker timePicker)
-            {
-                timePicker.IsHitTestVisible = true;
-                timePicker.Background = new SolidColorBrush(Color.FromArgb(255, 240, 240, 240));
-            }
         }
 
         private void TurnOffDateOrTimePicker(object picker)
@@ -119,11 +112,6 @@ namespace kafi.Views
             {
                 datePicker.IsHitTestVisible = false;
                 datePicker.Background = new SolidColorBrush(Colors.Transparent);
-            }
-            else if (picker is TimePicker timePicker)
-            {
-                timePicker.IsHitTestVisible = false;
-                timePicker.Background = new SolidColorBrush(Colors.Transparent);
             }
         }
         private async void ChangePasswordButton_Click(object sender, RoutedEventArgs e)

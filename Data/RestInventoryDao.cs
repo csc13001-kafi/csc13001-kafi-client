@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -43,9 +44,11 @@ namespace kafi.Data
         {
             var json = JsonSerializer.Serialize(inventory, _options);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            Debug.WriteLine(await content.ReadAsStringAsync());
             var response = await _httpClient.PostAsync("/materials", content);
             var payload = await response.Content.ReadAsStringAsync();
             var newInventory = JsonSerializer.Deserialize<Inventory>(payload, _options);
+            Debug.WriteLine(payload);
             response.EnsureSuccessStatusCode();
             return newInventory;
         }
