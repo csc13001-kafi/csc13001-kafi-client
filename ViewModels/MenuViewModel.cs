@@ -32,6 +32,7 @@ namespace kafi.ViewModels
             _windowService = windowService;
 
             IsActive = true;
+            Categories = new ObservableCollection<Category>();
         }
 
 
@@ -42,7 +43,7 @@ namespace kafi.ViewModels
         private List<Category> _fullCategories = [];
 
         public List<Inventory> FullMaterials { get; set; } = [];
-        public ObservableCollection<Category> Categories { get; set; } = [];
+        public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<Product> FilteredProducts { get; set; } = [];
         public ObservableCollection<ProductMaterial> Materials { get; set; } = [];
 
@@ -257,6 +258,7 @@ namespace kafi.ViewModels
                 );
 
                 var newProduct = await _repository.AddProduct(request);
+                newProduct.Materials = [.. Materials];
                 _fullProducts.Add(newProduct);
                 FilterByCategory(SelectedCategory);
                 DeleteAllInput();
@@ -466,9 +468,20 @@ namespace kafi.ViewModels
                     UpdatedAt = DateTime.Now
                 };
 
-                LoadCategoriesAndProductToView(_fullCategories[index]);
+                var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(c => c.Id == SelectedCategoryId));
+                if (categoryIndex != -1)
+                {
+                    Categories[categoryIndex] = new Category
+                    {
+                        Id = SelectedCategoryId,
+                        Name = CategoryName,
+                        Image = _selectedCategoryFile == null ? _fullCategories[index].Image : _selectedCategoryFile.Path,
+                        CreatedAt = _fullCategories[index].CreatedAt,
+                        UpdatedAt = DateTime.Now
+                    };
+                }
                 DeleteAllInput();
-                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(StatusMessage));
+                WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(""));
             }
             catch (System.Exception ex)
             {
@@ -585,14 +598,19 @@ namespace kafi.ViewModels
             {
                 await _repository.DeleteCategory(id);
                 var category = _fullCategories.FirstOrDefault(c => c.Id == id);
-                if (category != null)
+                if (category == null)
+                    return;
+                _fullCategories.Remove(category);
+
+                var deletedCategory = Categories.FirstOrDefault(c => c.Id == id);
+                if (deletedCategory != null)
                 {
-                    _fullCategories.Remove(category);
-                    Categories.Remove(category);
-                    if (SelectedCategory.Id == id)
-                    {
-                        SelectedCategory = Categories.FirstOrDefault();
-                    }
+                    Categories.Remove(deletedCategory);
+                }
+
+                if (SelectedCategory.Id == id)
+                {
+                    SelectedCategory = Categories.FirstOrDefault();
                 }
             }
             catch (System.Exception ex)

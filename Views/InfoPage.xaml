@@ -14,6 +14,7 @@
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
         <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter" />
         <converters:RoleToStringConverter x:Key="RoleToStringConverter" />
+        <converters:TimeToStringConverter x:Key="TimeToStringConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -234,39 +235,24 @@
                             Grid.Column="1"
                             Header="Lương"
                             Text="{x:Bind ViewModel.Salary, Mode=OneWay}" />
-                        <TimePicker
-                            x:Name="StartShiftTimePicker"
+                        <TextBlock
+                            x:Name="StartShiftText"
                             Grid.Row="1"
-                            HorizontalAlignment="Stretch"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            ClockIdentifier="24HourClock"
-                            CornerRadius="10"
+                            Padding="10,0,0,0"
+                            VerticalAlignment="Bottom"
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="16"
                             FontWeight="Medium"
-                            Header="Ca bắt đầu"
-                            HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
-                            IsHitTestVisible="False"
-                            MinuteIncrement="15"
-                            Time="{x:Bind ViewModel.StartShift, Mode=OneWay}" />
-                        <TimePicker
-                            x:Name="EndShiftTimePicker"
+                            Text="{x:Bind ViewModel.StartShift, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
+                        <TextBlock
                             Grid.Row="1"
                             Grid.Column="1"
-                            HorizontalAlignment="Stretch"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            ClockIdentifier="24HourClock"
-                            CornerRadius="10"
+                            Padding="10,0,0,0"
+                            VerticalAlignment="Bottom"
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="16"
                             FontWeight="Medium"
-                            Header="Ca kết thúc"
-                            HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
-                            IsHitTestVisible="False"
-                            MinuteIncrement="15"
-                            Time="{x:Bind ViewModel.EndShift, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.EndShift, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
                     </Grid>
                 </StackPanel>
                 <ProgressRing

@@ -25,21 +25,22 @@ namespace kafi.Service
             }
             var response = await base.SendAsync(request, cancellationToken);
 
+            Debug.WriteLine($"Initial response: {response.StatusCode}");
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
                     bool refreshed = await TryRefreshTokenAsync(refreshToken);
-                    if (!refreshed)
+                    Debug.WriteLine($"Refresh succeeded: {refreshed}");
+                    if (refreshed)
                     {
-                        _tokenStorage.ClearTokens();
-                        _windowService.ShowLoginWindow();
-                        return response;
+                        var clonedRequest = await CloneHttpRequestMessageAsync(request);
+                        (accessToken, _) = _tokenStorage.GetTokens();
+                        Debug.WriteLine($"Retrying with accessToken: {accessToken}");
+                        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                        response = await base.SendAsync(clonedRequest, cancellationToken);
+                        Debug.WriteLine($"Retry response: {response.StatusCode}");
                     }
-                    var clonedRequest = await CloneHttpRequestMessageAsync(request);
-                    (accessToken, _) = _tokenStorage.GetTokens();
-                    clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                    response = await base.SendAsync(clonedRequest, cancellationToken);
                 }
             }
             return response;
@@ -57,7 +58,7 @@ namespace kafi.Service
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent);
-                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshResponse.RefreshToken);
+                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshToken);
                     return true;
                 }
                 return false;

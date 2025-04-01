@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.ViewModels;
@@ -250,6 +252,66 @@ namespace kafi.Views
                 timePicker.IsHitTestVisible = false;
                 timePicker.Background = new SolidColorBrush(Colors.Transparent);
             }
+        }
+
+        private void TimePicker_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TimePicker timePicker)
+                return;
+            var flyoutGrid = FindChild<Grid>(FindChild<ContentPresenter>(FindChild<Grid>(FindChild<Button>(FindChildren<Grid>(timePicker).FirstOrDefault()!))));
+            if (flyoutGrid != null && flyoutGrid.Children.Count > 1)
+            {
+                var divider = flyoutGrid.Children[3];
+                divider.Visibility = Visibility.Collapsed;
+
+                var hourPicker = flyoutGrid.Children[2];
+                var hourText = FindChild<TextBlock>(hourPicker);
+                hourText.Foreground = new SolidColorBrush(Colors.Transparent);
+                var minutePicker = flyoutGrid.Children[4];
+                var minuteText = FindChild<TextBlock>(minutePicker);
+                minuteText.Foreground = new SolidColorBrush(Colors.Transparent);
+            }
+        }
+
+        public static IEnumerable<T> FindChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t)
+                {
+                    yield return t;
+                }
+
+                foreach (var descendant in FindChildren<T>(child))
+                {
+                    yield return descendant;
+                }
+            }
+        }
+
+        public static T FindChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t)
+                {
+                    return t;
+                }
+
+                var descendant = FindChild<T>(child);
+                if (descendant != null)
+                {
+                    return descendant;
+                }
+            }
+
+            return null;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
+using CommunityToolkit.WinUI;
 using kafi.ViewModels;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -57,7 +58,14 @@ namespace kafi.Views
         {
             if (sender is Button button)
             {
-                button.Foreground = new SolidColorBrush(Colors.Black);
+                var buttonPanel = button.Content as StackPanel;
+                var buttonText = buttonPanel.FindChild<TextBlock>();
+                var buttonIcon = buttonPanel.FindChild<FontIcon>();
+                if (buttonText != null)
+                {
+                    buttonText.Foreground = new SolidColorBrush(Colors.Black);
+                    buttonIcon.Foreground = new SolidColorBrush(Colors.Black);
+                }
             }
         }
 
@@ -65,7 +73,14 @@ namespace kafi.Views
         {
             if (sender is Button button)
             {
-                button.Foreground = new SolidColorBrush(Colors.White);
+                var buttonPanel = button.Content as StackPanel;
+                var buttonText = buttonPanel.FindChild<TextBlock>();
+                var buttonIcon = buttonPanel.FindChild<FontIcon>();
+                if (buttonText != null)
+                {
+                    buttonText.Foreground = new SolidColorBrush(Colors.White);
+                    buttonIcon.Foreground = new SolidColorBrush(Colors.White);
+                }
             }
         }
 
@@ -91,7 +106,6 @@ namespace kafi.Views
                 MoveFocusToPreviousBox(currentBox);
             }
 
-            // Handle paste scenario
             if (currentBox?.Text.Length > 1)
             {
                 HandlePaste(currentBox.Text);
@@ -115,7 +129,6 @@ namespace kafi.Views
         }
         private TextBox GetNextTextBox(TextBox currentBox)
         {
-            // Assuming you have a list of TextBoxes in the order they should be focused
             List<TextBox> textBoxes = [otpBox1, otpBox2, otpBox3, otpBox4, otpBox5, otpBox6];
             int currentIndex = textBoxes.IndexOf(currentBox);
             if (currentIndex >= 0 && currentIndex < textBoxes.Count - 1)

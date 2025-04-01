@@ -133,6 +133,7 @@ namespace kafi.ViewModels
                 {
                     Id = newUserInfo.Id,
                     Name = UserName,
+                    Image = newUserInfo.Image,
                     Email = Email,
                     Phone = Phone,
                     Address = Address,
@@ -159,8 +160,8 @@ namespace kafi.ViewModels
             if (string.IsNullOrEmpty(SelectedUser.Name) ||
                 string.IsNullOrEmpty(SelectedUser.Email) ||
                 string.IsNullOrEmpty(SelectedUser.Phone) ||
-                string.IsNullOrEmpty(SelectedUser.Address) ||
-                SelectedUser.Salary == 0)
+                string.IsNullOrEmpty(SelectedUser.Address)
+                )
             {
                 return false;
             }

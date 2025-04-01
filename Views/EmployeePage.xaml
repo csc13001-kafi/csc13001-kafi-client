@@ -439,7 +439,7 @@
                 Width="1000"
                 Height="200"
                 Closed="ViewEmployeePopup_Closed"
-                IsLightDismissEnabled="True"
+                IsLightDismissEnabled="False"
                 IsOpen="False"
                 LightDismissOverlayMode="On">
                 <Grid
@@ -478,7 +478,7 @@
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="18"
                             FontWeight="Medium"
-                            Text="Vi" />
+                            Text="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}" />
                     </StackPanel>
                     <Grid Grid.Row="1" ColumnSpacing="40">
                         <Grid.ColumnDefinitions>
@@ -495,7 +495,6 @@
                                 Width="200"
                                 Height="200"
                                 Background="#D19F9F"
-                                DisplayName="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}"
                                 ProfilePicture="{x:Bind ViewModel.SelectedUserImage, Mode=OneWay}" />
                             <Button
                                 x:Name="EditEmployeeButton"
@@ -674,11 +673,23 @@
                                         FontFamily="{StaticResource LexendMedium}"
                                         FontSize="16"
                                         FontWeight="Medium"
+                                        Foreground="Transparent"
                                         Header="Ca bắt đầu"
                                         HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
                                         IsHitTestVisible="False"
+                                        Loaded="TimePicker_Loaded"
                                         MinuteIncrement="15"
-                                        Time="{x:Bind ViewModel.SelectedUser.StartShift, Mode=TwoWay}" />
+                                        Time="{x:Bind ViewModel.SelectedUser.StartShift, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock
+                                        x:Name="StartShiftText"
+                                        Grid.Row="1"
+                                        Padding="10,0,0,4"
+                                        VerticalAlignment="Bottom"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
+                                        IsHitTestVisible="False"
+                                        Text="{Binding ElementName=StartShiftTimePicker, Path=Time, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
                                     <TimePicker
                                         x:Name="EndShiftTimePicker"
                                         Grid.Row="1"
@@ -691,11 +702,24 @@
                                         FontFamily="{StaticResource LexendMedium}"
                                         FontSize="16"
                                         FontWeight="Medium"
+                                        Foreground="Transparent"
                                         Header="Ca kết thúc"
                                         HeaderTemplate="{StaticResource TextBoxHeaderTemplate}"
                                         IsHitTestVisible="False"
+                                        Loaded="TimePicker_Loaded"
                                         MinuteIncrement="15"
-                                        Time="{x:Bind ViewModel.SelectedUser.EndShift, Mode=TwoWay}" />
+                                        Time="{x:Bind ViewModel.SelectedUser.EndShift, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock
+                                        x:Name="EndShiftText"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Padding="10,0,0,4"
+                                        VerticalAlignment="Bottom"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="16"
+                                        FontWeight="Medium"
+                                        IsHitTestVisible="False"
+                                        Text="{Binding ElementName=EndShiftTimePicker, Path=Time, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
                                 </Grid>
                             </StackPanel>
                         </ScrollViewer>

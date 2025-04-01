@@ -13,5 +13,7 @@ namespace kafi.Models
         public string Email { get; set; }
         [JsonPropertyName("role")]
         public Role Role { get; set; }
+        [JsonPropertyName("profileImage")]
+        public string Image { get; set; }
     }
 }
