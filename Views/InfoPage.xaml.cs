@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.ViewModels;
@@ -130,18 +130,18 @@ namespace kafi.Views
         {
             var oldPasswordBox = new PasswordBox
             {
-                Header = "Old Password:",
-                PlaceholderText = "Old Password",
+                Header = "Mật khẩu cũ:",
+                PlaceholderText = "",
             };
             var newPasswordBox = new PasswordBox
             {
-                Header = "New Password:",
-                PlaceholderText = "New Password",
+                Header = "Mật khẩu mới:",
+                PlaceholderText = "",
             };
             var confirmPasswordBox = new PasswordBox
             {
-                Header = "Confirm Password:",
-                PlaceholderText = "Confirm Password",
+                Header = "Nhập lại mật khẩu mới:",
+                PlaceholderText = "",
             };
 
             var oldPasswordError = new TextBlock
