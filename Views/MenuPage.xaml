@@ -15,7 +15,8 @@
         <helpers:BindingProxy x:Key="MenuProxy" Data="{x:Bind ViewModel, Mode=OneWay}" />
         <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
-        <converters:IsEditingToStringConverter x:Key="IsEditingToStringConverter" />
+        <converters:ModeToStringConverter x:Key="ModeToStringConverter" />
+        <converters:ModeToVisibilityConverter x:Key="ModeToVisibilityConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -62,7 +63,6 @@
                         Padding="10,8"
                         VerticalAlignment="Top"
                         Background="{StaticResource PrimaryBrush}"
-                        Click="AddButton_Click"
                         Command="{x:Bind ViewModel.TurnOnAddingCategoryCommand}"
                         CornerRadius="10">
                         <StackPanel
@@ -78,7 +78,6 @@
                         Padding="10,8"
                         VerticalAlignment="Top"
                         Background="{StaticResource SecondaryBrush}"
-                        Click="AddButton_Click"
                         Command="{x:Bind ViewModel.TurnOnAddingProductCommand}"
                         CornerRadius="10"
                         Foreground="White"
@@ -157,10 +156,7 @@
                                                 <Setter Property="Background" Value="Transparent" />
                                             </Style>
                                         </StackPanel.Resources>
-                                        <Button
-                                            Click="AddButton_Click"
-                                            Command="{Binding Data.TurnOnEditingCategoryCommand, Source={StaticResource MenuProxy}}"
-                                            CommandParameter="{x:Bind Id}">
+                                        <Button Command="{Binding Data.TurnOnEditingCategoryCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
                                             <FontIcon Glyph="&#xEC88;" />
                                         </Button>
                                         <Button Command="{Binding Data.DeleteCategoryCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
@@ -253,10 +249,7 @@
                                             <Setter Property="Background" Value="Transparent" />
                                         </Style>
                                     </StackPanel.Resources>
-                                    <Button
-                                        Click="AddButton_Click"
-                                        Command="{Binding Data.TurnOnEditingProductCommand, Source={StaticResource MenuProxy}}"
-                                        CommandParameter="{x:Bind Id}">
+                                    <Button Command="{Binding Data.TurnOnEditingProductCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
                                         <FontIcon Glyph="&#xEC88;" />
                                     </Button>
                                     <Button Command="{Binding Data.DeleteProductCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
@@ -275,9 +268,8 @@
                 x:Name="AddPopup"
                 Width="500"
                 Height="200"
-                Closed="AddPopup_Closed"
-                IsLightDismissEnabled="False"
-                IsOpen="False"
+                IsLightDismissEnabled="True"
+                IsOpen="{x:Bind ViewModel.IsPopupOpen, Mode=TwoWay}"
                 LightDismissOverlayMode="On"
                 RelativePanel.AlignRightWithPanel="True">
                 <Popup.ChildTransitions>
@@ -312,18 +304,8 @@
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="20"
                             FontWeight="Medium"
-                            Text="{x:Bind ViewModel.IsEditingCategory, Converter={StaticResource IsEditingToStringConverter}, ConverterParameter=phân loại, Mode=OneWay}"
-                            TextAlignment="Center"
-                            Visibility="{x:Bind ViewModel.IsCategory, Mode=OneWay}" />
-                        <TextBlock
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            FontFamily="{StaticResource LexendMedium}"
-                            FontSize="20"
-                            FontWeight="Medium"
-                            Text="{x:Bind ViewModel.IsEditingProduct, Converter={StaticResource IsEditingToStringConverter}, ConverterParameter=phân loại, Mode=OneWay}"
-                            TextAlignment="Center"
-                            Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToStringConverter}, Mode=OneWay}"
+                            TextAlignment="Center" />
                         <Button
                             x:Name="ClosePopupButton"
                             Width="30"
@@ -400,12 +382,12 @@
                                     Height="150"
                                     Source="{x:Bind ViewModel.SelectedImage, Mode=OneWay}"
                                     Stretch="Uniform"
-                                    Visibility="{x:Bind ViewModel.IsImageExist, Mode=OneWay}" />
+                                    Visibility="{x:Bind ViewModel.IsImageSelected, Mode=OneWay}" />
                                 <Border
                                     Width="200"
                                     Height="170"
                                     Background="LightGray"
-                                    Visibility="{x:Bind ViewModel.IsImageExist, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                                    Visibility="{x:Bind ViewModel.IsImageSelected, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
                                     <FontIcon
                                         Margin="-10,0,0,0"
                                         FontSize="50"
@@ -413,10 +395,10 @@
                                         Glyph="&#xEE71;" />
                                 </Border>
                                 <Button
+                                    x:Name="OpenPickerButton"
                                     HorizontalAlignment="Center"
                                     BorderThickness="0"
-                                    Command="{x:Bind ViewModel.PickImageCommand}"
-                                    IsEnabled="{x:Bind ViewModel.IsPickerEnable, Mode=OneWay}"
+                                    Click="OpenPickerButton_Click"
                                     PointerEntered="DeleteAllInputsButton_PointerEntered"
                                     PointerExited="DeleteAllInputsButton_PointerExited">
                                     <TextBlock>
@@ -432,26 +414,26 @@
                                 Grid.Column="1"
                                 Margin="0,-30,0,0"
                                 VerticalAlignment="Center"
-                                Visibility="{x:Bind ViewModel.IsCategory, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Category, Mode=OneWay}">
                                 <TextBlock FontSize="16" Text="Tên phân loại" />
                                 <Border>
-                                    <TextBox PlaceholderText="Nhập tên phân loại" Text="{x:Bind ViewModel.CategoryName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox PlaceholderText="Nhập tên phân loại" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </StackPanel>
 
                             <StackPanel
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}">
                                 <TextBlock FontSize="16" Text="Tên món" />
                                 <Border>
-                                    <TextBox PlaceholderText="Nhập tên món" Text="{x:Bind ViewModel.ProductName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox PlaceholderText="Nhập tên món" Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </StackPanel>
                             <StackPanel
                                 Grid.Row="2"
                                 Grid.Column="1"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}">
                                 <TextBlock FontSize="16" Text="Phân loại" />
                                 <Border>
                                     <ComboBox
@@ -463,17 +445,18 @@
                                         DisplayMemberPath="Name"
                                         FontSize="16"
                                         ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
-                                        SelectedValue="{x:Bind ViewModel.ProductCategoryId, Mode=TwoWay}"
+                                        PlaceholderText="Chọn phân loại"
+                                        SelectedItem="{x:Bind ViewModel.SelectedCategoryForEdit, Mode=TwoWay}"
                                         SelectedValuePath="Id" />
                                 </Border>
                             </StackPanel>
                             <StackPanel
                                 Grid.Row="3"
                                 Grid.Column="1"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}">
                                 <TextBlock FontSize="16" Text="Giá" />
                                 <Border>
-                                    <TextBox PlaceholderText="Nhập giá món" Text="{x:Bind ViewModel.ProductPrice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox PlaceholderText="Nhập giá món" Text="{x:Bind ViewModel.Price, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </StackPanel>
 
@@ -485,12 +468,12 @@
                                 FontSize="18"
                                 FontWeight="Bold"
                                 Text="Nguyên liệu"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}" />
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}" />
                             <ItemsControl
                                 Grid.Row="5"
                                 Grid.ColumnSpan="2"
-                                ItemsSource="{x:Bind ViewModel.Materials}"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}">
+                                ItemsSource="{x:Bind ViewModel.SelectedMaterials, Mode=OneWay}"
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid ColumnSpacing="20">
@@ -567,7 +550,7 @@
                                 BorderThickness="0"
                                 Command="{x:Bind ViewModel.AddMaterialCommand}"
                                 Foreground="#8A8A8A"
-                                Visibility="{x:Bind ViewModel.IsProduct, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Product, Mode=OneWay}">
                                 <StackPanel Orientation="Horizontal">
                                     <FontIcon
                                         Margin="0,3,0,0"
@@ -584,7 +567,12 @@
                         <TextBlock
                             Margin="0,10"
                             Style="{StaticResource ErrorMessageStyle}"
-                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" />
+                        <TextBlock
+                            Foreground="Green"
+                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.HasSuccess, Mode=OneWay}" />
                         <StackPanel
                             HorizontalAlignment="Right"
                             Orientation="Horizontal"
@@ -594,7 +582,7 @@
                                 Command="{x:Bind ViewModel.DeleteAllInputCommand}"
                                 PointerEntered="DeleteAllInputsButton_PointerEntered"
                                 PointerExited="DeleteAllInputsButton_PointerExited"
-                                Visibility="{x:Bind ViewModel.IsEditing, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Add, Mode=OneWay}">
                                 <TextBlock>
                                     <Underline>
                                         Xóa
@@ -606,7 +594,7 @@
                                 Command="{x:Bind ViewModel.DeleteAllInputCommand}"
                                 PointerEntered="DeleteAllInputsButton_PointerEntered"
                                 PointerExited="DeleteAllInputsButton_PointerExited"
-                                Visibility="{x:Bind ViewModel.IsEditing, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Edit, Mode=OneWay}">
                                 <TextBlock>
                                     <Underline>
                                         Reset
@@ -619,7 +607,7 @@
                                 Command="{x:Bind ViewModel.AddCommand}"
                                 CornerRadius="20"
                                 Foreground="White"
-                                Visibility="{x:Bind ViewModel.IsEditing, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Add, Mode=OneWay}">
                                 Lưu
                             </Button>
                             <Button
@@ -628,7 +616,7 @@
                                 Command="{x:Bind ViewModel.UpdateCommand}"
                                 CornerRadius="20"
                                 Foreground="White"
-                                Visibility="{x:Bind ViewModel.IsEditing, Mode=OneWay}">
+                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Edit, Mode=OneWay}">
                                 Cập nhật
                             </Button>
                         </StackPanel>

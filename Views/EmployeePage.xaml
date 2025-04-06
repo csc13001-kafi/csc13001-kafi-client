@@ -9,7 +9,6 @@
     xmlns:helpers="using:kafi.Helpers"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:BindingProxy x:Key="EmployeeProxy" Data="{x:Bind ViewModel}" />
@@ -18,6 +17,7 @@
         <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <converters:TimeToStringConverter x:Key="TimeToStringConverter" />
         <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter" />
+        <converters:ImageStringToImageSourceConverter x:Key="ImageStringToImageSourceConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -95,6 +95,7 @@
                     IsReadOnly="True"
                     ItemsSource="{x:Bind ViewModel.Employees, Mode=OneWay}"
                     RowHeight="50"
+                    SelectionMode="Single"
                     VerticalScrollBarVisibility="Auto">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTextColumn
@@ -439,7 +440,7 @@
                 Width="1000"
                 Height="200"
                 Closed="ViewEmployeePopup_Closed"
-                IsLightDismissEnabled="False"
+                IsLightDismissEnabled="True"
                 IsOpen="False"
                 LightDismissOverlayMode="On">
                 <Grid
@@ -495,7 +496,7 @@
                                 Width="200"
                                 Height="200"
                                 Background="#D19F9F"
-                                ProfilePicture="{x:Bind ViewModel.SelectedUserImage, Mode=OneWay}" />
+                                ProfilePicture="{x:Bind ViewModel.SelectedUser.Image, Converter={StaticResource ImageStringToImageSourceConverter}, Mode=OneWay}" />
                             <Button
                                 x:Name="EditEmployeeButton"
                                 Padding="10,9"

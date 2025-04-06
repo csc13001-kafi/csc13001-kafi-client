@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.ViewModels;
@@ -29,7 +29,7 @@ namespace kafi.Views
             this.NavigationCacheMode = NavigationCacheMode.Enabled;
 
         }
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this, (recipient, message) =>
@@ -69,7 +69,7 @@ namespace kafi.Views
             ChangeProfileImageButton.Visibility = Visibility.Collapsed;
         }
 
-        private void TurnOnIsReadOnlyTextBoxes(Grid grid)
+        private static void TurnOnIsReadOnlyTextBoxes(Grid grid)
         {
             foreach (var child in grid.Children)
             {
@@ -83,7 +83,7 @@ namespace kafi.Views
                 textBox.Background = new SolidColorBrush(Colors.Transparent);
             }
         }
-        private void TurnOffIsReadOnlyTextBoxes(Grid grid)
+        private static void TurnOffIsReadOnlyTextBoxes(Grid grid)
         {
             foreach (var child in grid.Children)
             {
@@ -97,7 +97,7 @@ namespace kafi.Views
                 textBox.Background = new SolidColorBrush(Color.FromArgb(255, 240, 240, 240));
             }
         }
-        private void TurnOnDateOrTimePicker(object picker)
+        private static void TurnOnDateOrTimePicker(object picker)
         {
             if (picker is CalendarDatePicker datePicker)
             {
@@ -106,7 +106,7 @@ namespace kafi.Views
             }
         }
 
-        private void TurnOffDateOrTimePicker(object picker)
+        private static void TurnOffDateOrTimePicker(object picker)
         {
             if (picker is CalendarDatePicker datePicker)
             {
@@ -118,18 +118,18 @@ namespace kafi.Views
         {
             var oldPasswordBox = new PasswordBox
             {
-                Header = "Mật khẩu cũ:",
-                PlaceholderText = "",
+                Header = "Old Password:",
+                PlaceholderText = "Old Password",
             };
             var newPasswordBox = new PasswordBox
             {
-                Header = "Mật khẩu mới:",
-                PlaceholderText = "",
+                Header = "New Password:",
+                PlaceholderText = "New Password",
             };
             var confirmPasswordBox = new PasswordBox
             {
-                Header = "Nhập lại mật khẩu mới:",
-                PlaceholderText = "",
+                Header = "Confirm Password:",
+                PlaceholderText = "Confirm Password",
             };
 
             var oldPasswordError = new TextBlock
@@ -224,6 +224,7 @@ namespace kafi.Views
 
                     // Show loading
                     progressRing.Visibility = Visibility.Visible;
+                    panel.Opacity = 0.5;
                     changePasswordDialog.IsPrimaryButtonEnabled = false;
 
                     // Async password change
@@ -243,6 +244,7 @@ namespace kafi.Views
                 finally
                 {
                     progressRing.Visibility = Visibility.Collapsed;
+                    panel.Opacity = 1;
                     changePasswordDialog.IsPrimaryButtonEnabled = true;
                     deferral.Complete();
                 }
