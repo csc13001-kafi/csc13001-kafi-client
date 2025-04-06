@@ -1,11 +1,9 @@
-﻿
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace kafi.Models.Authentication
+namespace kafi.Models;
+
+public class RefreshTokenResponse
 {
-    public class RefreshTokenResponse
-    {
-        [JsonPropertyName("accessToken")]
-        public required string AccessToken { get; set; }
-    }
+    [JsonPropertyName("accessToken")]
+    public required string AccessToken { get; set; }
 }

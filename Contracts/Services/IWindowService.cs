@@ -1,11 +1,10 @@
 ﻿using Microsoft.UI.Xaml;
 
-namespace kafi.Contracts.Services
+namespace kafi.Contracts.Services;
+
+public interface IWindowService
 {
-    public interface IWindowService
-    {
-        void ShowMainWindow();
-        void ShowLoginWindow();
-        Window GetCurrentWindow();
-    }
+    void ShowMainWindow();
+    void ShowLoginWindow();
+    Window GetCurrentWindow();
 }

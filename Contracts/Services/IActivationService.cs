@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace kafi.Contracts.Services
+namespace kafi.Contracts.Services;
+
+public interface IActivationService
 {
-    public interface IActivationService
-    {
-        Task ActivateAsync(object activationArgs);
-    }
+    Task ActivateAsync(object activationArgs);
 }

@@ -12,6 +12,7 @@
     <Page.Resources>
         <converters:IsEnabledToForegroundConverter x:Key="IsEnabledToForegroundConverter" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
+        <converters:NotEnabledConverter x:Key="NotEnabledConverter" />
     </Page.Resources>
     <Grid Padding="100">
         <Grid.Background>
@@ -81,7 +82,7 @@
                 Text="Đăng Nhập" />
             <StackPanel
                 x:Name="AuthInput"
-                Margin="0,0,0,10"
+                Margin="0,0,0,-40"
                 HorizontalAlignment="Center"
                 Spacing="30"
                 Visibility="Visible">
@@ -99,19 +100,7 @@
                     FontSize="16"
                     PlaceholderText="Tên đăng nhập"
                     Text="{x:Bind ViewModel.UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Visibility="{x:Bind ViewModel.IsResetPassword, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}" />
-                <Button
-                    x:Name="CancelForgotPasswordButton"
-                    Margin="0,-20,0,0"
-                    HorizontalAlignment="Right"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Click="CancelForgotPasswordButton_Click"
-                    Command="{x:Bind ViewModel.CancelForgotPasswordCommand}"
-                    Content="Hủy"
-                    FontFamily="{StaticResource Lexend}"
-                    Foreground="#4F4F4F"
-                    Visibility="{x:Bind ViewModel.IsForgotPassword, Mode=OneWay}" />
+                    Visibility="{x:Bind ViewModel.IsShowingUserName, Mode=OneWay}" />
                 <PasswordBox
                     x:Name="Password"
                     Width="480"
@@ -125,7 +114,7 @@
                     FontSize="16"
                     Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
                     PlaceholderText="Mật khẩu"
-                    Visibility="{x:Bind ViewModel.IsForgotPassword, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}" />
+                    Visibility="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay}" />
                 <PasswordBox
                     x:Name="NewPassword"
                     Width="480"
@@ -165,15 +154,15 @@
                     Content="Quên mật khẩu ?"
                     FontFamily="{StaticResource Lexend}"
                     Foreground="#4F4F4F"
-                    Visibility="{x:Bind ViewModel.IsForgotPassword, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}" />
+                    Visibility="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
                 x:Name="OtpInput"
-                Margin="0,0,0,10"
+                Margin="0,-40,0,-20"
                 HorizontalAlignment="Center"
                 Orientation="Horizontal"
                 Spacing="10"
-                Visibility="Collapsed">
+                Visibility="{x:Bind ViewModel.IsVerifyPassword, Mode=OneWay}">
                 <StackPanel.Resources>
                     <Style TargetType="TextBox">
                         <Setter Property="Height" Value="56" />
@@ -186,7 +175,6 @@
                         <Setter Property="FontSize" Value="20" />
                         <Setter Property="FontFamily" Value="{StaticResource Lexend}" />
                     </Style>
-
                 </StackPanel.Resources>
                 <TextBox
                     x:Name="otpBox1"
@@ -224,7 +212,11 @@
                     Text="{x:Bind ViewModel.SixthOtpDigit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     TextChanged="OTPBox_TextChanged" />
             </StackPanel>
-            <StackPanel Orientation="Vertical" Spacing="10">
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                Orientation="Vertical"
+                Spacing="10">
                 <StackPanel.Resources>
                     <Style TargetType="Button">
                         <Setter Property="Width" Value="200" />
@@ -243,13 +235,16 @@
                         </Setter>
                     </Style>
                 </StackPanel.Resources>
-                <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                <TextBlock
+                    Padding="60,0"
+                    Style="{StaticResource ErrorMessageStyle}"
+                    Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
                 <Button
                     x:Name="LoginButton"
                     Command="{x:Bind ViewModel.LoginCommand}"
                     PointerEntered="Button_PointerEntered"
                     PointerExited="Button_PointerExited"
-                    Visibility="{x:Bind ViewModel.IsForgotPassword, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                    Visibility="{x:Bind ViewModel.IsLoggingIn, Mode=OneWay}">
                     <StackPanel
                         VerticalAlignment="Center"
                         Orientation="Horizontal"
@@ -261,57 +256,76 @@
                         <FontIcon Glyph="&#xE970;" />
                     </StackPanel>
                 </Button>
-                <Button
-                    x:Name="RequestOtpButton"
-                    Command="{x:Bind ViewModel.RequestForgotPasswordOtpCommand}"
-                    PointerEntered="Button_PointerEntered"
-                    PointerExited="Button_PointerExited"
-                    Visibility="{x:Bind ViewModel.IsForgotPassword, Mode=OneWay}">
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="10">
-                        <TextBlock
-                            x:Name="RequestOtpButtonText"
-                            Foreground="{Binding ElementName=RequestOtpButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
-                            Text="Xác nhận" />
-                        <FontIcon Glyph="&#xE970;" />
-                    </StackPanel>
-                </Button>
-                <Button
-                    x:Name="VerifyOtpButton"
-                    Command="{x:Bind ViewModel.VerifyOtpCommand}"
-                    PointerEntered="Button_PointerEntered"
-                    PointerExited="Button_PointerExited"
-                    Visibility="{x:Bind ViewModel.IsVerifyPassword, Mode=OneWay}">
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="10">
-                        <TextBlock
-                            x:Name="VerifyOtpButtonText"
-                            Foreground="{Binding ElementName=VerifyOtpButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
-                            Text="Xác nhận" />
-                        <FontIcon Glyph="&#xE970;" />
-                    </StackPanel>
-                </Button>
-                <Button
-                    x:Name="ResetPasswordButton"
-                    Command="{x:Bind ViewModel.ResetPasswordCommand}"
-                    PointerEntered="Button_PointerEntered"
-                    PointerExited="Button_PointerExited"
-                    Visibility="{x:Bind ViewModel.IsResetPassword, Mode=OneWay}">
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="10">
-                        <TextBlock
-                            x:Name="ResetPasswordButtonText"
-                            Foreground="{Binding ElementName=ResetPasswordButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
-                            Text="Xác nhận" />
-                        <FontIcon Glyph="&#xE970;" />
-                    </StackPanel>
-                </Button>
+
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="10">
+                    <Button
+                        x:Name="CancelForgotPasswordButton"
+                        Width="Auto"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="CancelForgotPasswordButton_Click"
+                        Command="{x:Bind ViewModel.CancelForgotPasswordCommand}"
+                        Content="Huỷ"
+                        FontFamily="{StaticResource Lexend}"
+                        FontSize="16"
+                        Foreground="#4F4F4F"
+                        IsEnabled="{x:Bind ViewModel.IsBusy, Converter={StaticResource NotEnabledConverter}, Mode=OneWay}"
+                        Visibility="{x:Bind ViewModel.IsLoggingIn, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}" />
+                    <Button
+                        x:Name="RequestOtpButton"
+                        Command="{x:Bind ViewModel.RequestForgotPasswordOtpCommand}"
+                        PointerEntered="Button_PointerEntered"
+                        PointerExited="Button_PointerExited"
+                        Visibility="{x:Bind ViewModel.IsRequestForgotPassword, Mode=OneWay}">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <TextBlock
+                                x:Name="RequestOtpButtonText"
+                                Foreground="{Binding ElementName=RequestOtpButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
+                                Text="Xác nhận request" />
+                            <FontIcon Glyph="&#xE970;" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        x:Name="VerifyOtpButton"
+                        Command="{x:Bind ViewModel.VerifyOtpCommand}"
+                        PointerEntered="Button_PointerEntered"
+                        PointerExited="Button_PointerExited"
+                        Visibility="{x:Bind ViewModel.IsVerifyPassword, Mode=OneWay}">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <TextBlock
+                                x:Name="VerifyOtpButtonText"
+                                Foreground="{Binding ElementName=VerifyOtpButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
+                                Text="Xác nhận verify" />
+                            <FontIcon Glyph="&#xE970;" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        x:Name="ResetPasswordButton"
+                        Command="{x:Bind ViewModel.ResetPasswordCommand}"
+                        PointerEntered="Button_PointerEntered"
+                        PointerExited="Button_PointerExited"
+                        Visibility="{x:Bind ViewModel.IsResetPassword, Mode=OneWay}">
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="10">
+                            <TextBlock
+                                x:Name="ResetPasswordButtonText"
+                                Foreground="{Binding ElementName=ResetPasswordButton, Path=IsEnabled, Converter={StaticResource IsEnabledToForegroundConverter}}"
+                                Text="Xác nhận reset" />
+                            <FontIcon Glyph="&#xE970;" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

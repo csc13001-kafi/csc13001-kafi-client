@@ -1,42 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using kafi.Contracts.Repository;
+using kafi.Contracts;
 using kafi.Data;
 using kafi.Models;
 
-namespace kafi.Repositories
+namespace kafi.Repositories;
+
+public interface IEmployeeRepository : IRepository<User>
 {
-    public interface IEmployeeRepository : IRepository<User>
+}
+
+public class EmployeeRepository(IEmployeeDao dao) : IEmployeeRepository
+{
+    private readonly IEmployeeDao _dao = dao;
+    public async Task<object> Add(object entity)
     {
+        return await _dao.Add(entity);
     }
 
-    public class EmployeeRepository(IEmployeeDao dao) : IEmployeeRepository
+    public async Task Delete(Guid id)
     {
-        private readonly IEmployeeDao _dao = dao;
-        public async Task<object> Add(object entity)
-        {
-            return await _dao.Add(entity);
-        }
+        await _dao.Delete(id);
+    }
 
-        public async Task Delete(Guid id)
-        {
-            await _dao.Delete(id);
-        }
+    public async Task<IEnumerable<User>> GetAll()
+    {
+        return await _dao.GetAll();
+    }
 
-        public async Task<IEnumerable<User>> GetAll()
-        {
-            return await _dao.GetAll();
-        }
+    public Task<User>? GetById(Guid id)
+    {
+        throw new NotImplementedException();
+    }
 
-        public Task<User>? GetById(Guid id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task Update(Guid id, object entity)
-        {
-            await _dao.Update(id, entity);
-        }
+    public async Task Update(Guid id, object entity)
+    {
+        await _dao.Update(id, entity);
     }
 }

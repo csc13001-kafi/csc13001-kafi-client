@@ -1,17 +1,8 @@
 ﻿namespace kafi.Models;
 
-public class NavItem
+public record NavItem
 {
-    public string Icon
-    {
-        get; set;
-    }
-    public string Content
-    {
-        get; set;
-    }
-    public string Tag
-    {
-        get; set;
-    }
+    public string? Icon { get; set; }
+    public string? Content { get; set; }
+    public string? Tag { get; set; }
 }

@@ -2,7 +2,6 @@
 using kafi.Contracts.Services;
 using kafi.Data;
 using kafi.Repositories;
-using kafi.Service;
 using kafi.Services;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +11,6 @@ using Microsoft.UI.Xaml;
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace kafi;
-
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.
 /// </summary>
@@ -29,7 +27,7 @@ public partial class App : Application
         ConfigureServices();
     }
 
-    private void ConfigureServices()
+    private static void ConfigureServices()
     {
         var services = new ServiceCollection();
 
@@ -41,7 +39,7 @@ public partial class App : Application
         services.AddTransient<AuthMessageHandler>();
         services.AddHttpClient("Common", client =>
         {
-            client.BaseAddress = new Uri("http://localhost:8080/");
+            client.BaseAddress = new Uri("http://localhost:8080");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         })
         .AddHttpMessageHandler<AuthMessageHandler>();
@@ -89,4 +87,3 @@ public partial class App : Application
         await activationService.ActivateAsync(args);
     }
 }
-

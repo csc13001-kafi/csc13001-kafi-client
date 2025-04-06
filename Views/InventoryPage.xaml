@@ -9,15 +9,13 @@
     xmlns:helpers="using:kafi.Helpers"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:kafi.ViewModels"
-    xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:BindingProxy x:Key="InventoryProxy" Data="{x:Bind ViewModel}" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
         <converters:ExpiredDateToStringConverter x:Key="ExpiredDateToStringConverter" />
-        <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter" />
-        <converters:StatusToForegroundConverter x:Key="StatusToForegroundConverter" />
+        <converters:StockStatusToBackgroundConverter x:Key="StockStatusToBackgroundConverter" />
+        <converters:StockStatusToForegroundConverter x:Key="StockStatusToForegroundConverter" />
         <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <converters:IsEditingToStringConverter x:Key="IsEditingToStringConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
@@ -113,13 +111,13 @@
                                         Margin="10,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Background="{Binding CurrentStock, Converter={StaticResource StatusToBackgroundConverter}}"
+                                        Background="{Binding CurrentStock, Converter={StaticResource StockStatusToBackgroundConverter}}"
                                         CornerRadius="14">
                                         <TextBlock
                                             Padding="30,6"
                                             FontFamily="{StaticResource LexendMedium}"
                                             FontWeight="Medium"
-                                            Foreground="{Binding CurrentStock, Converter={StaticResource StatusToForegroundConverter}}"
+                                            Foreground="{Binding CurrentStock, Converter={StaticResource StockStatusToForegroundConverter}}"
                                             Text="{Binding CurrentStock}" />
                                     </Border>
                                 </DataTemplate>

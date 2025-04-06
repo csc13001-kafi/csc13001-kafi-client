@@ -1,12 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace kafi.Models.Authentication
+namespace kafi.Models;
+
+public class LoginRequest
 {
-    public class LoginRequest
-    {
-        [JsonPropertyName("username")]
-        public required string UserName { get; set; }
-        [JsonPropertyName("password")]
-        public required string Password { get; set; }
-    }
+    [JsonPropertyName("username")]
+    public required string UserName { get; set; }
+    [JsonPropertyName("password")]
+    public required string Password { get; set; }
 }

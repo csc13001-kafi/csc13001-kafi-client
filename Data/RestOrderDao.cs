@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using kafi.Contracts.Data;
+using kafi.Contracts;
 using kafi.Models;
 
 namespace kafi.Data
