@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Data;
 
 namespace kafi.Converters;
 
-public partial class IsProductAvailableToOpactityConverter : IValueConverter
+public partial class IsProductAvailableToOpacityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {

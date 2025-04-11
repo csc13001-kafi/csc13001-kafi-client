@@ -302,6 +302,7 @@ public partial class TableViewModel : ObservableRecipient
         }
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("closepopup"));
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("ordercreated"));
         SelectedProducts.Clear();
         GroupedSelectedProducts.Clear();
         ClientPhoneNumber = string.Empty;
@@ -310,6 +311,15 @@ public partial class TableViewModel : ObservableRecipient
         Discount = 0;
         DiscountPercent = 0;
         ClientPayment = 0;
+    }
+
+    [RelayCommand]
+    private void CancelQRPayment()
+    {
+        _paymentStatusTimer?.Stop();
+        CloseQrCode();
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
+        WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("closepopup"));
     }
 
     private bool CanSelectPaymentMethod(string method) => !string.IsNullOrEmpty(method) && !string.Equals(method, PaymentMethod);
@@ -513,11 +523,15 @@ public partial class TableViewModel : ObservableRecipient
             {
                 _paymentStatusTimer?.Stop();
                 CloseQrCode();
+                CompleteCheckout("QR");
             }
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Error checking payment status: {ex.Message}");
+            _paymentStatusTimer?.Stop();
+            CloseQrCode();
+            CompleteCheckout("QR");
         }
     }
 

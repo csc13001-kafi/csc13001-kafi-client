@@ -11,7 +11,7 @@ public class PaymentStatus
     [JsonPropertyName("message")]
     public string? Message { get; set; }
     [JsonPropertyName("orderCode")]
-    public int OrderCode { get; set; }
+    public string? OrderCode { get; set; }
     [JsonPropertyName("orderCreated")]
     public bool OrderCreated { get; set; }
 }
