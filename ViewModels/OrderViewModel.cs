@@ -5,17 +5,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Models;
 using kafi.Repositories;
 
 namespace kafi.ViewModels;
 
-public partial class OrderViewModel(IOrderRepository orderRepository) : ObservableObject
+public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
 {
-    private readonly IOrderRepository _orderRepository = orderRepository;
+    private readonly IOrderRepository _orderRepository;
     private const int DefaultPageSize = 10;
 
     private List<Order> _orders = [];
+
+    public OrderViewModel(IOrderRepository orderRepository)
+    {
+        _orderRepository = orderRepository;
+        IsActive = true;
+    }
 
     public ObservableCollection<Order> Orders { get; set; } = [];
 
@@ -126,5 +134,13 @@ public partial class OrderViewModel(IOrderRepository orderRepository) : Observab
     partial void OnPageSizeChanged(int value)
     {
         UpdatePagedView();
+    }
+
+    public void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "ordercreated")
+        {
+            LoadDataAsync().ConfigureAwait(false);
+        }
     }
 }
