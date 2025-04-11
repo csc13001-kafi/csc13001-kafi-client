@@ -11,7 +11,7 @@ public partial class PaymentTypeToBackgroundConverter : IValueConverter
     {
         if (value is string type && parameter is string paymentType)
         {
-            if (type == paymentType)
+            if (type.ToLower() == paymentType)
             {
                 return (SolidColorBrush)App.Current.Resources["SecondaryBrush"];
             }

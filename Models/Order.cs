@@ -4,6 +4,18 @@ using System.Text.Json.Serialization;
 
 namespace kafi.Models;
 
+public record CreateOrderRequest
+(
+    Guid Id,
+    string Table,
+    string EmployeeName,
+    DateTime CreatedAt,
+    string ClientPhoneNumber,
+    string PaymentMethod,
+    List<Guid> Products,
+    List<int> Quantities
+);
+
 public class Order
 {
     [JsonPropertyName("id")]
@@ -16,7 +28,7 @@ public class Order
     public string? ClientPhoneNumber { get; set; }
 
     [JsonPropertyName("table")]
-    public int TableNumber { get; set; }
+    public string? Table { get; set; }
 
     [JsonPropertyName("time")]
     public DateTime Time { get; set; }
@@ -55,4 +67,24 @@ public class OrderProduct
 
     [JsonPropertyName("quantity")]
     public int Quantity { get; set; }
+}
+public class CreateOrderResponse
+{
+    [JsonPropertyName("discountPercentage")]
+    public int DiscountPercentage { get; set; }
+
+    [JsonPropertyName("discount")]
+    public int Discount { get; set; }
+
+    [JsonPropertyName("paymentLink")]
+    public string? PaymentLink { get; set; }
+
+    [JsonPropertyName("qrLink")]
+    public string? QrLink { get; set; }
+
+    [JsonPropertyName("orderCode")]
+    public int OrderCode { get; set; }
+
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
 }

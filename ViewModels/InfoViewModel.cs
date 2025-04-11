@@ -75,7 +75,7 @@ public partial class InfoViewModel(IAuthService authService, IInfoRepository rep
 
         try
         {
-            Image = new BitmapImage(new Uri(User.Image!));
+            Image = string.IsNullOrEmpty(User.Image) ? null : new BitmapImage(new Uri(User.Image));
             Name = User.Name;
             Email = User.Email;
             Phone = User.Phone;
@@ -178,7 +178,7 @@ public partial class InfoViewModel(IAuthService authService, IInfoRepository rep
     private void CancelUpdate()
     {
         _file = null;
-        Image = new BitmapImage(new Uri(User.Image!));
+        Image = string.IsNullOrEmpty(User.Image) ? null : new BitmapImage(new Uri(User.Image));
         Name = User.Name;
         Email = User.Email;
         Phone = User.Phone;

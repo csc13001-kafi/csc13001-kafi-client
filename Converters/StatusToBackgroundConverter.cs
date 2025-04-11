@@ -23,7 +23,7 @@ public partial class StatusToBackgroundConverter : IValueConverter
         {
             case "cash" or "instock":
                 return new SolidColorBrush(Color.FromArgb(255, 230, 246, 233));
-            case "credit":
+            case "qr":
                 return new SolidColorBrush(Color.FromArgb(38, 255, 176, 116));
             case "outofstock":
                 return new SolidColorBrush(Color.FromArgb(255, 246, 230, 240));

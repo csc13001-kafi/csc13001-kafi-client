@@ -14,8 +14,8 @@
         <helpers:BindingProxy x:Key="InventoryProxy" Data="{x:Bind ViewModel}" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
         <converters:ExpiredDateToStringConverter x:Key="ExpiredDateToStringConverter" />
-        <converters:StockStatusToBackgroundConverter x:Key="StockStatusToBackgroundConverter" />
-        <converters:StockStatusToForegroundConverter x:Key="StockStatusToForegroundConverter" />
+        <converters:StatusToBackgroundConverter x:Key="StatusToBackgroundConverter" />
+        <converters:StatusToForegroundConverter x:Key="StatusToForegroundConverter" />
         <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <converters:IsEditingToStringConverter x:Key="IsEditingToStringConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
@@ -111,13 +111,13 @@
                                         Margin="10,0"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Background="{Binding CurrentStock, Converter={StaticResource StockStatusToBackgroundConverter}}"
+                                        Background="{Binding CurrentStock, Converter={StaticResource StatusToBackgroundConverter}}"
                                         CornerRadius="14">
                                         <TextBlock
                                             Padding="30,6"
                                             FontFamily="{StaticResource LexendMedium}"
                                             FontWeight="Medium"
-                                            Foreground="{Binding CurrentStock, Converter={StaticResource StockStatusToForegroundConverter}}"
+                                            Foreground="{Binding CurrentStock, Converter={StaticResource StatusToForegroundConverter}}"
                                             Text="{Binding CurrentStock}" />
                                     </Border>
                                 </DataTemplate>

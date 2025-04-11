@@ -48,7 +48,7 @@ public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage) 
     private async Task<bool> TryRefreshTokenAsync(string refreshToken)
     {
         using var client = new HttpClient();
-        client.BaseAddress = new Uri("http://localhost:8080");
+        client.BaseAddress = new Uri(App.Configuration["ApiSettings:BaseUrl"] ?? throw new InvalidOperationException("API base URL is not configured in appsettings.json"));
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshToken);
         try
         {

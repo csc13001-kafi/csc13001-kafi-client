@@ -6,7 +6,6 @@ using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -113,12 +112,31 @@ public sealed partial class ShellPage : Page
     {
         Overlay.Width = this.XamlRoot.Size.Width;
         Overlay.Height = this.XamlRoot.Size.Height;
-        Overlay.Tapped += Overlay_Tapped;
     }
 
-    private void Overlay_Tapped(object sender, TappedRoutedEventArgs e)
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        Overlay.Visibility = Visibility.Collapsed;
-        Overlay.Tapped -= Overlay_Tapped;
+        UpdateOverlaySize();
+    }
+
+    private void UpdateOverlaySize()
+    {
+        if (Overlay != null)
+        {
+            Overlay.Width = this.XamlRoot.Size.Width;
+            Overlay.Height = this.XamlRoot.Size.Height;
+        }
+    }
+
+    private void NavigationViewControl_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
+    {
+        LargePaneContent.Visibility = Visibility.Collapsed;
+        MediumPaneContent.Visibility = Visibility.Visible;
+    }
+
+    private void NavigationViewControl_PaneOpening(NavigationView sender, object args)
+    {
+        LargePaneContent.Visibility = Visibility.Visible;
+        MediumPaneContent.Visibility = Visibility.Collapsed;
     }
 }

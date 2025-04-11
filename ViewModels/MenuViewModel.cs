@@ -27,11 +27,11 @@ public enum Mode
     EditingProduct
 }
 
-public partial class MenuViewModel(IMenuRepository repository, IWindowService windowService, IAuthService authService) : ObservableRecipient, IRecipient<PropertyChangedMessage<object>>
+public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyChangedMessage<object>>
 {
-    private readonly IMenuRepository _repository = repository;
-    private readonly IWindowService _windowService = windowService;
-    private readonly IAuthService _authService = authService;
+    private readonly IMenuRepository _repository;
+    private readonly IWindowService _windowService;
+    private readonly IAuthService _authService;
     private StorageFile? _selectedFile; // Holds the selected image file
     private Guid _selectedItemId = Guid.Empty; // Tracks the ID of the item being edited
     public bool IsEmployee => _authService.IsInRole(Role.Employee);
@@ -43,6 +43,16 @@ public partial class MenuViewModel(IMenuRepository repository, IWindowService wi
 
     // Backing collections for full data
     private List<Product> _fullProducts = [];
+
+    public MenuViewModel(IMenuRepository repository, IWindowService windowService, IAuthService authService)
+    {
+        _repository = repository;
+        _windowService = windowService;
+        _authService = authService;
+
+        IsActive = true;
+    }
+
     public List<Inventory> FullMaterials { get; set; } = [];
 
     #region Observable Properties

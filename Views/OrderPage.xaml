@@ -21,6 +21,7 @@
         <converters:PriceToStringConverter x:Key="PriceToStringConverter" />
         <converters:PaymentTypeToBackgroundConverter x:Key="PaymentTypeToBackgroundConverter" />
         <converters:PaymentTypeToForegroundConverter x:Key="PaymentTypeToForegroundConverter" />
+        <converters:PhoneToStringConverter x:Key="PhoneToStringConverter" />
         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
@@ -280,17 +281,15 @@
                                 Grid.Column="1"
                                 HorizontalAlignment="Right">
                                 <Run Text="Khách hàng:" />
-                                <Run Text="{x:Bind ViewModel.SelectedOrder.ClientPhoneNumber, Mode=OneWay}" />
+                                <Run Text="{x:Bind ViewModel.SelectedOrder.ClientPhoneNumber, Mode=OneWay, Converter={StaticResource PhoneToStringConverter}}" />
                             </TextBlock>
                             <TextBlock
                                 Grid.Row="2"
                                 Grid.Column="0"
                                 FontFamily="{StaticResource LexendBold}"
                                 FontSize="17"
-                                FontWeight="Bold">
-                                <Run Text="Bàn" />
-                                <Run Text="{x:Bind ViewModel.SelectedOrder.TableNumber, Mode=OneWay}" />
-                            </TextBlock>
+                                FontWeight="Bold"
+                                Text="{x:Bind ViewModel.SelectedOrder.Table, Mode=OneWay}" />
                             <TextBlock
                                 Grid.Row="2"
                                 Grid.Column="1"
@@ -470,12 +469,12 @@
                                         Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForegroundConverter}, ConverterParameter=cash}"
                                         Text="Tiền mặt" />
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Background="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToBackgroundConverter}, ConverterParameter=credit}">
-                                    <FontIcon Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForegroundConverter}, ConverterParameter=credit}" Glyph="&#xED14;" />
+                                <StackPanel Grid.Column="1" Background="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToBackgroundConverter}, ConverterParameter=qr}">
+                                    <FontIcon Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForegroundConverter}, ConverterParameter=qr}" Glyph="&#xED14;" />
                                     <TextBlock
                                         HorizontalAlignment="Center"
-                                        Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForegroundConverter}, ConverterParameter=credit}"
-                                        Text="Credit" />
+                                        Foreground="{x:Bind ViewModel.SelectedOrder.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToForegroundConverter}, ConverterParameter=qr}"
+                                        Text="QR" />
                                 </StackPanel>
                             </Grid>
                             <Button
