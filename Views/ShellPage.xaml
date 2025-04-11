@@ -18,6 +18,8 @@
             IsSettingsVisible="False"
             MenuItemsSource="{x:Bind ViewModel.NavItems}"
             OpenPaneLength="280"
+            PaneClosing="NavigationViewControl_PaneClosing"
+            PaneOpening="NavigationViewControl_PaneOpening"
             SelectionChanged="OnNavigationViewSelectionChanged">
             <NavigationView.Background>
                 <ImageBrush ImageSource="/Assets/Bg.png" />
@@ -98,6 +100,8 @@
                     <VisualState.Setters>
                         <Setter Target="LargePaneContent.Visibility" Value="Visible" />
                         <Setter Target="MediumPaneContent.Visibility" Value="Collapsed" />
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

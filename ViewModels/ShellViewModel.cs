@@ -11,7 +11,7 @@ using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace kafi.ViewModels;
 
-public partial class ShellViewModel : ObservableObject, IRecipient<ValueChangedMessage<string>>, IRecipient<ValueChangedMessage<User>>
+public partial class ShellViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>, IRecipient<ValueChangedMessage<User>>
 {
     private readonly IAuthService _authService;
     private readonly IWindowService _windowService;
@@ -64,9 +64,7 @@ public partial class ShellViewModel : ObservableObject, IRecipient<ValueChangedM
             NavItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
         }
 
-
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this);
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<User>>(this);
+        IsActive = true;
     }
 
     [RelayCommand]

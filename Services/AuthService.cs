@@ -21,9 +21,16 @@ public class AuthService : IAuthService
     {
         _authHttpClient = httpClientFactory.CreateClient("Common");
         _secureTokenStorage = secureTokenStorage;
+
+        var configuration = App.Configuration;
+
         _noAuthHttpClient = new HttpClient
         {
-            BaseAddress = new Uri("http://localhost:8080")
+            BaseAddress = new Uri(configuration["ApiSettings:BaseUrl"] ?? throw new InvalidOperationException("API base URL is not configured in appsettings.json")),
+            DefaultRequestHeaders =
+            {
+                { "Accept", "application/json" }
+            }
         };
     }
 
