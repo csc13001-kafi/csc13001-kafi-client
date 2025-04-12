@@ -20,8 +20,8 @@ public class ActivationService(ISecureTokenStorage tokenStorage, IWindowService 
         }
         else
         {
-            await _authService.LoadCurrentUserFromToken();
-            _windowService.ShowMainWindow();
+            if (await _authService.LoadCurrentUserFromToken() == true)
+                _windowService.ShowMainWindow();
         }
 
         Debug.WriteLine($"at: {tokens.accessToken}");

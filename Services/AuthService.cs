@@ -41,7 +41,7 @@ public class AuthService : IAuthService
         return CurrentUser != null && CurrentUser.Role == role;
     }
 
-    public async Task LoadCurrentUserFromToken()
+    public async Task<bool> LoadCurrentUserFromToken()
     {
         try
         {
@@ -55,15 +55,18 @@ public class AuthService : IAuthService
                 };
                 var user = JsonSerializer.Deserialize<User>(responseContent, options);
                 CurrentUser = user;
+                return true;
             }
             else
             {
                 Debug.WriteLine($"Load current user failed. Status code: {response.StatusCode}");
+                return false;
             }
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Exception during load current user: {ex}");
+            return false;
         }
     }
 

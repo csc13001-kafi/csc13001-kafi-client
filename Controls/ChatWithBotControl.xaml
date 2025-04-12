@@ -20,25 +20,37 @@
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
 
         <DataTemplate x:Key="MessageViewTemplate" x:DataType="models:Message">
-            <Grid
-                Height="Auto"
-                Margin="0,6"
-                HorizontalAlignment="{x:Bind IsUser, Converter={StaticResource IsUserMessageToAlignmentConverter}}">
-                <Border Background="{x:Bind IsUser, Converter={StaticResource IsUserMessageToBackgroundConverter}}" CornerRadius="16">
-                    <controls:MarkdownTextBlock
-                        MaxWidth="220"
-                        Padding="12,6,12,8"
-                        FontFamily="{StaticResource Lexend}"
-                        Foreground="Black"
-                        Header1FontSize="18"
-                        Header1Foreground="DarkBlue"
-                        IsTextSelectionEnabled="True"
-                        LinkClicked="MarkdownTextBlock_LinkClicked"
-                        ListBulletSpacing="4"
-                        Text="{x:Bind Text}"
-                        TextWrapping="WrapWholeWords" />
-                </Border>
-            </Grid>
+            <StackPanel>
+                <Grid
+                    Height="Auto"
+                    Margin="0,6"
+                    HorizontalAlignment="{x:Bind IsUser, Converter={StaticResource IsUserMessageToAlignmentConverter}}">
+                    <Border Background="{x:Bind IsUser, Converter={StaticResource IsUserMessageToBackgroundConverter}}" CornerRadius="16">
+                        <controls:MarkdownTextBlock
+                            MaxWidth="254"
+                            Padding="12,8,12,8"
+                            FontFamily="Segoe UI"
+                            FontSize="15"
+                            Foreground="Black"
+                            Header1FontSize="18"
+                            Header1Foreground="DarkBlue"
+                            IsTextSelectionEnabled="True"
+                            LinkClicked="MarkdownTextBlock_LinkClicked"
+                            ListBulletSpacing="4"
+                            Text="{x:Bind Text}"
+                            TextWrapping="WrapWholeWords" />
+                    </Border>
+                </Grid>
+                <ProgressRing
+                    Width="20"
+                    Height="20"
+                    Margin="0,6"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Foreground="{StaticResource SecondaryBrush}"
+                    IsActive="{Binding Data.IsMessageLoading, Source={StaticResource ChatViewModel}, Mode=OneWay}"
+                    Visibility="{x:Bind IsNew}" />
+            </StackPanel>
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
@@ -61,12 +73,12 @@
         <!--  Chat Popup  -->
         <Popup
             x:Name="ChatPopup"
-            Margin="0,0,360,480"
+            Margin="0,0,420,500"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             IsOpen="False">
             <Border
-                Width="340"
+                Width="380"
                 Height="460"
                 Background="LightGray"
                 CornerRadius="10">
@@ -116,34 +128,24 @@
                     </Grid>
 
                     <!--  Message List  -->
-                    <Grid Grid.Row="1">
-                        <ListView
-                            x:Name="InvertedListView"
-                            Grid.Row="1"
-                            Padding="0,6,4,10"
-                            ItemTemplate="{StaticResource MessageViewTemplate}"
-                            ItemsSource="{x:Bind ViewModel.Messages, Mode=OneWay}"
-                            SelectionMode="None">
-                            <ListView.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <ItemsStackPanel VerticalAlignment="Bottom" ItemsUpdatingScrollMode="KeepLastItemInView" />
-                                </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                        </ListView>
-                        <ProgressRing
-                            Width="20"
-                            Height="20"
-                            Margin="10,0,0,10"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            Foreground="{StaticResource SecondaryBrush}"
-                            IsActive="{x:Bind ViewModel.IsMessageLoading, Mode=OneWay}" />
-                    </Grid>
+                    <ListView
+                        x:Name="InvertedListView"
+                        Grid.Row="1"
+                        Padding="0,6,4,10"
+                        ItemTemplate="{StaticResource MessageViewTemplate}"
+                        ItemsSource="{x:Bind ViewModel.Messages, Mode=OneWay}"
+                        SelectionMode="None">
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsStackPanel VerticalAlignment="Bottom" ItemsUpdatingScrollMode="KeepLastItemInView" />
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
 
                     <!--  Input Area  -->
                     <Grid
@@ -166,7 +168,10 @@
                             FontSize="15"
                             FontWeight="Normal"
                             IsSpellCheckEnabled="True"
+                            KeyDown="TextBox_KeyDown"
+                            KeyUp="TextBox_KeyUp"
                             PlaceholderText="Type a message..."
+                            PreviewKeyDown="TextBox_PreviewKeyDown"
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                             Text="{x:Bind ViewModel.MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             TextWrapping="Wrap" />

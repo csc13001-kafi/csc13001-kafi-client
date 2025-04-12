@@ -10,9 +10,10 @@ using kafi.Models;
 
 namespace kafi.Services;
 
-public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage) : DelegatingHandler
+public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage, IWindowService windowService) : DelegatingHandler
 {
     private readonly ISecureTokenStorage _tokenStorage = secureTokenStorage;
+    private readonly IWindowService _windowService = windowService;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -39,6 +40,12 @@ public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage) 
                     clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     response = await base.SendAsync(clonedRequest, cancellationToken);
                     Debug.WriteLine($"Retry response: {response.StatusCode}");
+                }
+                else
+                {
+                    Debug.WriteLine("Refresh token expired or invalid.");
+                    _tokenStorage.ClearTokens();
+                    _windowService.ShowLoginWindow();
                 }
             }
         }

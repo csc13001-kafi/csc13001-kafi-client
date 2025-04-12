@@ -7,7 +7,7 @@ public interface IAuthService
 {
     bool IsInRole(Role role);
     User? CurrentUser { get; }
-    Task LoadCurrentUserFromToken();
+    Task<bool> LoadCurrentUserFromToken();
     Task<LoginResponse?> LoginAsync(LoginRequest request);
     Task<string> LogoutAsync();
     Task<string> ChangePasswordAsync(string oldPassword, string newPassword, string confirmPassword);

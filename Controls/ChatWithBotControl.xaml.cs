@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
@@ -21,17 +22,49 @@ namespace kafi.Controls
         private void ChatButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             ChatPopup.IsOpen = true;
+            ChatButton.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed;
         }
 
         private void CloseChatPopupButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             ChatPopup.IsOpen = false;
+            ChatButton.Visibility = Microsoft.UI.Xaml.Visibility.Visible;
         }
 
         private async void MarkdownTextBlock_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
         {
             var uri = new Uri(e.Link);
             await Launcher.LaunchUriAsync(uri);
+        }
+
+        private bool _isShiftPressed = false;
+        private void TextBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Shift)
+            {
+                _isShiftPressed = true;
+            }
+        }
+
+        private void TextBox_KeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Shift)
+            {
+                _isShiftPressed = false;
+            }
+        }
+
+        private async void TextBox_PreviewKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Enter)
+            {
+                if (!_isShiftPressed)
+                {
+                    e.Handled = true;
+                    Debug.WriteLine("Enter pressed without Shift, sending message.");
+                    await ViewModel.SendMessageCommand.ExecuteAsync(null);
+                }
+            }
         }
     }
 }

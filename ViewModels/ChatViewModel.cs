@@ -36,13 +36,15 @@ public partial class ChatViewModel(IAiService aiService) : ObservableObject
         IsMessageLoading = true;
         try
         {
-            var userMessage = new Message { IsUser = true, Text = MessageText };
+            var userMessage = new Message { IsUser = true, Text = MessageText, IsNew = true };
             Messages.Add(userMessage);
             MessageText = string.Empty;
 
             Message response = await _aiService.SendMessageAsync(_sessionId, userMessage.Text);
             if (response != null)
             {
+                Messages.Remove(userMessage);
+                Messages.Add(new Message { IsUser = true, Text = userMessage.Text, SessionId = _sessionId });
                 Messages.Add(new Message { IsUser = false, Text = response.Text, SessionId = response.SessionId });
             }
             else
