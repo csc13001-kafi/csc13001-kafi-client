@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="kafi.Controls.ChatWithBotControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:converters="using:kafi.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:kafi.Helpers"
+    xmlns:local="using:kafi.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:kafi.Models"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <helpers:BindingProxy x:Key="ChatViewModel" Data="{x:Bind ViewModel}" />
+        <converters:IsUserMessageToAlignmentConverter x:Key="IsUserMessageToAlignmentConverter" />
+        <converters:IsUserMessageToBackgroundConverter x:Key="IsUserMessageToBackgroundConverter" />
+
+        <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
+        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
+
+        <DataTemplate x:Key="MessageViewTemplate" x:DataType="models:Message">
+            <Grid
+                Height="Auto"
+                Margin="0,6"
+                HorizontalAlignment="{x:Bind IsUser, Converter={StaticResource IsUserMessageToAlignmentConverter}}">
+                <Border Background="{x:Bind IsUser, Converter={StaticResource IsUserMessageToBackgroundConverter}}" CornerRadius="16">
+                    <controls:MarkdownTextBlock
+                        MaxWidth="220"
+                        Padding="12,6,12,8"
+                        FontFamily="{StaticResource Lexend}"
+                        Foreground="Black"
+                        Header1FontSize="18"
+                        Header1Foreground="DarkBlue"
+                        IsTextSelectionEnabled="True"
+                        LinkClicked="MarkdownTextBlock_LinkClicked"
+                        ListBulletSpacing="4"
+                        Text="{x:Bind Text}"
+                        TextWrapping="WrapWholeWords" />
+                </Border>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <!--  Circular Chat Button  -->
+        <Button
+            x:Name="ChatButton"
+            Width="50"
+            Height="50"
+            Margin="20"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Background="{StaticResource PrimaryBrush}"
+            Canvas.ZIndex="2"
+            Click="ChatButton_Click"
+            Command="{x:Bind ViewModel.StartChatCommand}"
+            CornerRadius="30"
+            Foreground="{StaticResource SecondaryBrush}">
+            <FontIcon Glyph="&#xE8BD;" />
+        </Button>
+        <!--  Chat Popup  -->
+        <Popup
+            x:Name="ChatPopup"
+            Margin="0,0,360,480"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            IsOpen="False">
+            <Border
+                Width="340"
+                Height="460"
+                Background="LightGray"
+                CornerRadius="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ProgressRing Grid.RowSpan="3" IsActive="{x:Bind ViewModel.IsSessionLoading, Mode=OneWay}" />
+
+                    <!--  Header with contact name and close button  -->
+                    <Grid
+                        Padding="10,4"
+                        BorderBrush="{StaticResource SecondaryBrush}"
+                        BorderThickness="0,0,0,1">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button
+                                x:Name="StartNewChatButton"
+                                Width="24"
+                                Height="24"
+                                Padding="0"
+                                Background="{StaticResource PrimaryBrush}"
+                                BorderBrush="Transparent"
+                                Command="{x:Bind ViewModel.StartNewChatCommand}"
+                                CornerRadius="100">
+                                <FontIcon FontSize="14" Glyph="&#xF8AA;" />
+                            </Button>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                FontFamily="{StaticResource LexendMedium}"
+                                FontWeight="Medium"
+                                Text="Ask AI" />
+                        </StackPanel>
+                        <Button
+                            x:Name="CloseChatPopupButton"
+                            Width="28"
+                            Height="28"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Click="CloseChatPopupButton_Click"
+                            CornerRadius="100">
+                            <FontIcon FontSize="12" Glyph="&#xEF2C;" />
+                        </Button>
+                    </Grid>
+
+                    <!--  Message List  -->
+                    <Grid Grid.Row="1">
+                        <ListView
+                            x:Name="InvertedListView"
+                            Grid.Row="1"
+                            Padding="0,6,4,10"
+                            ItemTemplate="{StaticResource MessageViewTemplate}"
+                            ItemsSource="{x:Bind ViewModel.Messages, Mode=OneWay}"
+                            SelectionMode="None">
+                            <ListView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsStackPanel VerticalAlignment="Bottom" ItemsUpdatingScrollMode="KeepLastItemInView" />
+                                </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+                        <ProgressRing
+                            Width="20"
+                            Height="20"
+                            Margin="10,0,0,10"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Foreground="{StaticResource SecondaryBrush}"
+                            IsActive="{x:Bind ViewModel.IsMessageLoading, Mode=OneWay}" />
+                    </Grid>
+
+                    <!--  Input Area  -->
+                    <Grid
+                        Grid.Row="2"
+                        Padding="8"
+                        BorderBrush="{StaticResource SecondaryBrush}"
+                        BorderThickness="0,1,0,0"
+                        ColumnSpacing="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox
+                            MaxHeight="172"
+                            Padding="10"
+                            AcceptsReturn="True"
+                            BorderBrush="Transparent"
+                            CornerRadius="20"
+                            FontFamily="{StaticResource Lexend}"
+                            FontSize="15"
+                            FontWeight="Normal"
+                            IsSpellCheckEnabled="True"
+                            PlaceholderText="Type a message..."
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            Text="{x:Bind ViewModel.MessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextWrapping="Wrap" />
+                        <Button
+                            Grid.Column="1"
+                            Width="40"
+                            Height="40"
+                            Padding="2,1,0,0"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Command="{x:Bind ViewModel.SendMessageCommand}"
+                            CornerRadius="100">
+                            <FontIcon Foreground="{StaticResource SecondaryBrush}" Glyph="&#xE725;" />
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
