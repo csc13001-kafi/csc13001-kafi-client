@@ -66,6 +66,7 @@ public partial class App : Application
         services.AddSingleton<IActivationService, ActivationService>();
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<IAuthService, AuthService>();
+        services.AddSingleton<IAiService, AiService>();
 
         // Repositories and Daos
         services.AddSingleton<IEmployeeDao, RestEmployeeDao>();
@@ -90,6 +91,7 @@ public partial class App : Application
         services.AddTransient<OrderViewModel>();
         services.AddTransient<InventoryViewModel>();
         services.AddTransient<TableViewModel>();
+        services.AddTransient<ChatViewModel>();
 
         Services = services.BuildServiceProvider();
     }

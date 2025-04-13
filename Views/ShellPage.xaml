@@ -91,6 +91,7 @@
             Canvas.ZIndex="1"
             Loaded="Overlay_Loaded"
             Visibility="{x:Bind ViewModel.IsOverlayVisible, Mode=OneWay}" />
+        <controls:ChatWithBotControl Canvas.ZIndex="1" Visibility="{x:Bind ViewModel.IsManager, Mode=OneWay}" />
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState>

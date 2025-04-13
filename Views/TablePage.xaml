@@ -22,7 +22,7 @@
         <converters:TableStatusToForegroundConverter x:Key="TableStatusToForegroundConverter" />
         <converters:TableStatusToBrushConverter x:Key="TableStatusToBrushConverter" />
         <converters:TableStatusToVisibilityConverter x:Key="TableStatusToVisibilityConverter" />
-        <converters:IsProductAvailableToOpactityConverter x:Key="IsProductAvailableToOpactityConverter" />
+        <converters:IsProductAvailableToOpacityConverter x:Key="IsProductAvailableToOpacityConverter" />
         <converters:IsProductAvailableToVisibilityConverter x:Key="IsProductAvailableToVisibilityConverter" />
         <converters:IdToTextConverter x:Key="IdToTextConverter" />
         <converters:PaymentTypeToBackgroundConverter x:Key="PaymentTypeToBackgroundConverter" />
@@ -288,7 +288,7 @@
                                         Height="160"
                                         Background="White"
                                         CornerRadius="10">
-                                        <Grid Opacity="{x:Bind IsAvailable, Converter={StaticResource IsProductAvailableToOpactityConverter}, Mode=OneWay}">
+                                        <Grid Opacity="{x:Bind IsAvailable, Converter={StaticResource IsProductAvailableToOpacityConverter}, Mode=OneWay}">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="*" />
                                                 <RowDefinition Height="Auto" />
@@ -976,6 +976,7 @@
                                         TextWrapping="WrapWholeWords"
                                         Visibility="{x:Bind ViewModel.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToVisibilityConverter}, ConverterParameter=QR}" />
                                 </StackPanel>
+
                                 <Button
                                     x:Name="CompleteOrderButton"
                                     Grid.Row="1"
@@ -990,6 +991,18 @@
                                     FontWeight="Medium"
                                     Foreground="White"
                                     Visibility="{x:Bind ViewModel.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToVisibilityConverter}, ConverterParameter=Cash}" />
+                                <Button
+                                    Grid.Row="1"
+                                    Padding="16,9"
+                                    Background="Red"
+                                    BorderBrush="Transparent"
+                                    Command="{x:Bind ViewModel.CancelQRPaymentCommand}"
+                                    Content="Huỷ thanh toán QR"
+                                    CornerRadius="12"
+                                    FontFamily="{StaticResource LexendMedium}"
+                                    FontWeight="Medium"
+                                    Foreground="White"
+                                    Visibility="{x:Bind ViewModel.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToVisibilityConverter}, ConverterParameter=QR}" />
                             </Grid>
                         </Grid>
                     </Grid>
