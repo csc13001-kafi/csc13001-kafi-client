@@ -1,16 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Microsoft.UI.Xaml;
+using kafi.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -23,9 +13,36 @@ namespace kafi.Views
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public MainViewModel ViewModel { get; }
         public MainPage()
         {
+            ViewModel = App.Services.GetRequiredService<MainViewModel>();
+            this.NavigationCacheMode = NavigationCacheMode.Enabled;
             this.InitializeComponent();
+        }
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            await ViewModel.LoadDataCommand.ExecuteAsync(null);
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+        }
+
+        private async void DashboardFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ViewModel.ChangeTimeRangeCommand.CanExecute(null))
+                await ViewModel.ChangeTimeRangeCommand.ExecuteAsync(null);
+        }
+
+        private async void RevenueDatePicker_DateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
+        {
+            if (ViewModel.ChangeRevenueDateCommand.CanExecute(null))
+            {
+                await ViewModel.ChangeRevenueDateCommand.ExecuteAsync(null);
+            }
         }
     }
 }

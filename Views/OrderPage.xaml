@@ -36,13 +36,29 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock
-                Margin="0,0,0,20"
-                VerticalAlignment="Top"
-                Style="{StaticResource PageTitleStyle}">
-                <Run Text="Đơn hàng" />
-                <Run Text="(" /><Run Text="{x:Bind ViewModel.TotalItems, Mode=OneWay}" /><Run Text=")" />
-            </TextBlock>
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Top" Style="{StaticResource PageTitleStyle}">
+                    <Run Text="Đơn hàng" />
+                    <Run Text="(" /><Run Text="{x:Bind ViewModel.TotalItems, Mode=OneWay}" /><Run Text=")" />
+                </TextBlock>
+                <Button
+                    Grid.Column="1"
+                    Padding="10,8"
+                    VerticalAlignment="Top"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    CornerRadius="10"
+                    Foreground="Transparent">
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock Foreground="Transparent" Text="Thêm nguyên liệu mới" />
+                        <FontIcon Foreground="Transparent" Glyph="&#xECC8;" />
+                    </StackPanel>
+                </Button>
+            </Grid>
 
             <Grid
                 Grid.Row="1"
