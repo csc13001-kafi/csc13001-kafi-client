@@ -316,13 +316,20 @@ public partial class TableViewModel : ObservableRecipient
     [RelayCommand]
     private void CancelQRPayment()
     {
-        _paymentStatusTimer?.Stop();
+        if (_paymentStatusTimer != null)
+        {
+            Debug.WriteLine("Stopping payment status timer");
+            _paymentStatusTimer.Stop();
+            _paymentStatusTimer = null;
+        }
+
         CloseQrCode();
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("closepopup"));
     }
 
     private bool CanSelectPaymentMethod(string method) => !string.IsNullOrEmpty(method) && !string.Equals(method, PaymentMethod);
+
     [RelayCommand]
     private void SelectPaymentMethod(string method)
     {
@@ -407,8 +414,8 @@ public partial class TableViewModel : ObservableRecipient
             UpdateTotalQuantity();
             UpdateTotalPrice();
         }
-
     }
+
     private void UpdateOrderNumbersForChange(NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
@@ -429,6 +436,7 @@ public partial class TableViewModel : ObservableRecipient
                 break;
         }
     }
+
     private void UpdateOrderNumbers(int startIndex, int endIndex)
     {
         for (int i = startIndex; i < endIndex && i < SelectedProducts.Count; i++)
@@ -436,6 +444,7 @@ public partial class TableViewModel : ObservableRecipient
             SelectedProducts[i].OrderNumber = i + 1;
         }
     }
+
     private void UpdateTotalPrice()
     {
         TotalPrice = SelectedProducts.Sum(item => item.TotalPrice);
@@ -491,9 +500,9 @@ public partial class TableViewModel : ObservableRecipient
         var qrAppWindow = _window.AppWindow;
         qrAppWindow.Resize(new Windows.Graphics.SizeInt32(514, 600));
         qrAppWindow.SetIcon("Assets\\WindowIcon.ico");
-
         _window.Activate();
     }
+
     private void OnQrImageLoaded(object sender, EventArgs e)
     {
         StartPaymentStatusPolling(_orderCode);
@@ -507,6 +516,13 @@ public partial class TableViewModel : ObservableRecipient
 
     private void StartPaymentStatusPolling(int orderCode)
     {
+        // Ensure any existing timer is stopped and disposed
+        if (_paymentStatusTimer != null)
+        {
+            _paymentStatusTimer.Stop();
+            _paymentStatusTimer = null;
+        }
+
         _paymentStatusTimer = new DispatcherTimer();
         _paymentStatusTimer.Interval = TimeSpan.FromSeconds(5);
         _paymentStatusTimer.Tick += async (s, e) => await CheckPaymentStatus(orderCode);
@@ -518,10 +534,14 @@ public partial class TableViewModel : ObservableRecipient
         try
         {
             PaymentStatus status = await _orderRepository.GetPaymentStatus(orderCode);
-
             if (string.Equals(status.Message, "Payment successful and order created"))
             {
-                _paymentStatusTimer?.Stop();
+                // Stop and clear timer before proceeding
+                if (_paymentStatusTimer != null)
+                {
+                    _paymentStatusTimer.Stop();
+                    _paymentStatusTimer = null;
+                }
                 CloseQrCode();
                 CompleteCheckout("QR");
             }
@@ -531,7 +551,6 @@ public partial class TableViewModel : ObservableRecipient
             Debug.WriteLine($"Error checking payment status: {ex.Message}");
             _paymentStatusTimer?.Stop();
             CloseQrCode();
-            CompleteCheckout("QR");
         }
     }
 
@@ -548,11 +567,8 @@ public partial class TableViewModel : ObservableRecipient
     {
         if (string.IsNullOrWhiteSpace(phone))
             return false;
-
         phone = phone.Trim();
-
         string pattern = @"^(0|\+84)(3[2-9]|5[25689]|7[06-9]|8[1-5]|9[0-9])\d{7}$";
-
         return Regex.IsMatch(phone, pattern);
     }
 
@@ -560,14 +576,11 @@ public partial class TableViewModel : ObservableRecipient
     {
         if (string.IsNullOrWhiteSpace(phone))
             return phone;
-
         phone = phone.Trim();
-
         if (phone.StartsWith("+84"))
         {
             return "0" + phone.Substring(3);
         }
-
         return phone;
     }
 }

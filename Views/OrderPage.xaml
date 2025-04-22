@@ -442,7 +442,6 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
-                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -493,24 +492,6 @@
                                         Text="QR" />
                                 </StackPanel>
                             </Grid>
-                            <Button
-                                Grid.Row="2"
-                                Grid.ColumnSpan="2"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                Background="#C0C0C0"
-                                BorderThickness="0"
-                                CornerRadius="10"
-                                Foreground="White">
-                                <StackPanel
-                                    Padding="10,4"
-                                    VerticalAlignment="Center"
-                                    Orientation="Horizontal"
-                                    Spacing="10">
-                                    <FontIcon VerticalAlignment="Center" Glyph="&#xE749;" />
-                                    <TextBlock VerticalAlignment="Center" Text="In lại hóa đơn" />
-                                </StackPanel>
-                            </Button>
                         </Grid>
                     </Grid>
                     <ProgressRing

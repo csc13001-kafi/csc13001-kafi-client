@@ -19,6 +19,8 @@
         <converters:ChangeToForegroundConverter x:Key="ChangeToForegroundConverter" />
         <converters:ChangeToIconGlyphConverter x:Key="ChangeToIconGlyphConverter" />
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
+        <converters:NotEnabledConverter x:Key="NotEnabledConverter" />
+        <converters:GeneratingReportTextConverter x:Key="GeneratingReportTextConverter" />
         <DataTemplate x:Key="DashboardItemsTemplate" x:DataType="vm:NumericReportItemViewModel">
             <ItemContainer>
                 <Grid
@@ -83,8 +85,6 @@
     </Page.Resources>
     <Grid>
         <ProgressRing
-            Grid.Row="1"
-            Grid.RowSpan="3"
             Width="50"
             Height="50"
             HorizontalAlignment="Center"
@@ -93,15 +93,23 @@
             IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
 
         <ScrollViewer>
-            <Grid Padding="0,0,10,0" Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource NotVisibilityConverter}}">
+            <Grid
+                Padding="0,0,10,0"
+                ColumnSpacing="30"
+                RowSpacing="30"
+                Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource NotVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="3*" />
+                </Grid.ColumnDefinitions>
 
-                <Grid Margin="0,0,0,20">
+                <Grid Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -116,29 +124,58 @@
                         </TextBlock>
                         <TextBlock Foreground="Gray" Text="Đây là những số liệu hôm nay" />
                     </StackPanel>
-                    <ComboBox
-                        x:Name="DashboardFilterComboBox"
+                    <StackPanel
                         Grid.Column="1"
-                        Margin="0,8"
-                        Padding="20,0,0,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Background="White"
-                        BorderBrush="{StaticResource SecondaryBrush}"
-                        CornerRadius="10"
-                        DisplayMemberPath="Item1"
-                        FontFamily="{StaticResource LexendMedium}"
-                        FontWeight="Medium"
-                        Foreground="{StaticResource SecondaryBrush}"
-                        ItemsSource="{x:Bind ViewModel.TimeRanges}"
-                        SelectedValue="{x:Bind ViewModel.SelectedTimeRange, Mode=TwoWay}"
-                        SelectedValuePath="Item2"
-                        SelectionChanged="DashboardFilterComboBox_SelectionChanged" />
+                        Orientation="Horizontal"
+                        Spacing="10">
+                        <Button
+                            x:Name="GenerateAnalyticButton"
+                            Grid.Column="1"
+                            Margin="0,8"
+                            Padding="10,8"
+                            VerticalAlignment="Top"
+                            Background="{StaticResource SecondaryBrush}"
+                            Command="{x:Bind ViewModel.GenerateAnalyticCommand}"
+                            CornerRadius="10"
+                            Foreground="White"
+                            PointerEntered="GenerateAnalyticButton_PointerEntered"
+                            PointerExited="GenerateAnalyticButton_PointerExited"
+                            Visibility="{x:Bind ViewModel.IsManager, Mode=OneWay}">
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                                <TextBlock
+                                    x:Name="GenerateAnalyticButtonText"
+                                    Foreground="White"
+                                    Text="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource GeneratingReportTextConverter}}" />
+                                <FontIcon FontSize="16" Glyph="&#xF0E3;" />
+                            </StackPanel>
+                        </Button>
+                        <ComboBox
+                            x:Name="DashboardFilterComboBox"
+                            Margin="0,8"
+                            Padding="20,0,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Background="White"
+                            BorderBrush="{StaticResource SecondaryBrush}"
+                            CornerRadius="10"
+                            DisplayMemberPath="Item1"
+                            FontFamily="{StaticResource LexendMedium}"
+                            FontWeight="Medium"
+                            Foreground="{StaticResource SecondaryBrush}"
+                            ItemsSource="{x:Bind ViewModel.TimeRanges}"
+                            SelectedValue="{x:Bind ViewModel.SelectedTimeRange, Mode=TwoWay}"
+                            SelectedValuePath="Item2"
+                            SelectionChanged="DashboardFilterComboBox_SelectionChanged" />
+                    </StackPanel>
                 </Grid>
 
                 <ItemsView
                     Grid.Row="1"
+                    Grid.ColumnSpan="2"
                     ItemTemplate="{StaticResource DashboardItemsTemplate}"
                     ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
                     SelectionMode="None">
@@ -154,150 +191,171 @@
                 </ItemsView>
 
                 <Grid
+                    x:Name="RevenueGrid"
                     Grid.Row="2"
-                    Margin="0,30"
-                    ColumnSpacing="30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="5*" />
-                        <ColumnDefinition Width="3*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid
-                        x:Name="RevenueGrid"
-                        Padding="4"
-                        Background="White"
-                        CornerRadius="10"
-                        RowSpacing="10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <Grid Padding="28,12,10,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                VerticalAlignment="Top"
-                                FontFamily="{StaticResource LexendMedium}"
-                                FontSize="24"
-                                FontWeight="Medium"
-                                Text="Doanh thu" />
-                            <CalendarDatePicker
-                                x:Name="RevenueDatePicker"
-                                Grid.Column="1"
-                                Padding="20,8"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Top"
-                                Background="White"
-                                BorderBrush="{StaticResource SecondaryBrush}"
-                                CalendarIdentifier="GregorianCalendar"
-                                CornerRadius="10"
-                                Date="{x:Bind ViewModel.RevenueSelectedDate, Mode=TwoWay}"
-                                DateChanged="RevenueDatePicker_DateChanged"
-                                DateFormat="{}{day.integer}/{month.integer}/{year.full}"
-                                Foreground="{StaticResource SecondaryBrush}"
-                                MaxDate="{x:Bind ViewModel.Today}" />
-                        </Grid>
-                        <lvc:CartesianChart
-                            Grid.Row="1"
-                            Width="{Binding ElementName=RevenueGrid, Path=Width}"
-                            Height="300"
-                            Padding="0"
-                            LegendPosition="Top"
-                            Series="{x:Bind ViewModel.RevenueSeries, Mode=OneWay}"
-                            XAxes="{x:Bind ViewModel.RevenueXAxes, Mode=OneWay}"
-                            YAxes="{x:Bind ViewModel.RevenueYAxes, Mode=OneWay}"
-                            ZoomMode="X" />
-                    </Grid>
-                    <Grid
-                        x:Name="OrderVolumeGrid"
-                        Grid.Column="1"
-                        Padding="4"
-                        Background="White"
-                        CornerRadius="10"
-                        RowSpacing="10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                    Grid.Column="0"
+                    Padding="4"
+                    Background="White"
+                    CornerRadius="10"
+                    RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Padding="28,12,10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <TextBlock
-                            Padding="28,12,10,0"
                             VerticalAlignment="Top"
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="24"
                             FontWeight="Medium"
-                            Text="Số lượng đơn tháng này" />
-                        <lvc:CartesianChart
-                            Grid.Row="1"
-                            Width="{Binding ElementName=OrderVolumeGrid, Path=Width}"
-                            Height="300"
-                            Padding="0"
-                            LegendPosition="Top"
-                            Series="{x:Bind ViewModel.SaleVolumeSeries, Mode=OneWay}"
-                            XAxes="{x:Bind ViewModel.SaleVolumeXAxes, Mode=OneWay}"
-                            YAxes="{x:Bind ViewModel.SaleVolumeYAxes, Mode=OneWay}" />
+                            Text="Doanh thu" />
+                        <CalendarDatePicker
+                            x:Name="RevenueDatePicker"
+                            Grid.Column="1"
+                            Padding="20,8"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Background="White"
+                            BorderBrush="{StaticResource SecondaryBrush}"
+                            CornerRadius="10"
+                            Date="{x:Bind ViewModel.RevenueSelectedDate, Mode=TwoWay}"
+                            DateChanged="RevenueDatePicker_DateChanged"
+                            DateFormat="{}{day.integer}/{month.integer}/{year.full}"
+                            Foreground="{StaticResource SecondaryBrush}"
+                            MaxDate="{x:Bind ViewModel.Today}" />
                     </Grid>
+                    <lvc:CartesianChart
+                        Grid.Row="1"
+                        Width="{Binding ElementName=RevenueGrid, Path=Width}"
+                        Height="300"
+                        Padding="0"
+                        LegendPosition="Top"
+                        Series="{x:Bind ViewModel.RevenueSeries, Mode=OneWay}"
+                        XAxes="{x:Bind ViewModel.RevenueXAxes, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.RevenueYAxes, Mode=OneWay}"
+                        ZoomMode="X" />
                 </Grid>
 
-                <Grid Grid.Row="3" ColumnSpacing="30">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="3*" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid
-                        x:Name="ProductVolumeGrid"
-                        Padding="6"
-                        Background="White"
-                        CornerRadius="10"
-                        RowSpacing="20">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            Padding="28,12,10,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            FontFamily="{StaticResource LexendMedium}"
-                            FontSize="24"
-                            FontWeight="Medium"
-                            Text="Top sản phẩm bán chạy" />
-                        <lvc:CartesianChart
-                            Grid.Row="1"
-                            Width="{Binding ElementName=ProductVolumeGrid, Path=Width}"
-                            Height="300"
-                            Series="{x:Bind ViewModel.ProductVolumeSeries, Mode=OneWay}"
-                            TooltipPosition="Hidden"
-                            XAxes="{x:Bind ViewModel.ProductVolumeXAxis, Mode=OneWay}"
-                            YAxes="{x:Bind ViewModel.ProductVolumeYAxis, Mode=OneWay}" />
-                    </Grid>
-                    <Grid
-                        x:Name="LowStockGrid"
-                        Grid.Column="1"
-                        Padding="6"
-                        Background="White"
-                        CornerRadius="10"
-                        RowSpacing="20">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock
-                            Padding="14,12,10,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            FontFamily="{StaticResource LexendMedium}"
-                            FontSize="24"
-                            FontWeight="Medium"
-                            Text="Tồn kho thấp" />
-                        <ListView
-                            Grid.Row="1"
-                            ItemTemplate="{StaticResource LowStockItemTemplate}"
-                            ItemsSource="{x:Bind ViewModel.LowStockMaterials, Mode=OneWay}"
-                            SelectionMode="None" />
-                    </Grid>
+                <Grid
+                    x:Name="OrderVolumeGrid"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Padding="4"
+                    Background="White"
+                    CornerRadius="10"
+                    RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Padding="28,12,10,0"
+                        VerticalAlignment="Top"
+                        FontFamily="{StaticResource LexendMedium}"
+                        FontSize="24"
+                        FontWeight="Medium"
+                        Text="Số lượng đơn tháng này" />
+                    <lvc:CartesianChart
+                        Grid.Row="1"
+                        Width="{Binding ElementName=OrderVolumeGrid, Path=Width}"
+                        Height="300"
+                        Padding="0"
+                        LegendPosition="Top"
+                        Series="{x:Bind ViewModel.SaleVolumeSeries, Mode=OneWay}"
+                        XAxes="{x:Bind ViewModel.SaleVolumeXAxes, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.SaleVolumeYAxes, Mode=OneWay}" />
                 </Grid>
+
+                <Grid
+                    x:Name="ProductVolumeGrid"
+                    Grid.Row="3"
+                    Padding="6"
+                    Background="White"
+                    CornerRadius="10"
+                    RowSpacing="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Padding="28,12,10,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontFamily="{StaticResource LexendMedium}"
+                        FontSize="24"
+                        FontWeight="Medium"
+                        Text="Top sản phẩm bán chạy" />
+                    <lvc:CartesianChart
+                        Grid.Row="1"
+                        Width="{Binding ElementName=ProductVolumeGrid, Path=Width}"
+                        Height="300"
+                        Series="{x:Bind ViewModel.ProductVolumeSeries, Mode=OneWay}"
+                        TooltipPosition="Hidden"
+                        XAxes="{x:Bind ViewModel.ProductVolumeXAxis, Mode=OneWay}"
+                        YAxes="{x:Bind ViewModel.ProductVolumeYAxis, Mode=OneWay}" />
+                </Grid>
+                <Grid
+                    x:Name="LowStockGrid"
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Padding="6"
+                    Background="White"
+                    CornerRadius="10"
+                    RowSpacing="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Padding="14,12,10,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        FontFamily="{StaticResource LexendMedium}"
+                        FontSize="24"
+                        FontWeight="Medium"
+                        Text="Tồn kho thấp" />
+                    <ListView
+                        Grid.Row="1"
+                        ItemTemplate="{StaticResource LowStockItemTemplate}"
+                        ItemsSource="{x:Bind ViewModel.LowStockMaterials, Mode=OneWay}"
+                        SelectionMode="None" />
+                    <TextBlock
+                        Grid.Row="1"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        Text="Không có nguyên liệu nào sắp hết"
+                        Visibility="{x:Bind ViewModel.IsLowStockEmpty, Mode=OneWay}" />
+                </Grid>
+
             </Grid>
         </ScrollViewer>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="UserRoleStates">
+                <VisualState x:Name="ManagerState">
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{x:Bind ViewModel.IsManager, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="StaffState">
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{x:Bind ViewModel.IsManager, Mode=OneWay, Converter={StaticResource NotEnabledConverter}}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <!--  Hide Revenue Grid  -->
+                        <Setter Target="RevenueGrid.Visibility" Value="Collapsed" />
+                        <!--  Move Order Volume Grid to be beside Low Stock Grid  -->
+                        <Setter Target="OrderVolumeGrid.(Grid.Row)" Value="3" />
+                        <Setter Target="OrderVolumeGrid.(Grid.Column)" Value="0" />
+                        <!--  Make Product Volume Grid take full width  -->
+                        <Setter Target="ProductVolumeGrid.(Grid.Row)" Value="2" />
+                        <Setter Target="ProductVolumeGrid.(Grid.ColumnSpan)" Value="2" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>

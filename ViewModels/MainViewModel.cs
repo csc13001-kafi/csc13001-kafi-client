@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using kafi.Contracts.Services;
 using kafi.Converters;
 using kafi.Models;
@@ -38,7 +38,6 @@ public partial class MainViewModel : ObservableObject
             new() { Icon = "/Assets/EmployeeIcon.png", Name = "Số lượng nhân viên", Color = ColorConverter.FromHex("#E7E5FF") },
         ] :
         [
-            new() { Icon = "/Assets/RevenueIcon.png", Name = "Doanh thu", Color = ColorConverter.FromHex("#E8F1FD"), IsMoney = true },
             new() { Icon = "/Assets/OrdersIcon.png", Name = "Số lượng đơn", Color = ColorConverter.FromHex("#FFEEDB") },
             new() { Icon = "/Assets/ProductIcon.png", Name = "Số lượng món ăn", Color = ColorConverter.FromHex("#E5F7FD") },
             new() { Icon = "/Assets/CategoriesIcon.png", Name = "Số lượng phân loại", Color = ColorConverter.FromHex("#E7E5FF") },
@@ -63,6 +62,12 @@ public partial class MainViewModel : ObservableObject
     public partial DateTimeOffset RevenueSelectedDate { get; set; }
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
+    [ObservableProperty]
+    public partial string AnalyticReport { get; set; } = string.Empty;
+    [ObservableProperty]
+    public partial bool IsGeneratingReport { get; set; } = false;
+
+    public bool IsLowStockEmpty => LowStockMaterials.Count == 0;
 
     public ObservableCollection<NumericReportItemViewModel> Items { get; set; }
     public ObservableCollection<LowStockMaterial> LowStockMaterials { get; set; }
@@ -159,7 +164,6 @@ public partial class MainViewModel : ObservableObject
             productVolumes.Clear();
             foreach (var product in topSellingProducts.TopProducts)
             {
-                Debug.WriteLine($"Product: {product.ProductName}, Quantity: {product.Quantity}");
                 productVolumes.Insert(0, new(product.ProductName, product.Quantity));
             }
 
@@ -195,13 +199,24 @@ public partial class MainViewModel : ObservableObject
         try
         {
             Dashboard dashboard = await _repository.GetDashboard(SelectedTimeRange);
-            Items[0].Value = dashboard.Overview.OrdersTotalPrice;
-            Items[0].Change = dashboard.Overview.RevenuePercentChange;
-            Items[1].Value = dashboard.Overview.OrdersCount;
-            Items[1].Change = dashboard.Overview.OrdersPercentChange;
-            Items[2].Value = dashboard.Product.ProductsCount;
-            Items[3].Value = dashboard.Product.CategoriesCount;
-            Items[4].Value = dashboard.Membership;
+            if (IsManager)
+            {
+                Items[0].Value = dashboard.Overview.OrdersTotalPrice;
+                Items[0].Change = dashboard.Overview.RevenuePercentChange;
+                Items[1].Value = dashboard.Overview.OrdersCount;
+                Items[1].Change = dashboard.Overview.OrdersPercentChange;
+                Items[2].Value = dashboard.Product.ProductsCount;
+                Items[3].Value = dashboard.Product.CategoriesCount;
+                Items[4].Value = dashboard.Membership;
+            }
+            else
+            {
+                Items[0].Value = dashboard.Overview.OrdersCount;
+                Items[0].Change = dashboard.Overview.OrdersPercentChange;
+                Items[1].Value = dashboard.Product.ProductsCount;
+                Items[2].Value = dashboard.Product.CategoriesCount;
+                Items[3].Value = dashboard.Membership;
+            }
         }
         catch (Exception ex)
         {
@@ -226,6 +241,31 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             Console.WriteLine($"Error changing revenue date: {ex.Message}");
+        }
+    }
+
+    private bool CanGenerateAnalytic() => !string.IsNullOrEmpty(SelectedTimeRange) && !IsGeneratingReport;
+    [RelayCommand(CanExecute = nameof(CanGenerateAnalytic))]
+    public async Task GenerateAnalyticAsync()
+    {
+        IsGeneratingReport = true;
+        try
+        {
+            AnalyticReport = await _repository.GetBusinessReport(SelectedTimeRange);
+
+            // Send a message that the report is ready to be displayed
+            WeakReferenceMessenger.Default.Send(new AnalyticReportReadyMessage(AnalyticReport));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating analytic report: {ex.Message}");
+
+            // Send the error message
+            WeakReferenceMessenger.Default.Send(new AnalyticReportReadyMessage(AnalyticReport));
+        }
+        finally
+        {
+            IsGeneratingReport = false;
         }
     }
 

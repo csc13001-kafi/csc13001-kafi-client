@@ -27,14 +27,74 @@ namespace kafi.Data
 
         public async Task<object> Add(object entity)
         {
-            if (entity is not MultipartFormDataContent form)
+            // Store form field data for later use
+            var formFields = new Dictionary<string, string>();
+
+            // Process the entity to extract form data
+            if (entity is MultipartFormDataContent form)
             {
-                throw new ArgumentException("Invalid entity type");
+                // Extract form data without disposing original content
+                foreach (var httpContent in form)
+                {
+                    if (httpContent.Headers.ContentDisposition != null)
+                    {
+                        var name = httpContent.Headers.ContentDisposition.Name?.Trim('"');
+
+                        if (httpContent is StringContent stringContent)
+                        {
+                            var value = await stringContent.ReadAsStringAsync();
+
+                            if (!string.IsNullOrEmpty(name))
+                                formFields[name] = value;
+                        }
+                    }
+                }
             }
-            var response = await _httpClient.PostAsync("/orders/order", form);
-            response.EnsureSuccessStatusCode();
+            else if (entity is CreateOrderRequest createOrderRequest)
+            {
+                // Convert CreateOrderRequest to form field dictionary
+                formFields["id"] = createOrderRequest.Id.ToString();
+                formFields["table"] = createOrderRequest.Table;
+                formFields["employeeName"] = createOrderRequest.EmployeeName;
+                formFields["time"] = createOrderRequest.CreatedAt.ToString("o");
+
+                if (!string.IsNullOrEmpty(createOrderRequest.ClientPhoneNumber))
+                    formFields["clientPhoneNumber"] = createOrderRequest.ClientPhoneNumber;
+
+                formFields["paymentMethod"] = createOrderRequest.PaymentMethod;
+
+                // Add products and quantities as JSON arrays
+                if (createOrderRequest.Products != null && createOrderRequest.Products.Count > 0)
+                {
+                    formFields["products"] = JsonSerializer.Serialize(createOrderRequest.Products);
+                }
+
+                if (createOrderRequest.Quantities != null && createOrderRequest.Quantities.Count > 0)
+                {
+                    formFields["quantities"] = JsonSerializer.Serialize(createOrderRequest.Quantities);
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Unsupported entity type: {entity.GetType().Name}");
+            }
+
+            // Create a fresh MultipartFormDataContent object right before sending the request
+            using var freshContent = new MultipartFormDataContent();
+
+            // Add all form fields from the dictionary
+            foreach (var field in formFields)
+            {
+                freshContent.Add(new StringContent(field.Value), field.Key);
+            }
+
+            // Send the request with the fresh content
+            var response = await _httpClient.PostAsync("/orders/order", freshContent);
             var resultJson = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<CreateOrderResponse>(resultJson) ?? throw new JsonException("Failed to deserialize order");
+
+            response.EnsureSuccessStatusCode();
+            return JsonSerializer.Deserialize<CreateOrderResponse>(resultJson) ??
+                throw new JsonException("Failed to deserialize order");
         }
 
         public Task Delete(Guid id)

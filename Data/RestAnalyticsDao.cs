@@ -14,17 +14,22 @@ public interface IAnalyticsDao
     Task<OrdersByDayResponse> GetOrdersByDayAndPaymentMethod(int month);
     Task<HourlySalesResponse> GetHourlySalesData(string date);
     Task<LowStockMaterialsResponse> GetLowStockMaterials(int limit);
+    Task<string> GetBusinessReport(string timeRange);
 }
 
 public class RestAnalyticsDao(IHttpClientFactory httpClientFactory) : IAnalyticsDao
 {
     private readonly HttpClient _httpClient = httpClientFactory.CreateClient("Common");
 
-    private async Task<T> GetAsync<T>(string endpoint)
+    private async Task<T> GetAsync<T>(string endpoint, bool isText = false)
     {
         var response = await _httpClient.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync();
+        if (isText)
+        {
+            return (T)(object)json;
+        }
         return JsonSerializer.Deserialize<T>(json)
             ?? throw new Exception($"Failed to deserialize response from {endpoint}");
     }
@@ -64,5 +69,10 @@ public class RestAnalyticsDao(IHttpClientFactory httpClientFactory) : IAnalytics
     public async Task<LowStockMaterialsResponse> GetLowStockMaterials(int limit)
     {
         return await GetAsync<LowStockMaterialsResponse>($"analytics/materials/low-stock?limit={limit}");
+    }
+
+    public async Task<string> GetBusinessReport(string timeRange)
+    {
+        return await GetAsync<string>($"analytics/business-report?timeRange={timeRange}", true);
     }
 }

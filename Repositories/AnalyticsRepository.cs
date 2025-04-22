@@ -13,6 +13,7 @@ public interface IAnalyticsRepository
     Task<OrdersByDayResponse> GetOrdersByDayAndPaymentMethod(int month);
     Task<HourlySalesResponse> GetHourlySalesData(string date);
     Task<LowStockMaterialsResponse> GetLowStockMaterials(int limit = 3);
+    Task<string> GetBusinessReport(string timeRange);
 }
 
 public class AnalyticsRepository(IAnalyticsDao dao) : IAnalyticsRepository
@@ -91,5 +92,15 @@ public class AnalyticsRepository(IAnalyticsDao dao) : IAnalyticsRepository
         }
 
         return await _dao.GetLowStockMaterials(limit);
+    }
+
+    public async Task<string> GetBusinessReport(string timeRange)
+    {
+        // Validate timeRange if needed
+        if (string.IsNullOrEmpty(timeRange))
+        {
+            throw new ArgumentException("Time range cannot be empty", nameof(timeRange));
+        }
+        return await _dao.GetBusinessReport(timeRange);
     }
 }

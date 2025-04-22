@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
@@ -61,7 +60,6 @@ namespace kafi.Controls
                 if (!_isShiftPressed)
                 {
                     e.Handled = true;
-                    Debug.WriteLine("Enter pressed without Shift, sending message.");
                     await ViewModel.SendMessageCommand.ExecuteAsync(null);
                 }
             }
