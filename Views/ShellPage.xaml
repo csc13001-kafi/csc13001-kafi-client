@@ -8,6 +8,7 @@
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:kafi.Models"
+    SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
     <Grid>
         <NavigationView

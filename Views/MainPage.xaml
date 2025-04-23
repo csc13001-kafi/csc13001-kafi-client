@@ -151,25 +151,25 @@
                                     x:Name="NormalReportText"
                                     Foreground="White"
                                     Text="Tạo báo cáo phân tích"
-                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}"/>
-                                
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}" />
+
                                 <TextBlock
                                     x:Name="LoadingReportText"
                                     Foreground="#FFE082"
                                     Text="Đang tạo báo cáo..."
-                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                
-                                <ProgressRing 
-                                    Width="16" 
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                <ProgressRing
+                                    Width="16"
                                     Height="16"
-                                    IsActive="True"
                                     Foreground="#FFE082"
-                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                
-                                <FontIcon 
-                                    FontSize="16" 
-                                    Glyph="&#xF0E3;" 
-                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}"/>
+                                    IsActive="True"
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                <FontIcon
+                                    FontSize="16"
+                                    Glyph="&#xF0E3;"
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}" />
                             </StackPanel>
                         </Button>
                         <ComboBox
@@ -314,7 +314,7 @@
                         Width="{Binding ElementName=ProductVolumeGrid, Path=Width}"
                         Height="300"
                         Series="{x:Bind ViewModel.ProductVolumeSeries, Mode=OneWay}"
-                        TooltipPosition="Hidden"
+                        TooltipPosition="Right"
                         XAxes="{x:Bind ViewModel.ProductVolumeXAxis, Mode=OneWay}"
                         YAxes="{x:Bind ViewModel.ProductVolumeYAxis, Mode=OneWay}" />
                 </Grid>

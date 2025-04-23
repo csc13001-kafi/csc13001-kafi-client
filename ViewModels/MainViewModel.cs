@@ -88,46 +88,8 @@ public partial class MainViewModel : ObservableObject
         RevenueSelectedDate = Today;
         LowStockMaterials = [];
 
-        RevenueSeries.Add(new LineSeries<TimeSpanPoint>
-        {
-            Name = "Doanh thu",
-            Values = revenues,
-            Stroke = new SolidColorPaint(SKColor.Parse("#458353")) { StrokeThickness = 3 },
-            Fill = new SolidColorPaint(SKColor.Parse("#FAC1D9").WithAlpha(84)),
-            GeometryFill = new SolidColorPaint(SKColor.Parse("#458353")),
-            GeometryStroke = new SolidColorPaint(SKColors.Black) { StrokeThickness = 2 },
-        });
-
-        ProductVolumeSeries.Add(new RowSeries<TopProduct>
-        {
-            Name = "Top món ăn",
-            Values = productVolumes,
-            Fill = new SolidColorPaint(SKColor.Parse("#458353")) { StrokeThickness = 3 },
-            DataLabelsFormatter = point => $"{point.Model!.ProductName} {point.Coordinate.PrimaryValue}",
-            DataLabelsPosition = LiveChartsCore.Measure.DataLabelsPosition.End,
-            DataLabelsTranslate = new(-1, 0),
-            DataLabelsPaint = new SolidColorPaint(new SKColor(245, 245, 245)),
-        });
-
-        SaleVolumeSeries.Add(new LineSeries<TimeSpanPoint>
-        {
-            Name = "Tiền mặt",
-            Values = ordersByDayByCash,
-            Stroke = new SolidColorPaint(SKColor.Parse("#DBA362")) { StrokeThickness = 3 },
-            Fill = new SolidColorPaint(SKColor.Parse("#C5A674").WithAlpha(33)),
-            GeometryFill = null,
-            GeometryStroke = null
-        });
-
-        SaleVolumeSeries.Add(new LineSeries<TimeSpanPoint>
-        {
-            Name = "QR",
-            Values = ordersByDayByQr,
-            Stroke = new SolidColorPaint(SKColor.Parse("#B6D3FA")) { StrokeThickness = 3 },
-            Fill = new SolidColorPaint(SKColor.Parse("#B6D3FA").WithAlpha(33)),
-            GeometryFill = null,
-            GeometryStroke = null
-        });
+        // Initialize chart series
+        InitializeChartSeries();
     }
 
     [RelayCommand]
@@ -136,6 +98,9 @@ public partial class MainViewModel : ObservableObject
         IsLoading = true;
         try
         {
+            // Reinitialize chart series configuration to prevent data label shifting
+            InitializeChartSeries();
+            
             await ChangeTimeRangeAsync();
             if (IsManager)
             {
@@ -151,6 +116,8 @@ public partial class MainViewModel : ObservableObject
             }
 
             var ordersCount = await _repository.GetOrdersByDayAndPaymentMethod(DateTime.Now.Month);
+            ordersByDayByCash.Clear();
+            ordersByDayByQr.Clear();
             foreach (var day in ordersCount.Days)
             {
                 ordersByDayByCash.Add(new TimeSpanPoint(TimeSpan.FromDays(day.Day), day.Cash));
@@ -190,6 +157,59 @@ public partial class MainViewModel : ObservableObject
         {
             IsLoading = false;
         }
+    }
+
+    private void InitializeChartSeries()
+    {
+        // Clear existing series
+        RevenueSeries.Clear();
+        ProductVolumeSeries.Clear();
+        SaleVolumeSeries.Clear();
+
+        // Reinitialize revenue series
+        RevenueSeries.Add(new LineSeries<TimeSpanPoint>
+        {
+            Name = "Doanh thu",
+            Values = revenues,
+            Stroke = new SolidColorPaint(SKColor.Parse("#458353")) { StrokeThickness = 3 },
+            Fill = new SolidColorPaint(SKColor.Parse("#FAC1D9").WithAlpha(84)),
+            GeometryFill = new SolidColorPaint(SKColor.Parse("#458353")),
+            GeometryStroke = new SolidColorPaint(SKColors.Black) { StrokeThickness = 2 },
+        });
+
+        // Reinitialize product volume series
+        ProductVolumeSeries.Add(new RowSeries<TopProduct>
+        {
+            Values = productVolumes,
+            Fill = new SolidColorPaint(SKColor.Parse("#458353")) { StrokeThickness = 3 },
+            DataLabelsFormatter = point => $"{point.Model!.ProductName} {point.Coordinate.PrimaryValue}",
+            DataLabelsPosition = LiveChartsCore.Measure.DataLabelsPosition.End,
+            DataLabelsTranslate = new(-1, 0),
+            DataLabelsPadding = new(0, 0, 6, 0),
+            DataLabelsPaint = new SolidColorPaint(new SKColor(245, 245, 245)),
+            YToolTipLabelFormatter = point => $"{point.Model!.ProductName} bán {point.Coordinate.PrimaryValue}",
+        });
+
+        // Reinitialize sale volume series
+        SaleVolumeSeries.Add(new LineSeries<TimeSpanPoint>
+        {
+            Name = "Tiền mặt",
+            Values = ordersByDayByCash,
+            Stroke = new SolidColorPaint(SKColor.Parse("#DBA362")) { StrokeThickness = 3 },
+            Fill = new SolidColorPaint(SKColor.Parse("#C5A674").WithAlpha(33)),
+            GeometryFill = null,
+            GeometryStroke = null
+        });
+
+        SaleVolumeSeries.Add(new LineSeries<TimeSpanPoint>
+        {
+            Name = "QR",
+            Values = ordersByDayByQr,
+            Stroke = new SolidColorPaint(SKColor.Parse("#B6D3FA")) { StrokeThickness = 3 },
+            Fill = new SolidColorPaint(SKColor.Parse("#B6D3FA").WithAlpha(33)),
+            GeometryFill = null,
+            GeometryStroke = null
+        });
     }
 
     private bool CanChangeTimeRange() => !string.IsNullOrEmpty(SelectedTimeRange);

@@ -52,8 +52,7 @@
                 <TextBlock
                     VerticalAlignment="Top"
                     Style="{StaticResource PageTitleStyle}"
-                    Text="Menu"
-                    Visibility="Collapsed" />
+                    Text="Menu" />
                 <StackPanel
                     Grid.Column="1"
                     Orientation="Horizontal"
@@ -63,6 +62,7 @@
                         Padding="10,8"
                         VerticalAlignment="Top"
                         Background="{StaticResource PrimaryBrush}"
+                        Click="OpenPopup_Click"
                         Command="{x:Bind ViewModel.TurnOnAddingCategoryCommand}"
                         CornerRadius="10">
                         <StackPanel
@@ -78,6 +78,7 @@
                         Padding="10,8"
                         VerticalAlignment="Top"
                         Background="{StaticResource SecondaryBrush}"
+                        Click="OpenPopup_Click"
                         Command="{x:Bind ViewModel.TurnOnAddingProductCommand}"
                         CornerRadius="10"
                         Foreground="White"
@@ -111,7 +112,7 @@
                     Margin="10,0"
                     ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}"
                     SelectionChanged="Category_SelectionChanged"
-                    SelectionMode="Single"
+                    SelectionMode="Multiple"
                     SizeChanged="Category_SizeChanged">
                     <ItemsView.Layout>
                         <UniformGridLayout
@@ -156,7 +157,10 @@
                                                 <Setter Property="Background" Value="Transparent" />
                                             </Style>
                                         </StackPanel.Resources>
-                                        <Button Command="{Binding Data.TurnOnEditingCategoryCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
+                                        <Button
+                                            Click="OpenPopup_Click"
+                                            Command="{Binding Data.TurnOnEditingCategoryCommand, Source={StaticResource MenuProxy}}"
+                                            CommandParameter="{x:Bind Id}">
                                             <FontIcon Glyph="&#xEC88;" />
                                         </Button>
                                         <Button Command="{Binding Data.DeleteCategoryCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
@@ -178,85 +182,91 @@
                 Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}" />
 
             <!--  Menu Items - 6 columns  -->
-            <ItemsRepeater
-                Grid.Row="3"
-                MinWidth="260"
-                Margin="10"
-                ItemsSource="{x:Bind ViewModel.FilteredProducts, Mode=OneWay}">
-                <ItemsRepeater.Layout>
-                    <UniformGridLayout
-                        MaximumRowsOrColumns="6"
-                        MinColumnSpacing="20"
-                        MinItemWidth="240"
-                        MinRowSpacing="20" />
-                </ItemsRepeater.Layout>
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="model:Product">
-                        <Grid
-                            x:Name="ProductGrid"
-                            Height="200"
-                            Padding="10"
-                            Background="White"
-                            CornerRadius="10">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <TextBlock
-                                Grid.Row="1"
-                                Margin="0,-16,12,0"
-                                HorizontalAlignment="Right"
-                                FontSize="16"
-                                Foreground="Gray"
-                                Text="{x:Bind Price, Converter={StaticResource PriceToStringConverter}}"
-                                TextAlignment="Center" />
-                            <Image
-                                Height="140"
-                                Canvas.ZIndex="-1"
-                                Source="{x:Bind Image}"
-                                Stretch="Uniform" />
-                            <Rectangle
-                                Width="{Binding ElementName=ProductGrid, Path=Width}"
-                                VerticalAlignment="Bottom"
-                                Canvas.ZIndex="-2"
-                                Fill="#fef5e6" />
-                            <Grid Grid.Row="0" VerticalAlignment="Top">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Row="3">
+                <ItemsRepeater
+                    MinWidth="260"
+                    Margin="10"
+                    ItemsSource="{x:Bind ViewModel.FilteredProducts, Mode=OneWay}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout
+                            ItemsStretch="Fill"
+                            MaximumRowsOrColumns="6"
+                            MinColumnSpacing="20"
+                            MinItemWidth="240"
+                            MinRowSpacing="20" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="model:Product">
+                            <Grid
+                                x:Name="ProductGrid"
+                                Height="200"
+                                Padding="10"
+                                Background="White"
+                                CornerRadius="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <TextBlock
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Left"
-                                    FontFamily="{StaticResource LexendMedium}"
-                                    FontSize="15"
-                                    FontWeight="Medium"
-                                    Text="{x:Bind Name}"
-                                    TextAlignment="Center" />
-                                <StackPanel
-                                    Grid.Column="1"
+                                    Grid.Row="1"
+                                    Margin="0,-16,12,0"
                                     HorizontalAlignment="Right"
-                                    Spacing="4"
-                                    Visibility="{Binding Data.IsEmployee, Source={StaticResource MenuProxy}, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
-                                    <StackPanel.Resources>
-                                        <Style TargetType="Button">
-                                            <Setter Property="BorderThickness" Value="0" />
-                                            <Setter Property="CornerRadius" Value="10" />
-                                            <Setter Property="Background" Value="Transparent" />
-                                        </Style>
-                                    </StackPanel.Resources>
-                                    <Button Command="{Binding Data.TurnOnEditingProductCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
-                                        <FontIcon Glyph="&#xEC88;" />
-                                    </Button>
-                                    <Button Command="{Binding Data.DeleteProductCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
-                                        <FontIcon Foreground="Red" Glyph="&#xE74D;" />
-                                    </Button>
-                                </StackPanel>
+                                    FontSize="16"
+                                    Foreground="Gray"
+                                    Text="{x:Bind Price, Converter={StaticResource PriceToStringConverter}}"
+                                    TextAlignment="Center" />
+                                <Image
+                                    Height="140"
+                                    Canvas.ZIndex="-1"
+                                    Source="{x:Bind Image}"
+                                    Stretch="Uniform" />
+                                <Rectangle
+                                    Width="{Binding ElementName=ProductGrid, Path=Width}"
+                                    VerticalAlignment="Bottom"
+                                    Canvas.ZIndex="-2"
+                                    Fill="#fef5e6" />
+                                <Grid Grid.Row="0" VerticalAlignment="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Left"
+                                        FontFamily="{StaticResource LexendMedium}"
+                                        FontSize="15"
+                                        FontWeight="Medium"
+                                        Text="{x:Bind Name}"
+                                        TextAlignment="Center" />
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        Spacing="4"
+                                        Visibility="{Binding Data.IsEmployee, Source={StaticResource MenuProxy}, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="Button">
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="CornerRadius" Value="10" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <Button
+                                            Click="OpenPopup_Click"
+                                            Command="{Binding Data.TurnOnEditingProductCommand, Source={StaticResource MenuProxy}}"
+                                            CommandParameter="{x:Bind Id}">
+                                            <FontIcon Glyph="&#xEC88;" />
+                                        </Button>
+                                        <Button Command="{Binding Data.DeleteProductCommand, Source={StaticResource MenuProxy}}" CommandParameter="{x:Bind Id}">
+                                            <FontIcon Foreground="Red" Glyph="&#xE74D;" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+
         </Grid>
 
         <RelativePanel Margin="-20,-105,-20,-20" Padding="10">
@@ -264,8 +274,9 @@
                 x:Name="AddPopup"
                 Width="500"
                 Height="200"
+                Closed="AddPopup_Closed"
                 IsLightDismissEnabled="True"
-                IsOpen="{x:Bind ViewModel.IsPopupOpen, Mode=OneWay}"
+                IsOpen="False"
                 LightDismissOverlayMode="On"
                 RelativePanel.AlignRightWithPanel="True">
                 <Popup.ChildTransitions>

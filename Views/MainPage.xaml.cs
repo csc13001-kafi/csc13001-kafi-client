@@ -70,7 +70,7 @@ namespace kafi.Views
             {
                 NormalReportText.Foreground = new SolidColorBrush(Colors.Black);
             }
-            
+
             GenerateAnalyticButton.Background = new SolidColorBrush(Color.FromArgb(255, 42, 78, 49));
         }
 
@@ -79,7 +79,7 @@ namespace kafi.Views
             // Restore original colors for both TextBlocks
             NormalReportText.Foreground = new SolidColorBrush(Colors.White);
             LoadingReportText.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 224, 130)); // #FFE082
-            
+
             GenerateAnalyticButton.Background = App.Current.Resources["SecondaryBrush"] as SolidColorBrush;
         }
 

@@ -14,7 +14,7 @@ using kafi.Repositories;
 namespace kafi.ViewModels;
 
 [ObservableRecipient]
-public partial class InventoryViewModel(IInventoryRepository repository) : ObservableValidator
+public partial class InventoryViewModel(IInventoryRepository repository) : ObservableValidator, IRecipient<ValueChangedMessage<string>>
 {
     private readonly IInventoryRepository _repository = repository;
     private const int DefaultPageSize = 10;
@@ -79,6 +79,7 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
         try
         {
             _fullInventoryList = [.. await _repository.GetAll()];
+            SortInventoryByNewestUpdate();
             UpdatePagedView();
         }
         catch (Exception ex)
@@ -284,6 +285,21 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
     partial void OnPageSizeChanged(int value)
     {
         UpdatePagedView();
+    }
+
+    private void SortInventoryByNewestUpdate()
+    {
+        _fullInventoryList = _fullInventoryList
+            .OrderByDescending(inv => inv.UpdatedAt)
+            .ToList();
+    }
+
+    public async void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "ordercreated")
+        {
+            await LoadDataAsync();
+        }
     }
 
 }

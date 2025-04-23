@@ -27,11 +27,11 @@ public enum Mode
     EditingProduct
 }
 
-    public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyChangedMessage<object>>
-    {
-        private readonly IMenuRepository _repository;
+public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyChangedMessage<object>>
+{
+    private readonly IMenuRepository _repository;
     private readonly IWindowService _windowService;
-        private readonly IAuthService _authService;
+    private readonly IAuthService _authService;
     private StorageFile? _selectedFile; // Holds the selected image file
     private Guid _selectedItemId = Guid.Empty; // Tracks the ID of the item being edited
     public bool IsEmployee => _authService.IsInRole(Role.Employee);
@@ -40,132 +40,125 @@ public enum Mode
     public ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
     public ObservableCollection<Product> FilteredProducts { get; } = new ObservableCollection<Product>();
     public ObservableCollection<ProductMaterial> SelectedMaterials { get; } = new ObservableCollection<ProductMaterial>();
+    public ObservableCollection<Category> SelectedCategories { get; } = new ObservableCollection<Category>();
 
     // Backing collections for full data
     private List<Product> _fullProducts = [];
 
     public MenuViewModel(IMenuRepository repository, IWindowService windowService, IAuthService authService)
-        {
-            _repository = repository;
+    {
+        _repository = repository;
         _windowService = windowService;
-            _authService = authService;
+        _authService = authService;
 
-            IsActive = true;
-        }
+        IsActive = true;
+    }
 
-        public List<Inventory> FullMaterials { get; set; } = [];
+    public List<Inventory> FullMaterials { get; set; } = [];
 
     #region Observable Properties
-        [ObservableProperty]
-    public partial Category? SelectedCategory { get; set; }
 
-        [ObservableProperty]
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(AddCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateCommand))]
     public partial Category? SelectedCategoryForEdit { get; set; } = null;
 
-        [ObservableProperty]
+    [ObservableProperty]
     public partial ProductMaterial? SelectedMaterialForEdit { get; set; } = null;
 
-        [ObservableProperty]
+    [ObservableProperty]
     public partial bool IsLoading { get; set; }
 
-        [ObservableProperty]
-    public partial bool IsPopupOpen { get; set; }
-
-        [ObservableProperty]
+    [ObservableProperty]
     public partial Mode CurrentMode { get; set; } = Mode.None;
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(AddCommand))]
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(AddCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateCommand))]
     public partial string Name { get; set; } = string.Empty;
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(AddCommand))]
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(AddCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateCommand))]
     public partial int Price { get; set; }
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(AddCommand))]
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(AddCommand))]
     [NotifyCanExecuteChangedFor(nameof(UpdateCommand))]
     [NotifyPropertyChangedFor(nameof(IsImageSelected))]
     public partial ImageSource? SelectedImage { get; set; }
 
     public bool IsImageSelected => SelectedImage != null;
 
-        [ObservableProperty]
+    [ObservableProperty]
     public partial string StatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial bool HasError { get; set; }
 
-        [ObservableProperty]
+    [ObservableProperty]
     public partial bool HasSuccess { get; set; }
     #endregion
 
     #region Commands
 
     private bool CanLoadData => !IsLoading && Categories.Count == 0;
-        [RelayCommand(CanExecute = nameof(CanLoadData))]
+    [RelayCommand(CanExecute = nameof(CanLoadData))]
     private async Task LoadDataAsync()
+    {
+        IsLoading = true;
+        try
         {
-            IsLoading = true;
-            try
-            {
-                var response = await _repository.GetCategoriesAndProducts();
-                _fullProducts = response.Products;
+            var response = await _repository.GetCategoriesAndProducts();
+            _fullProducts = response.Products;
 
             Categories.Clear();
             foreach (var category in response.Categories)
                 Categories.Add(category);
 
-            if (Categories.Count != 0)
-                {
-                SelectedCategory = Categories[0];
-                FilterByCategory(SelectedCategory);
-            }
+            // Load all products instead of filtering by the first category
+            LoadAllProducts();
         }
         catch (Exception ex)
-            {
+        {
             SetStatusMessage($"Error loading data: {ex.Message}", isError: true);
-            }
-            finally
-            {
-                IsLoading = false;
-            }
         }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
     private bool CanLoadMaterials => !IsLoading && FullMaterials.Count == 0;
-        [RelayCommand(CanExecute = nameof(CanLoadMaterials))]
+    [RelayCommand(CanExecute = nameof(CanLoadMaterials))]
     private async Task LoadMaterialsAsync()
+    {
+        try
         {
-            try
-            {
             FullMaterials = [.. (await _repository.GetMaterials())];
             if (FullMaterials.Count != 0 && !SelectedMaterials.Any())
-                {
+            {
                 SelectedMaterials.Add(new ProductMaterial { Id = FullMaterials[0].Id });
             }
         }
         catch (Exception ex)
-            {
-            SetStatusMessage($"Error loading materials: {ex.Message}", isError: true);
-            }
-        }
-
-        [RelayCommand]
-        private async Task PickImageAsync()
         {
+            SetStatusMessage($"Error loading materials: {ex.Message}", isError: true);
+        }
+    }
+
+    [RelayCommand]
+    private async Task PickImageAsync()
+    {
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("showoverlay"));
-            try
-            {
-                var picker = new Windows.Storage.Pickers.FileOpenPicker();
+        try
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
             WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(_windowService.GetCurrentWindow()));
 
-                picker.FileTypeFilter.Add(".jpg");
-                picker.FileTypeFilter.Add(".jpeg");
-                picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
 
             _selectedFile = await picker.PickSingleFileAsync();
 
@@ -180,9 +173,9 @@ public enum Mode
         catch (Exception ex)
         {
             SetStatusMessage($"Error picking image: {ex.Message}", isError: true);
-            }
-            finally
-            {
+        }
+        finally
+        {
             WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
         }
     }
@@ -192,7 +185,6 @@ public enum Mode
     {
         ResetForm();
         CurrentMode = Mode.AddingCategory;
-        IsPopupOpen = true;
     }
 
     [RelayCommand]
@@ -205,10 +197,9 @@ public enum Mode
         }
         ResetForm();
         CurrentMode = Mode.AddingProduct;
-        IsPopupOpen = true;
-        }
+    }
 
-        [RelayCommand]
+    [RelayCommand]
     private void TurnOnEditingCategory(Guid id)
     {
         var category = Categories.FirstOrDefault(c => c.Id == id);
@@ -219,12 +210,11 @@ public enum Mode
         SelectedImage = new BitmapImage(new Uri(category.Image ?? string.Empty));
         _selectedItemId = id;
         CurrentMode = Mode.EditingCategory;
-        IsPopupOpen = true;
-        }
+    }
 
-        [RelayCommand]
-        private void TurnOnEditingProduct(Guid id)
-        {
+    [RelayCommand]
+    private void TurnOnEditingProduct(Guid id)
+    {
         var product = _fullProducts.FirstOrDefault(p => p.Id == id);
         if (product == null) return;
 
@@ -236,16 +226,15 @@ public enum Mode
         SelectedMaterials.Clear();
         foreach (var material in product.Materials!)
             SelectedMaterials.Add(new ProductMaterial
-                    {
-                        Id = material.Id,
-                        Quantity = material.Quantity
-                    });
+            {
+                Id = material.Id,
+                Quantity = material.Quantity
+            });
 
         SelectedImage = new BitmapImage(new Uri(product.Image ?? string.Empty));
         _selectedItemId = id;
 
         CurrentMode = Mode.EditingProduct;
-        IsPopupOpen = true;
     }
 
     private bool CanAddOrUpdate =>
@@ -274,11 +263,14 @@ public enum Mode
                 newProduct.Materials = [.. SelectedMaterials];
 
                 _fullProducts.Add(newProduct);
-                FilterByCategory(SelectedCategory);
+                
+                // Apply current category filter to ensure new product shows up if appropriate
+                FilterByMultipleCategories(SelectedCategories);
 
                 SetStatusMessage("Product added successfully", isError: false);
             }
-            ClosePopup();
+
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("close"));
         }
         catch (Exception ex)
         {
@@ -306,45 +298,28 @@ public enum Mode
                 await _repository.UpdateProduct(_selectedItemId, request);
 
                 UpdateProductInCollections();
-                FilterByCategory(SelectedCategory);
+                
+                // Apply current category filter after updating
+                FilterByMultipleCategories(SelectedCategories);
 
                 SetStatusMessage("Product updated successfully", isError: false);
             }
-            ClosePopup();
+
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("close"));
         }
         catch (Exception ex)
         {
             SetStatusMessage($"Error updating item: {ex.Message}", isError: true);
-            }
         }
-
-        [RelayCommand]
-    private void AddMaterial() => SelectedMaterials.Add(new ProductMaterial { Id = FullMaterials.FirstOrDefault()?.Id ?? Guid.Empty });
-
-        [RelayCommand]
-    private void DeleteMaterial(Guid id) => SelectedMaterials.Remove(SelectedMaterials.FirstOrDefault(m => m.Id == id)!);
-
-        [RelayCommand]
-    private void ClosePopup()
-    {
-        IsPopupOpen = false;
-        ResetForm();
     }
 
     [RelayCommand]
-    private void FilterByCategory(Category? category)
-    {
-        if (category == null) return;
+    private void AddMaterial() => SelectedMaterials.Add(new ProductMaterial { Id = FullMaterials.FirstOrDefault()?.Id ?? Guid.Empty });
 
-        FilteredProducts.Clear();
-        var categoryProducts = _fullProducts.Where(p => p.CategoryId == category.Id);
-        foreach (var product in categoryProducts)
-            FilteredProducts.Add(product);
+    [RelayCommand]
+    private void DeleteMaterial(Guid id) => SelectedMaterials.Remove(SelectedMaterials.FirstOrDefault(m => m.Id == id)!);
 
-        SelectedCategory = category;
-        }
-
-        [RelayCommand]
+    [RelayCommand]
     private async Task DeleteCategoryAsync(Guid id)
     {
         try
@@ -354,33 +329,40 @@ public enum Mode
             var category = Categories.FirstOrDefault(c => c.Id == id);
             if (category == null) return;
 
+            // Remove the category from the categories collection
             Categories.Remove(category);
 
-            if (SelectedCategory?.Id == id)
-                SelectedCategory = Categories.FirstOrDefault();
+            // Remove from selected categories if it's there
+            var selectedCategory = SelectedCategories.FirstOrDefault(c => c.Id == id);
+            if (selectedCategory != null)
+                SelectedCategories.Remove(selectedCategory);
 
-            FilterByCategory(SelectedCategory);
+            // Remove products of deleted category from full products list
+            _fullProducts.RemoveAll(p => p.CategoryId == id);
 
+            // Update filtered products based on remaining selected categories
+            FilterByMultipleCategories(SelectedCategories);
         }
         catch (Exception ex)
         {
             SetStatusMessage($"Error deleting category: {ex.Message}", isError: true);
         }
-        }
+    }
 
-        [RelayCommand]
-        private async Task DeleteProductAsync(Guid id)
+    [RelayCommand]
+    private async Task DeleteProductAsync(Guid id)
+    {
+        try
         {
-            try
+            await _repository.DeleteProduct(id);
+            var product = _fullProducts.FirstOrDefault(p => p.Id == id);
+            if (product != null)
             {
-                await _repository.DeleteProduct(id);
-                var product = _fullProducts.FirstOrDefault(p => p.Id == id);
-                if (product != null)
-                {
-                    _fullProducts.Remove(product);
-                    FilterByCategory(SelectedCategory);
-                }
+                _fullProducts.Remove(product);
+                // Update filtered products based on current category selection
+                FilterByMultipleCategories(SelectedCategories);
             }
+        }
         catch (Exception ex)
         {
             SetStatusMessage($"Error deleting product: {ex.Message}", isError: true);
@@ -416,6 +398,63 @@ public enum Mode
                 SelectedMaterials.Add(material);
             SelectedImage = new BitmapImage(new Uri(product.Image ?? string.Empty));
         }
+    }
+
+    [RelayCommand]
+    private void LoadAllProducts()
+    {
+        FilteredProducts.Clear();
+        foreach (var product in _fullProducts)
+            FilteredProducts.Add(product);
+    }
+
+    [RelayCommand]
+    private void FilterByMultipleCategories(IEnumerable<object> selectedItems)
+    {
+        if (selectedItems is ObservableCollection<Category> categories)
+        {
+            // If this is our own collection, use it directly
+            FilterByCategories(categories);
+            return;
+        }
+
+        // Otherwise, handle items coming from the UI control
+        SelectedCategories.Clear();
+
+        // If no categories are selected, show all products
+        if (selectedItems == null || !selectedItems.Any())
+        {
+            LoadAllProducts();
+            return;
+        }
+
+        // Add selected categories to our collection
+        foreach (var item in selectedItems)
+        {
+            if (item is Category category)
+                SelectedCategories.Add(category);
+        }
+
+        // Filter products based on selected categories
+        FilterByCategories(SelectedCategories);
+    }
+
+    // New helper method for filtering by categories
+    private void FilterByCategories(IEnumerable<Category> categories)
+    {
+        FilteredProducts.Clear();
+        
+        if (!categories.Any())
+        {
+            LoadAllProducts();
+            return;
+        }
+        
+        var categoryIds = categories.Select(c => c.Id).ToList();
+        var filteredProducts = _fullProducts.Where(p => categoryIds.Contains(p.CategoryId)).ToList();
+
+        foreach (var product in filteredProducts)
+            FilteredProducts.Add(product);
     }
     #endregion
 
@@ -520,13 +559,13 @@ public enum Mode
     }
     #endregion
 
-        public void Receive(PropertyChangedMessage<object> message)
+    public void Receive(PropertyChangedMessage<object> message)
+    {
+        if (message.Sender.GetType() == typeof(InventoryViewModel) &&
+            message.PropertyName == nameof(InventoryViewModel.Inventories))
         {
-            if (message.Sender.GetType() == typeof(InventoryViewModel) &&
-                message.PropertyName == nameof(InventoryViewModel.Inventories))
-            {
-                FullMaterials = (List<Inventory>)message.NewValue;
-                OnPropertyChanged(nameof(FullMaterials));
-            }
+            FullMaterials = (List<Inventory>)message.NewValue;
+            OnPropertyChanged(nameof(FullMaterials));
         }
     }
+}

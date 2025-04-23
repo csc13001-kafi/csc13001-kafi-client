@@ -1,7 +1,8 @@
 using System;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Contracts.Services;
 using kafi.Helpers;
-using kafi.Models;
 using kafi.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
@@ -19,7 +20,7 @@ namespace kafi.Views;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class MenuPage : Page
+public sealed partial class MenuPage : Page, IRecipient<ValueChangedMessage<string>>
 {
     private Window? _window;
     public MenuViewModel ViewModel { get; }
@@ -30,8 +31,8 @@ public sealed partial class MenuPage : Page
         this.InitializeComponent();
         var proxy = (BindingProxy)Resources["MenuProxy"];
         proxy.Data = ViewModel;
-        ViewModel.PropertyChanged += ViewModel_PropertyChanged!;
         _window = App.Services.GetRequiredService<IWindowService>().GetCurrentWindow();
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this);
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -41,6 +42,13 @@ public sealed partial class MenuPage : Page
             await ViewModel.LoadDataCommand.ExecuteAsync(null);
         if (ViewModel.LoadMaterialsCommand.CanExecute(null))
             await ViewModel.LoadMaterialsCommand.ExecuteAsync(null);
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        // Unregister from messages when navigating away
+        WeakReferenceMessenger.Default.Unregister<ValueChangedMessage<string>>(this);
+        base.OnNavigatedFrom(e);
     }
 
     private const int MinColumnSpacing = 20;
@@ -81,12 +89,8 @@ public sealed partial class MenuPage : Page
 
     private void Category_SelectionChanged(ItemsView sender, ItemsViewSelectionChangedEventArgs args)
     {
-        if (sender.SelectedItem is not Category category)
-            return;
-        if (category == ViewModel.SelectedCategory)
-            return;
-
-        ViewModel.FilterByCategoryCommand.Execute(category);
+        // Pass all selected items to the new multiple filter method
+        ViewModel.FilterByMultipleCategoriesCommand.Execute(sender.SelectedItems);
     }
 
     private void AddProductButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -113,29 +117,6 @@ public sealed partial class MenuPage : Page
             textBlock.Foreground = new SolidColorBrush(Colors.Black);
     }
 
-    private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ViewModel.IsPopupOpen))
-        {
-            if (ViewModel.IsPopupOpen)
-            {
-                AddPopup.Height = XamlRoot.Size.Height - 20;
-                var storyboard = new Storyboard();
-                var animation = new DoubleAnimation
-                {
-                    From = 300,
-                    To = 0,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(300)),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-                };
-                Storyboard.SetTarget(animation, PopupTranslateTransform);
-                Storyboard.SetTargetProperty(animation, "X");
-                storyboard.Children.Add(animation);
-                storyboard.Begin();
-            }
-        }
-    }
-
     private void ClosePopupButton_Click(object sender, RoutedEventArgs e)
     {
         var closeStoryboard = new Storyboard();
@@ -153,7 +134,7 @@ public sealed partial class MenuPage : Page
 
         closeStoryboard.Completed += (s, e) =>
         {
-            ViewModel.ClosePopupCommand.Execute(null);
+            AddPopup.IsOpen = false;
         };
         closeStoryboard.Begin();
     }
@@ -168,6 +149,39 @@ public sealed partial class MenuPage : Page
         finally
         {
             AddPopup.IsLightDismissEnabled = true;
+        }
+    }
+
+    private void AddPopup_Closed(object sender, object e)
+    {
+        ViewModel.DeleteAllInputCommand.Execute(null);
+    }
+
+    private void OpenPopup_Click(object sender, RoutedEventArgs e)
+    {
+        AddPopup.Height = XamlRoot.Size.Height - 20;
+        AddPopup.IsOpen = true;
+
+        var storyboard = new Storyboard();
+        var animation = new DoubleAnimation
+        {
+            From = 300,
+            To = 0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+
+        Storyboard.SetTarget(animation, PopupTranslateTransform);
+        Storyboard.SetTargetProperty(animation, "X");
+        storyboard.Children.Add(animation);
+        storyboard.Begin();
+    }
+
+    public void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "close")
+        {
+            ClosePopupButton_Click(this, new RoutedEventArgs());
         }
     }
 }
