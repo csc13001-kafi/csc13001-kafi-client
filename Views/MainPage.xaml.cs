@@ -61,13 +61,25 @@ namespace kafi.Views
 
         private void GenerateAnalyticButton_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            GenerateAnalyticButtonText.Foreground = new SolidColorBrush(Colors.Black);
+            // Apply black color to whichever text is currently visible
+            if (ViewModel.IsGeneratingReport)
+            {
+                LoadingReportText.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            else
+            {
+                NormalReportText.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            
             GenerateAnalyticButton.Background = new SolidColorBrush(Color.FromArgb(255, 42, 78, 49));
         }
 
         private void GenerateAnalyticButton_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
-            GenerateAnalyticButtonText.Foreground = new SolidColorBrush(Colors.White);
+            // Restore original colors for both TextBlocks
+            NormalReportText.Foreground = new SolidColorBrush(Colors.White);
+            LoadingReportText.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 224, 130)); // #FFE082
+            
             GenerateAnalyticButton.Background = App.Current.Resources["SecondaryBrush"] as SolidColorBrush;
         }
 

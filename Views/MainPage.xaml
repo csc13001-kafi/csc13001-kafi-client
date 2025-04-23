@@ -21,6 +21,8 @@
         <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
         <converters:NotEnabledConverter x:Key="NotEnabledConverter" />
         <converters:GeneratingReportTextConverter x:Key="GeneratingReportTextConverter" />
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:BoolToLoadingColorConverter x:Key="BoolToLoadingColorConverter" />
         <DataTemplate x:Key="DashboardItemsTemplate" x:DataType="vm:NumericReportItemViewModel">
             <ItemContainer>
                 <Grid
@@ -146,10 +148,28 @@
                                 Orientation="Horizontal"
                                 Spacing="10">
                                 <TextBlock
-                                    x:Name="GenerateAnalyticButtonText"
+                                    x:Name="NormalReportText"
                                     Foreground="White"
-                                    Text="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource GeneratingReportTextConverter}}" />
-                                <FontIcon FontSize="16" Glyph="&#xF0E3;" />
+                                    Text="Tạo báo cáo phân tích"
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}"/>
+                                
+                                <TextBlock
+                                    x:Name="LoadingReportText"
+                                    Foreground="#FFE082"
+                                    Text="Đang tạo báo cáo..."
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                
+                                <ProgressRing 
+                                    Width="16" 
+                                    Height="16"
+                                    IsActive="True"
+                                    Foreground="#FFE082"
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                
+                                <FontIcon 
+                                    FontSize="16" 
+                                    Glyph="&#xF0E3;" 
+                                    Visibility="{x:Bind ViewModel.IsGeneratingReport, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Reverse}"/>
                             </StackPanel>
                         </Button>
                         <ComboBox
