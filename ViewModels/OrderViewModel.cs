@@ -58,6 +58,7 @@ public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChang
         try
         {
             _orders = [.. await _orderRepository.GetAll()];
+            _orders = [.. _orders.OrderByDescending(o => o.Time)];
             UpdatePagedView();
         }
         catch (Exception ex)
@@ -136,11 +137,26 @@ public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChang
         UpdatePagedView();
     }
 
-    public void Receive(ValueChangedMessage<string> message)
+    public async void Receive(ValueChangedMessage<string> message)
     {
         if (message.Value == "ordercreated")
         {
-            LoadDataAsync().ConfigureAwait(false);
+            var latestOrders = await _orderRepository.GetAll();
+
+            var existingIds = _orders.Select(o => o.Id).ToHashSet();
+            var newOrders = latestOrders.Where(o => !existingIds.Contains(o.Id)).ToList();
+
+            if (newOrders.Any())
+            {
+                var sortedNewOrders = newOrders.OrderByDescending(o => o.Time);
+                _orders.InsertRange(0, sortedNewOrders);
+                
+                UpdatePagedView();
+            }
+            else
+            {
+                await LoadDataAsync();
+            }
         }
     }
 }

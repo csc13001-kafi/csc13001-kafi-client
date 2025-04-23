@@ -10,46 +10,13 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:RoleToStringConverter x:Key="RoleToStringConverter" />
+        <converters:NotVisibilityConverter x:Key="NotVisibilityConverter" />
     </UserControl.Resources>
     <Grid Padding="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-
-        <!--  Search Area  -->
-        <Border
-            Width="700"
-            Height="44"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Background="#DBDBDB"
-            CornerRadius="18">
-            <Grid>
-                <AutoSuggestBox
-                    x:Name="SearchBox"
-                    Width="650"
-                    Height="34"
-                    Margin="10,0,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    FontSize="16"
-                    PlaceholderText="Tìm kiếm...">
-                    <AutoSuggestBox.Resources>
-                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#DBDBDB" />
-                        <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#DBDBDB" />
-                        <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#DBDBDB" />
-                    </AutoSuggestBox.Resources>
-                </AutoSuggestBox>
-                <FontIcon
-                    Margin="0,0,20,0"
-                    HorizontalAlignment="Right"
-                    Glyph="&#xF78B;" />
-            </Grid>
-        </Border>
 
         <!--  Right Side (Cart, Notification, Avatar, Name)  -->
         <StackPanel
@@ -62,7 +29,8 @@
                 Height="30"
                 Padding="0"
                 BorderThickness="0"
-                Click="NavigateToMenuPage_Click">
+                Click="NavigateToMenuPage_Click"
+                Visibility="{x:Bind IsManager, Converter={StaticResource NotVisibilityConverter}}">
                 <ImageIcon HorizontalAlignment="Center" Source="/Assets/IconShoppingBag.svg" />
             </Button>
             <StackPanel

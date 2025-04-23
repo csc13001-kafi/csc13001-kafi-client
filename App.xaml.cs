@@ -81,6 +81,8 @@ public partial class App : Application
         services.AddSingleton<IInventoryRepository, InventoryRepository>();
         services.AddSingleton<IInfoDao, RestInfoDao>();
         services.AddSingleton<IInfoRepository, InfoRepository>();
+        services.AddSingleton<IAnalyticsDao, RestAnalyticsDao>();
+        services.AddSingleton<IAnalyticsRepository, AnalyticsRepository>();
 
         // Viewmodels
         services.AddTransient<LoginViewModel>();
@@ -92,6 +94,7 @@ public partial class App : Application
         services.AddTransient<InventoryViewModel>();
         services.AddTransient<TableViewModel>();
         services.AddTransient<ChatViewModel>();
+        services.AddTransient<MainViewModel>();
 
         Services = services.BuildServiceProvider();
     }

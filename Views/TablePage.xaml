@@ -45,7 +45,18 @@
             Source="{x:Bind ViewModel.GroupedSelectedProducts, Mode=OneWay}" />
     </Page.Resources>
     <Grid>
-        <Grid Margin="0,0,10,0" ColumnSpacing="10">
+        <!--  Loading indicator  -->
+        <ProgressRing
+            Width="50"
+            Height="50"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+
+        <Grid
+            Margin="0,0,10,0"
+            ColumnSpacing="10"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource NotVisibilityConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -55,14 +66,6 @@
                 <ColumnDefinition Width="6*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Loading indicator  -->
-            <ProgressRing
-                Grid.Row="1"
-                Width="50"
-                Height="50"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
 
             <SelectorBar
                 x:Name="OrderSelectorBar"
