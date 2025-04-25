@@ -6,84 +6,78 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace kafi.Services
+namespace kafi.Services;
+
+public class WindowService(INavigationService navigationService) : IWindowService
 {
-    public class WindowService : IWindowService
+    private readonly INavigationService _navigationService = navigationService;
+    private readonly List<Window> _activeWindows = new();
+    private readonly object _windowsLock = new();
+    private Window? _currentWindow;
+
+    public void ShowMainWindow()
     {
-        private readonly INavigationService _navigationService;
-        private readonly List<Window> _activeWindows = new();
-        private readonly object _windowsLock = new();
-        private Window _currentWindow;
-
-        public WindowService(INavigationService navigationService)
+        MainWindow window = App.Services.GetRequiredService<MainWindow>();
+        var frame = window.Content as Frame;
+        if (frame == null)
         {
-            _navigationService = navigationService;
+            frame = new Frame();
+            window.Content = frame;
         }
+        _navigationService.Initialize(frame);
+        _navigationService.NavigateTo(typeof(ShellPage));
+        ActivateWindow(window);
+        CloseWindowOfType<LoginWindow>();
+    }
 
-        public void ShowMainWindow()
+    public void ShowLoginWindow()
+    {
+        LoginWindow window = App.Services.GetRequiredService<LoginWindow>();
+        ActivateWindow(window);
+        CloseWindowOfType<MainWindow>();
+    }
+
+    public Window GetCurrentWindow()
+    {
+        lock (_windowsLock)
         {
-            MainWindow window = App.Services.GetRequiredService<MainWindow>();
-            var frame = window.Content as Frame;
-            if (frame == null)
+            return _currentWindow!;
+        }
+    }
+
+    private void ActivateWindow(Window window)
+    {
+        lock (_windowsLock)
+        {
+            window.Activate();
+            window.Closed += Window_Closed;
+            _activeWindows.Add(window);
+            _currentWindow = window;
+        }
+    }
+
+    private void CloseWindowOfType<TWindow>() where TWindow : Window
+    {
+        lock (_windowsLock)
+        {
+            foreach (var window in _activeWindows.OfType<TWindow>().ToList())
             {
-                frame = new Frame();
-                window.Content = frame;
-            }
-            _navigationService.Initialize(frame);
-            _navigationService.NavigateTo(typeof(ShellPage));
-            ActivateWindow(window);
-            CloseWindowOfType<LoginWindow>();
-        }
-
-        public void ShowLoginWindow()
-        {
-            LoginWindow window = App.Services.GetRequiredService<LoginWindow>();
-            ActivateWindow(window);
-            CloseWindowOfType<MainWindow>();
-        }
-
-        public Window GetCurrentWindow()
-        {
-            lock (_windowsLock)
-            {
-                return _currentWindow;
-            }
-        }
-
-        private void ActivateWindow(Window window)
-        {
-            lock (_windowsLock)
-            {
-                window.Activate();
-                window.Closed += Window_Closed;
-                _activeWindows.Add(window);
-                _currentWindow = window;
+                window.Close();
             }
         }
+    }
 
-        private void CloseWindowOfType<TWindow>() where TWindow : Window
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        lock (_windowsLock)
         {
-            lock (_windowsLock)
+            if (sender is Window window)
             {
-                foreach (var window in _activeWindows.OfType<TWindow>().ToList())
+                window.Closed -= Window_Closed;
+                _activeWindows.Remove(window);
+                if (_currentWindow == window)
                 {
-                    window.Close();
-                }
-            }
-        }
-
-        private void Window_Closed(object sender, WindowEventArgs args)
-        {
-            lock (_windowsLock)
-            {
-                if (sender is Window window)
-                {
-                    window.Closed -= Window_Closed;
-                    _activeWindows.Remove(window);
-                    if (_currentWindow == window)
-                    {
-                        _currentWindow = _activeWindows.LastOrDefault();
-                    }
+                    _currentWindow = _activeWindows.LastOrDefault();
                 }
             }
         }

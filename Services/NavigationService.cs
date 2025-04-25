@@ -2,30 +2,17 @@
 using kafi.Contracts.Services;
 using Microsoft.UI.Xaml.Controls;
 
-namespace kafi.Service
+namespace kafi.Services;
+
+public class NavigationService : INavigationService
 {
-    public class NavigationService : INavigationService
-    {
-        private Frame _frame;
+    private Frame? _frame;
 
-        public void Initialize(Frame frame)
-        {
-            _frame = frame;
-        }
+    public void Initialize(Frame frame) => _frame = frame;
 
-        public void GoBack()
-        {
-            _frame.GoBack();
-        }
+    public void GoBack() => _frame!.GoBack();
 
-        public void NavigateTo(Type sourcePage)
-        {
-            _frame.Navigate(sourcePage);
-        }
+    public void NavigateTo(Type sourcePage) => _frame!.Navigate(sourcePage);
 
-        public void NavigateTo(Type sourcePage, object parameter)
-        {
-            _frame.Navigate(sourcePage, parameter);
-        }
-    }
+    public void NavigateTo(Type sourcePage, object parameter) => _frame!.Navigate(sourcePage, parameter);
 }

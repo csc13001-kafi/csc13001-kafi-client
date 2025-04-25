@@ -5,119 +5,158 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Models;
 using kafi.Repositories;
 
-namespace kafi.ViewModels
+namespace kafi.ViewModels;
+
+public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
 {
-    public partial class OrderViewModel(IOrderRepository orderRepository) : ObservableObject
+    private readonly IOrderRepository _orderRepository;
+    private const int DefaultPageSize = 10;
+
+    private List<Order> _orders = [];
+
+    public OrderViewModel(IOrderRepository orderRepository)
     {
-        private readonly IOrderRepository _orderRepository = orderRepository;
-        private const int DefaultPageSize = 10;
+        _orderRepository = orderRepository;
+        IsActive = true;
+    }
 
-        private List<Order> _orders = [];
+    public ObservableCollection<Order> Orders { get; set; } = [];
 
-        public ObservableCollection<Order> Orders { get; set; } = [];
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; }
 
-        [ObservableProperty]
-        private bool isLoading;
+    [ObservableProperty]
+    public partial bool IsBillLoading { get; set; }
 
-        [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
-        [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
-        private int currentPage = 1;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(GoToNextPageCommand))]
+    public partial int CurrentPage { get; set; } = 1;
 
-        [ObservableProperty]
-        private int totalPages = 1;
+    [ObservableProperty]
+    public partial int TotalPages { get; set; } = 1;
 
-        [ObservableProperty]
-        private int pageSize = DefaultPageSize;
+    [ObservableProperty]
+    public partial int PageSize { get; set; } = DefaultPageSize;
 
-        [ObservableProperty]
-        private int totalItems = 0;
+    [ObservableProperty]
+    public partial int TotalItems { get; set; } = 0;
 
-        [ObservableProperty]
-        private Order selectedOrder;
+    [ObservableProperty]
+    public partial Order SelectedOrder { get; set; }
 
-        private bool CanLoadData => !Orders.Any();
-        [RelayCommand(CanExecute = nameof(CanLoadData))]
-        private async Task LoadDataAsync()
+    private bool CanLoadData => !Orders.Any();
+    [RelayCommand(CanExecute = nameof(CanLoadData))]
+    private async Task LoadDataAsync()
+    {
+        IsLoading = true;
+        try
         {
-            IsLoading = true;
-            try
+            _orders = [.. await _orderRepository.GetAll()];
+            _orders = [.. _orders.OrderByDescending(o => o.Time)];
+            UpdatePagedView();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private bool CanViewOrder(Guid id) => id != Guid.Empty;
+    [RelayCommand(CanExecute = nameof(CanViewOrder))]
+    private async Task ViewOrderAsync(Guid id)
+    {
+        IsBillLoading = true;
+        try
+        {
+            SelectedOrder = await _orderRepository.GetById(id)!;
+            if (SelectedOrder == null)
             {
-                _orders = [.. await _orderRepository.GetAll()];
+                System.Diagnostics.Debug.WriteLine("Order not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading order: {ex.Message}");
+        }
+        finally
+        {
+            IsBillLoading = false;
+        }
+    }
+
+    private void UpdatePagedView()
+    {
+        TotalItems = _orders.Count;
+        CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
+
+        TotalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
+        TotalPages = TotalPages == 0 ? 1 : TotalPages;
+
+        var pagedItems = _orders
+            .Skip((CurrentPage - 1) * PageSize)
+            .Take(PageSize);
+
+        Orders.Clear();
+        foreach (var item in pagedItems)
+        {
+            Orders.Add(item);
+        }
+
+        GoToPreviousPageCommand.NotifyCanExecuteChanged();
+        GoToNextPageCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanGoToPreviousPage => CurrentPage > 1;
+    [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
+    private void GoToPreviousPage()
+    {
+        CurrentPage--;
+        UpdatePagedView();
+    }
+
+    private bool CanGoToNextPage => CurrentPage < TotalPages;
+    [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
+    private void GoToNextPage()
+    {
+        CurrentPage++;
+        UpdatePagedView();
+    }
+
+    partial void OnPageSizeChanged(int value)
+    {
+        UpdatePagedView();
+    }
+
+    public async void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "ordercreated")
+        {
+            var latestOrders = await _orderRepository.GetAll();
+
+            var existingIds = _orders.Select(o => o.Id).ToHashSet();
+            var newOrders = latestOrders.Where(o => !existingIds.Contains(o.Id)).ToList();
+
+            if (newOrders.Any())
+            {
+                var sortedNewOrders = newOrders.OrderByDescending(o => o.Time);
+                _orders.InsertRange(0, sortedNewOrders);
+                
                 UpdatePagedView();
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading data: {ex.Message}");
+                await LoadDataAsync();
             }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        private bool CanViewOrder(Guid id) => id != Guid.Empty;
-        [RelayCommand(CanExecute = nameof(CanViewOrder))]
-        private async Task ViewOrderAsync(Guid id)
-        {
-            try
-            {
-                SelectedOrder = await _orderRepository.GetById(id);
-                if (SelectedOrder == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("Order not found");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error loading order: {ex.Message}");
-            }
-        }
-
-        private void UpdatePagedView()
-        {
-            TotalItems = _orders.Count;
-            CurrentPage = Math.Clamp(CurrentPage, 1, TotalPages);
-
-            TotalPages = (int)Math.Ceiling((double)TotalItems / PageSize);
-            TotalPages = TotalPages == 0 ? 1 : TotalPages;
-
-            var pagedItems = _orders
-                .Skip((CurrentPage - 1) * PageSize)
-                .Take(PageSize);
-
-            Orders.Clear();
-            foreach (var item in pagedItems)
-            {
-                Orders.Add(item);
-            }
-
-            GoToPreviousPageCommand.NotifyCanExecuteChanged();
-            GoToNextPageCommand.NotifyCanExecuteChanged();
-        }
-
-        private bool CanGoToPreviousPage => CurrentPage > 1;
-        [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
-        private void GoToPreviousPage()
-        {
-            CurrentPage--;
-            UpdatePagedView();
-        }
-
-        private bool CanGoToNextPage => CurrentPage < TotalPages;
-        [RelayCommand(CanExecute = nameof(CanGoToNextPage))]
-        private void GoToNextPage()
-        {
-            CurrentPage++;
-            UpdatePagedView();
-        }
-
-        partial void OnPageSizeChanged(int value)
-        {
-            UpdatePagedView();
         }
     }
 }

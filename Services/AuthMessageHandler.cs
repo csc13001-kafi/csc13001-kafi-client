@@ -6,88 +6,93 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using kafi.Contracts.Services;
-using kafi.Models.Authentication;
+using kafi.Models;
 
-namespace kafi.Service
+namespace kafi.Services;
+
+public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage, IWindowService windowService) : DelegatingHandler
 {
-    public partial class AuthMessageHandler(ISecureTokenStorage secureTokenStorage, IWindowService windowService) : DelegatingHandler
+    private readonly ISecureTokenStorage _tokenStorage = secureTokenStorage;
+    private readonly IWindowService _windowService = windowService;
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        private readonly ISecureTokenStorage _tokenStorage = secureTokenStorage;
-        private readonly IWindowService _windowService = windowService;
+        var (accessToken, refreshToken) = _tokenStorage.GetTokens();
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        if (!string.IsNullOrEmpty(accessToken))
         {
-            var (accessToken, refreshToken) = _tokenStorage.GetTokens();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        }
+        var response = await base.SendAsync(request, cancellationToken);
 
-            if (!string.IsNullOrEmpty(accessToken))
+        Debug.WriteLine($"Initial response: {response.StatusCode}");
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            if (!string.IsNullOrEmpty(refreshToken))
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            }
-            var response = await base.SendAsync(request, cancellationToken);
-
-            Debug.WriteLine($"Initial response: {response.StatusCode}");
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                if (!string.IsNullOrEmpty(refreshToken))
+                bool refreshed = await TryRefreshTokenAsync(refreshToken);
+                Debug.WriteLine($"Refresh succeeded: {refreshed}");
+                if (refreshed)
                 {
-                    bool refreshed = await TryRefreshTokenAsync(refreshToken);
-                    Debug.WriteLine($"Refresh succeeded: {refreshed}");
-                    if (refreshed)
-                    {
-                        var clonedRequest = await CloneHttpRequestMessageAsync(request);
-                        (accessToken, _) = _tokenStorage.GetTokens();
-                        Debug.WriteLine($"Retrying with accessToken: {accessToken}");
-                        clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                        response = await base.SendAsync(clonedRequest, cancellationToken);
-                        Debug.WriteLine($"Retry response: {response.StatusCode}");
-                    }
+                    var clonedRequest = await CloneHttpRequestMessageAsync(request);
+                    (accessToken, _) = _tokenStorage.GetTokens();
+                    Debug.WriteLine($"Retrying with accessToken: {accessToken}");
+                    clonedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    response = await base.SendAsync(clonedRequest, cancellationToken);
+                    Debug.WriteLine($"Retry response: {response.StatusCode}");
+                }
+                else
+                {
+                    Debug.WriteLine("Refresh token expired or invalid.");
+                    _tokenStorage.ClearTokens();
+                    _windowService.ShowLoginWindow();
                 }
             }
-            return response;
         }
+        return response;
+    }
 
-        private async Task<bool> TryRefreshTokenAsync(string refreshToken)
+    private async Task<bool> TryRefreshTokenAsync(string refreshToken)
+    {
+        using var client = new HttpClient();
+        client.BaseAddress = new Uri(App.Configuration["ApiSettings:BaseUrl"] ?? throw new InvalidOperationException("API base URL is not configured in appsettings.json"));
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshToken);
+        try
         {
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost:8080/");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshToken);
-            try
+            var response = await client.GetAsync("auth/refresh-token");
+            if (response.IsSuccessStatusCode)
             {
-                var response = await client.GetAsync("auth/refresh-token");
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent);
-                    _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshToken);
-                    return true;
-                }
-                return false;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var refreshResponse = JsonSerializer.Deserialize<RefreshTokenResponse>(responseContent)!;
+                _tokenStorage.SaveTokens(refreshResponse.AccessToken, refreshToken);
+                return true;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to refresh token, error {ex}");
-                return false;
-            }
+            return false;
         }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to refresh token, error {ex}");
+            return false;
+        }
+    }
 
-        private static async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage request)
+    private static async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage request)
+    {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri);
+        foreach (var header in request.Headers)
         {
-            var clone = new HttpRequestMessage(request.Method, request.RequestUri);
-            foreach (var header in request.Headers)
-            {
-                clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-            if (request.Content != null)
-            {
-                var contentBytes = await request.Content.ReadAsByteArrayAsync();
-                clone.Content = new ByteArrayContent(contentBytes);
-                foreach (var header in request.Content.Headers)
-                {
-                    clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
-                }
-            }
-            clone.Version = request.Version;
-            return clone;
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
+        if (request.Content != null)
+        {
+            var contentBytes = await request.Content.ReadAsByteArrayAsync();
+            clone.Content = new ByteArrayContent(contentBytes);
+            foreach (var header in request.Content.Headers)
+            {
+                clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+        clone.Version = request.Version;
+        return clone;
     }
 }

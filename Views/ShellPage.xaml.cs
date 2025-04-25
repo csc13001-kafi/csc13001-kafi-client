@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using kafi.Models;
 using kafi.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -19,7 +20,7 @@ public sealed partial class ShellPage : Page
     public ShellPage()
     {
         this.InitializeComponent();
-        ViewModel = (ShellViewModel)App.Services.GetService(typeof(ShellViewModel))!;
+        ViewModel = App.Services.GetRequiredService<ShellViewModel>();
         ContentFrame.Navigate(typeof(MainPage));
         PageHeader.NavigateToPage = new Action<Type>((pageType) => ContentFrame.Navigate(pageType));
     }
@@ -28,7 +29,7 @@ public sealed partial class ShellPage : Page
     {
         if (args.SelectedItem is NavItem selectedItem)
         {
-            var selectedTag = selectedItem.Tag?.ToString();
+            var selectedTag = selectedItem.Tag!.ToString();
             switch (selectedTag)
             {
                 case "MainPage":
@@ -105,5 +106,37 @@ public sealed partial class ShellPage : Page
             await Task.Delay(500);
             header.Visibility = Visibility.Collapsed;
         }
+    }
+
+    private void Overlay_Loaded(object sender, RoutedEventArgs e)
+    {
+        Overlay.Width = this.XamlRoot.Size.Width;
+        Overlay.Height = this.XamlRoot.Size.Height;
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        UpdateOverlaySize();
+    }
+
+    private void UpdateOverlaySize()
+    {
+        if (Overlay != null)
+        {
+            Overlay.Width = this.XamlRoot.Size.Width;
+            Overlay.Height = this.XamlRoot.Size.Height;
+        }
+    }
+
+    private void NavigationViewControl_PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs args)
+    {
+        LargePaneContent.Visibility = Visibility.Collapsed;
+        MediumPaneContent.Visibility = Visibility.Visible;
+    }
+
+    private void NavigationViewControl_PaneOpening(NavigationView sender, object args)
+    {
+        LargePaneContent.Visibility = Visibility.Visible;
+        MediumPaneContent.Visibility = Visibility.Collapsed;
     }
 }

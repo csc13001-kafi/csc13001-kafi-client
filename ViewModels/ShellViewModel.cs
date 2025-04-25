@@ -10,14 +10,14 @@ using kafi.Models;
 using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace kafi.ViewModels;
-public partial class ShellViewModel : ObservableObject
+
+public partial class ShellViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>, IRecipient<ValueChangedMessage<User>>
 {
     private readonly IAuthService _authService;
     private readonly IWindowService _windowService;
-    private readonly ISecureTokenStorage _secureTokenStorage;
 
     public string Username => _authService.CurrentUser?.Name ?? "Unknown User";
-    public BitmapImage ProfileImage
+    public BitmapImage? ProfileImage
     {
         get
         {
@@ -31,11 +31,13 @@ public partial class ShellViewModel : ObservableObject
     public ObservableCollection<NavItem> NavItems;
     public ObservableCollection<NavItem> FooterItems;
 
+    [ObservableProperty]
+    public partial bool IsOverlayVisible { get; set; } = false;
+
     public ShellViewModel(IAuthService authService, IWindowService windowService, ISecureTokenStorage secureTokenStorage)
     {
         _authService = authService;
         _windowService = windowService;
-        _secureTokenStorage = secureTokenStorage;
 
         NavItems = [];
         FooterItems =
@@ -62,11 +64,7 @@ public partial class ShellViewModel : ObservableObject
             NavItems.Add(new() { Icon = "/Assets/NavInfoIcon.svg", Content = "Thông tin", Tag = "InfoPage" });
         }
 
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<User>>(this, (r, m) =>
-        {
-            OnPropertyChanged(nameof(Username));
-            OnPropertyChanged(nameof(ProfileImage));
-        });
+        IsActive = true;
     }
 
     [RelayCommand]
@@ -76,4 +74,24 @@ public partial class ShellViewModel : ObservableObject
         _windowService.ShowLoginWindow();
     }
 
+    public void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "showoverlay")
+        {
+            IsOverlayVisible = true;
+        }
+        else if (message.Value == "hideoverlay")
+        {
+            IsOverlayVisible = false;
+        }
+    }
+
+    public void Receive(ValueChangedMessage<User> message)
+    {
+        if (message.Value != null)
+        {
+            OnPropertyChanged(nameof(Username));
+            OnPropertyChanged(nameof(ProfileImage));
+        }
+    }
 }

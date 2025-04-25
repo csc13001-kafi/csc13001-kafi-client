@@ -4,39 +4,38 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
-namespace kafi.Converters
+namespace kafi.Converters;
+
+public partial class StatusToBackgroundConverter : IValueConverter
 {
-    public class StatusToBackgroundConverter : IValueConverter
+    public object Convert(object value, Type targetType, object parameter, string language)
     {
-        public object Convert(object value, Type targetType, object parameter, string language)
+        if (value is int currentStock)
         {
-            if (value is int currentStock)
+            value = currentStock switch
             {
-                value = currentStock switch
-                {
-                    > 0 => "InStock",
-                    < 20 => "OutOfStock",
-                };
-            }
-
-            switch (value)
-            {
-                case "Cash" or "InStock":
-                    return new SolidColorBrush(Color.FromArgb(255, 230, 246, 233));
-                case "QR":
-                    return new SolidColorBrush(Color.FromArgb(38, 255, 176, 116));
-                case "OutOfStock":
-                    return new SolidColorBrush(Color.FromArgb(255, 246, 230, 240));
-                default:
-                    break;
-            }
-
-            return new SolidColorBrush(Colors.Transparent);
+                > 0 => "InStock",
+                < 20 => "OutOfStock",
+            };
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        switch (value.ToString()?.ToLower())
         {
-            throw new NotImplementedException();
+            case "cash" or "instock":
+                return new SolidColorBrush(Color.FromArgb(255, 230, 246, 233));
+            case "qr":
+                return new SolidColorBrush(Color.FromArgb(38, 255, 176, 116));
+            case "outofstock":
+                return new SolidColorBrush(Color.FromArgb(255, 246, 230, 240));
+            default:
+                break;
         }
+
+        return new SolidColorBrush(Colors.Transparent);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
     }
 }

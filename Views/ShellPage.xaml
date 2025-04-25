@@ -8,79 +8,91 @@
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:kafi.Models"
+    SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
-    <NavigationView
-        x:Name="NavigationViewControl"
-        FooterMenuItemsSource="{x:Bind ViewModel.FooterItems}"
-        IsBackButtonVisible="Collapsed"
-        IsPaneToggleButtonVisible="False"
-        IsSettingsVisible="False"
-        MenuItemsSource="{x:Bind ViewModel.NavItems}"
-        OpenPaneLength="280"
-        SelectionChanged="OnNavigationViewSelectionChanged">
-        <NavigationView.Background>
-            <ImageBrush ImageSource="/Assets/Bg.png" />
-        </NavigationView.Background>
-        <NavigationView.PaneCustomContent>
-            <Grid>
-                <StackPanel
-                    x:Name="LargePaneContent"
-                    Margin="0,10"
-                    HorizontalAlignment="Center"
-                    Visibility="Collapsed">
+    <Grid>
+        <NavigationView
+            x:Name="NavigationViewControl"
+            FooterMenuItemsSource="{x:Bind ViewModel.FooterItems}"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
+            IsSettingsVisible="False"
+            MenuItemsSource="{x:Bind ViewModel.NavItems}"
+            OpenPaneLength="280"
+            PaneClosing="NavigationViewControl_PaneClosing"
+            PaneOpening="NavigationViewControl_PaneOpening"
+            SelectionChanged="OnNavigationViewSelectionChanged">
+            <NavigationView.Background>
+                <ImageBrush ImageSource="/Assets/Bg.png" />
+            </NavigationView.Background>
+            <NavigationView.PaneCustomContent>
+                <Grid>
+                    <StackPanel
+                        x:Name="LargePaneContent"
+                        Margin="0,10"
+                        HorizontalAlignment="Center"
+                        Visibility="Collapsed">
+                        <ImageIcon
+                            Width="40"
+                            Height="40"
+                            Source="/Assets/Kafi.png" />
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontFamily="{StaticResource ClimateCrisis}"
+                            FontSize="30"
+                            Text="Kafi" />
+                        <TextBlock
+                            Margin="0,0,0,10"
+                            FontFamily="{StaticResource SeoulHangangCL}"
+                            FontSize="20"
+                            Text="POS System" />
+                    </StackPanel>
                     <ImageIcon
+                        x:Name="MediumPaneContent"
                         Width="40"
                         Height="40"
-                        Source="/Assets/Kafi.png" />
-                    <TextBlock
+                        Margin="4,10,0,20"
                         HorizontalAlignment="Center"
-                        FontFamily="{StaticResource ClimateCrisis}"
-                        FontSize="30"
-                        Text="Kafi" />
-                    <TextBlock
-                        Margin="0,0,0,10"
-                        FontFamily="{StaticResource SeoulHangangCL}"
-                        FontSize="20"
-                        Text="POS System" />
-                </StackPanel>
-                <ImageIcon
-                    x:Name="MediumPaneContent"
-                    Width="40"
-                    Height="40"
-                    Margin="4,10,0,20"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Source="/Assets/Kafi.png"
-                    Visibility="Visible" />
-            </Grid>
-        </NavigationView.PaneCustomContent>
-        <NavigationView.MenuItemTemplate>
-            <DataTemplate x:DataType="models:NavItem">
-                <NavigationViewItem
-                    Padding="0,10,0,10"
-                    Content="{x:Bind Content}"
-                    Tag="{x:Bind Tag}">
-                    <NavigationViewItem.Icon>
-                        <ImageIcon Source="{x:Bind Icon}" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </DataTemplate>
-        </NavigationView.MenuItemTemplate>
-        <!--  Main Content  -->
-        <Grid Margin="20" RowSpacing="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+                        VerticalAlignment="Center"
+                        Source="/Assets/Kafi.png"
+                        Visibility="Visible" />
 
-            <controls:HeaderControl
-                x:Name="PageHeader"
-                Grid.Row="0"
-                IsManager="{x:Bind ViewModel.IsManager, Mode=OneWay}"
-                ProfileImage="{x:Bind ViewModel.ProfileImage, Mode=OneWay}"
-                Username="{x:Bind ViewModel.Username, Mode=OneWay}" />
-            <Frame x:Name="ContentFrame" Grid.Row="1" />
-        </Grid>
+                </Grid>
+            </NavigationView.PaneCustomContent>
+            <NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="models:NavItem">
+                    <NavigationViewItem
+                        Padding="0,10,0,10"
+                        Content="{x:Bind Content}"
+                        Tag="{x:Bind Tag}">
+                        <NavigationViewItem.Icon>
+                            <ImageIcon Source="{x:Bind Icon}" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </NavigationView.MenuItemTemplate>
+            <!--  Main Content  -->
+            <Grid Margin="20" RowSpacing="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <controls:HeaderControl
+                    x:Name="PageHeader"
+                    Grid.Row="0"
+                    IsManager="{x:Bind ViewModel.IsManager, Mode=OneWay}"
+                    ProfileImage="{x:Bind ViewModel.ProfileImage, Mode=OneWay}"
+                    Username="{x:Bind ViewModel.Username, Mode=OneWay}" />
+                <Frame x:Name="ContentFrame" Grid.Row="1" />
+            </Grid>
+        </NavigationView>
+        <Grid
+            x:Name="Overlay"
+            Background="#32000000"
+            Canvas.ZIndex="1"
+            Loaded="Overlay_Loaded"
+            Visibility="{x:Bind ViewModel.IsOverlayVisible, Mode=OneWay}" />
+        <controls:ChatWithBotControl Canvas.ZIndex="1" Visibility="{x:Bind ViewModel.IsManager, Mode=OneWay}" />
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState>
@@ -90,9 +102,11 @@
                     <VisualState.Setters>
                         <Setter Target="LargePaneContent.Visibility" Value="Visible" />
                         <Setter Target="MediumPaneContent.Visibility" Value="Collapsed" />
+                        <Setter Target="NavigationViewControl.IsPaneToggleButtonVisible" Value="True" />
+                        <Setter Target="NavigationViewControl.PaneDisplayMode" Value="Left" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
-    </NavigationView>
+    </Grid>
 </Page>

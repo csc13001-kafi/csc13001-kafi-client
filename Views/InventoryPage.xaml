@@ -9,8 +9,6 @@
     xmlns:helpers="using:kafi.Helpers"
     xmlns:local="using:kafi.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:kafi.ViewModels"
-    xmlns:wctprimitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:BindingProxy x:Key="InventoryProxy" Data="{x:Bind ViewModel}" />

@@ -1,9 +1,8 @@
-﻿namespace kafi.Contracts.Services
+﻿namespace kafi.Contracts.Services;
+
+public interface ISecureTokenStorage
 {
-    public interface ISecureTokenStorage
-    {
-        void SaveTokens(string accessToken, string refreshToken);
-        (string accessToken, string refreshToken) GetTokens();
-        void ClearTokens();
-    }
+    void SaveTokens(string accessToken, string refreshToken);
+    (string accessToken, string refreshToken) GetTokens();
+    void ClearTokens();
 }
