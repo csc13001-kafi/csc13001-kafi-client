@@ -591,15 +591,15 @@
                                             <Setter Property="CornerRadius" Value="10" />
                                         </Style>
                                     </Grid.Resources>
-                                    <TextBox Header="Tên" Text="{x:Bind ViewModel.SelectedUser.Name, Mode=TwoWay}" />
+                                    <TextBox Header="Tên" Text="{x:Bind ViewModel.SelectedUser.Name, Mode=OneWay}" />
                                     <TextBox
                                         Grid.Column="1"
                                         Header="Email"
-                                        Text="{x:Bind ViewModel.SelectedUser.Email, Mode=TwoWay}" />
+                                        Text="{x:Bind ViewModel.SelectedUser.Email, Mode=OneWay}" />
                                     <TextBox
                                         Grid.Row="1"
                                         Header="Số điện thoại"
-                                        Text="{x:Bind ViewModel.SelectedUser.Phone, Mode=TwoWay}" />
+                                        Text="{x:Bind ViewModel.SelectedUser.Phone, Mode=OneWay}" />
                                     <CalendarDatePicker
                                         x:Name="EditBirthdatePicker"
                                         Grid.Row="1"
@@ -608,7 +608,7 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         CornerRadius="10"
-                                        Date="{x:Bind ViewModel.SelectedUser.Birthdate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}, Mode=TwoWay}"
+                                        Date="{x:Bind ViewModel.SelectedUser.Birthdate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}, Mode=OneWay}"
                                         DateFormat="{}{day.integer}/{month.integer}/{year.full}"
                                         FontFamily="{StaticResource LexendMedium}"
                                         FontSize="16"
@@ -620,7 +620,7 @@
                                     <TextBox
                                         Grid.Row="2"
                                         Header="Địa chỉ"
-                                        Text="{x:Bind ViewModel.SelectedUser.Address, Mode=TwoWay}" />
+                                        Text="{x:Bind ViewModel.SelectedUser.Address, Mode=OneWay}" />
                                 </Grid>
                                 <TextBlock
                                     FontFamily="{StaticResource LexendMedium}"
@@ -658,15 +658,16 @@
                                     <TextBox
                                         x:Name="RoleTextBox"
                                         Header="Vai trò"
-                                        Text="{x:Bind ViewModel.SelectedUser.Role, Mode=TwoWay}" />
+                                        Text="{x:Bind ViewModel.SelectedUser.Role, Mode=OneWay}" />
                                     <TextBox
                                         Grid.Column="1"
+                                        Width="{Binding ElementName=EndShiftTimePicker, Path=ActualWidth}"
+                                        HorizontalAlignment="Left"
                                         Header="Lương"
-                                        Text="{x:Bind ViewModel.SelectedUser.Salary, Mode=TwoWay}" />
+                                        Text="{x:Bind ViewModel.EditedSalary, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <TimePicker
                                         x:Name="StartShiftTimePicker"
                                         Grid.Row="1"
-                                        HorizontalAlignment="Stretch"
                                         Background="Transparent"
                                         BorderThickness="0"
                                         ClockIdentifier="24HourClock"
@@ -695,7 +696,6 @@
                                         x:Name="EndShiftTimePicker"
                                         Grid.Row="1"
                                         Grid.Column="1"
-                                        HorizontalAlignment="Stretch"
                                         Background="Transparent"
                                         BorderThickness="0"
                                         ClockIdentifier="24HourClock"

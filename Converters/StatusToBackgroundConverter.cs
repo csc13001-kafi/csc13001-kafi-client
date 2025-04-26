@@ -14,8 +14,8 @@ public partial class StatusToBackgroundConverter : IValueConverter
         {
             value = currentStock switch
             {
-                > 0 => "InStock",
-                < 20 => "OutOfStock",
+                >= 50 => "InStock",
+                < 50 => "OutOfStock",
             };
         }
 

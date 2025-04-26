@@ -52,7 +52,6 @@ namespace kafi.Views
         private void EditInfoButton_Click(object sender, RoutedEventArgs e)
         {
             TurnOffIsReadOnlyTextBoxes(PersonalInfoGrid);
-            TurnOffIsReadOnlyTextBoxes(JobInfoGrid);
             TurnOnDateOrTimePicker(EditBirthdatePicker);
             EditInfoButton.Visibility = Visibility.Collapsed;
             PostEditGrid.Visibility = Visibility.Visible;
@@ -62,7 +61,6 @@ namespace kafi.Views
         private void CancelEditInfoButton_Click(object sender, RoutedEventArgs e)
         {
             TurnOnIsReadOnlyTextBoxes(PersonalInfoGrid);
-            TurnOnIsReadOnlyTextBoxes(JobInfoGrid);
             TurnOffDateOrTimePicker(EditBirthdatePicker);
             EditInfoButton.Visibility = Visibility.Visible;
             PostEditGrid.Visibility = Visibility.Collapsed;
@@ -71,8 +69,10 @@ namespace kafi.Views
 
         private static void TurnOnIsReadOnlyTextBoxes(Grid grid)
         {
+            if (grid == null || grid.Children == null) return;
             foreach (var child in grid.Children)
             {
+
                 if (child is not TextBox textBox)
                     continue;
 
@@ -214,7 +214,18 @@ namespace kafi.Views
                         oldPasswordError.Visibility = Visibility.Visible;
                         hasError = true;
                     }
-                    // Add other validations...
+                    if (string.IsNullOrWhiteSpace(newPasswordBox.Password))
+                    {
+                        newPasswordError.Text = "New password required";
+                        newPasswordError.Visibility = Visibility.Visible;
+                        hasError = true;
+                    }
+                    if (newPasswordBox.Password != confirmPasswordBox.Password)
+                    {
+                        confirmPasswordError.Text = "Confirm password does not match new password.";
+                        confirmPasswordError.Visibility = Visibility.Visible;
+                        hasError = true;
+                    }
 
                     if (hasError)
                     {

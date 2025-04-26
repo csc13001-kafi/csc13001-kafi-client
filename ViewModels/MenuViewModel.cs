@@ -94,6 +94,12 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
     public partial string StatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string SuccessMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool HasError { get; set; }
 
     [ObservableProperty]
@@ -255,6 +261,8 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
                 Categories.Add(newCategory);
 
                 SetStatusMessage("Category added successfully", isError: false);
+                SuccessMessage = "Thêm phân loại thành công.";
+                ErrorMessage = string.Empty;
             }
             else if (CurrentMode == Mode.AddingProduct)
             {
@@ -263,11 +271,13 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
                 newProduct.Materials = [.. SelectedMaterials];
 
                 _fullProducts.Add(newProduct);
-                
+
                 // Apply current category filter to ensure new product shows up if appropriate
                 FilterByMultipleCategories(SelectedCategories);
 
                 SetStatusMessage("Product added successfully", isError: false);
+                SuccessMessage = "Thêm sản phẩm thành công.";
+                ErrorMessage = string.Empty;
             }
 
             WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("close"));
@@ -275,6 +285,8 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
         catch (Exception ex)
         {
             SetStatusMessage($"Error adding item: {ex.Message}", isError: true);
+            ErrorMessage = $"Lỗi khi thêm: {ex.Message}";
+            SuccessMessage = string.Empty;
         }
     }
 
@@ -290,7 +302,8 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
                 var request = _selectedFile is null ? new CreateCategoryRequest(Name) : new CreateCategoryRequest(Name, _selectedFile.OpenStreamForReadAsync().Result, _selectedFile!.ContentType, _selectedFile.Name);
                 await _repository.UpdateCategory(_selectedItemId, request);
                 UpdateCategoryInCollections();
-                SetStatusMessage("Category updated successfully", isError: false);
+                SetStatusMessage("Phân loại đã được cập nhật thành công", isError: false);
+                SuccessMessage = "Phân loại đã được cập nhật thành công.";
             }
             else if (CurrentMode == Mode.EditingProduct)
             {
@@ -298,18 +311,21 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
                 await _repository.UpdateProduct(_selectedItemId, request);
 
                 UpdateProductInCollections();
-                
+
                 // Apply current category filter after updating
                 FilterByMultipleCategories(SelectedCategories);
 
-                SetStatusMessage("Product updated successfully", isError: false);
+                SetStatusMessage("Sản phẩm đã được cập nhật thành công", isError: false);
+                SuccessMessage = "Sản phẩm đã được cập nhật thành công.";
             }
 
             WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("close"));
         }
         catch (Exception ex)
         {
-            SetStatusMessage($"Error updating item: {ex.Message}", isError: true);
+            SetStatusMessage($"Lỗi khi cập nhật: {ex.Message}", isError: true);
+            ErrorMessage = $"Lỗi khi cập nhật: {ex.Message}";
+            SuccessMessage = string.Empty;
         }
     }
 
@@ -370,37 +386,6 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
     }
 
     [RelayCommand]
-    private void DeleteAllInput()
-    {
-        if (CurrentMode == Mode.AddingCategory || CurrentMode == Mode.AddingProduct)
-        {
-            ResetForm();
-        }
-        else if (CurrentMode == Mode.EditingCategory)
-        {
-            var category = Categories.FirstOrDefault(c => c.Id == _selectedItemId);
-            if (category != null)
-            {
-                Name = category.Name ?? string.Empty;
-                SelectedImage = new BitmapImage(new Uri(category.Image ?? string.Empty));
-            }
-        }
-        else if (CurrentMode == Mode.EditingProduct)
-        {
-            var product = _fullProducts.FirstOrDefault(p => p.Id == _selectedItemId);
-            if (product == null) return;
-
-            Name = product.Name ?? string.Empty;
-            SelectedCategoryForEdit = Categories.FirstOrDefault(c => c.Id == product.CategoryId);
-            Price = product.Price;
-            SelectedMaterials.Clear();
-            foreach (var material in product.Materials!)
-                SelectedMaterials.Add(material);
-            SelectedImage = new BitmapImage(new Uri(product.Image ?? string.Empty));
-        }
-    }
-
-    [RelayCommand]
     private void LoadAllProducts()
     {
         FilteredProducts.Clear();
@@ -443,13 +428,13 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
     private void FilterByCategories(IEnumerable<Category> categories)
     {
         FilteredProducts.Clear();
-        
+
         if (!categories.Any())
         {
             LoadAllProducts();
             return;
         }
-        
+
         var categoryIds = categories.Select(c => c.Id).ToList();
         var filteredProducts = _fullProducts.Where(p => categoryIds.Contains(p.CategoryId)).ToList();
 
@@ -533,6 +518,7 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
         };
     }
 
+    [RelayCommand]
     private void ResetForm()
     {
         Name = string.Empty;
@@ -553,9 +539,16 @@ public partial class MenuViewModel : ObservableRecipient, IRecipient<PropertyCha
 
     private void SetStatusMessage(string message, bool isError)
     {
-        StatusMessage = message;
-        HasError = isError;
-        HasSuccess = !isError && !string.IsNullOrEmpty(message);
+        if (isError)
+        {
+            ErrorMessage = message;
+            SuccessMessage = string.Empty;
+        }
+        else
+        {
+            SuccessMessage = message;
+            ErrorMessage = string.Empty;
+        }
     }
     #endregion
 

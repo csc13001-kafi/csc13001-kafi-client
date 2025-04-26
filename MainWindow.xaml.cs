@@ -1,3 +1,4 @@
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -13,5 +14,9 @@ public sealed partial class MainWindow : Window
     {
         this.InitializeComponent();
         this.AppWindow.SetIcon("Assets\\WindowIcon.ico");
+        if (this.AppWindow.Presenter is OverlappedPresenter presenter)
+        {
+            presenter.Maximize();
+        }
     }
 }

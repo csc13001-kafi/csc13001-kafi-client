@@ -278,6 +278,7 @@
                         SelectionMode="None">
                         <ItemsView.Layout>
                             <UniformGridLayout
+                                ItemsStretch="Fill"
                                 MaximumRowsOrColumns="6"
                                 MinColumnSpacing="20"
                                 MinItemWidth="200"
@@ -405,7 +406,7 @@
                         BorderBrush="Transparent"
                         CornerRadius="10"
                         PlaceholderText="Nhập số điện thoại của khách hàng"
-                        Text="{x:Bind ViewModel.ClientPhoneNumber, Mode=TwoWay}" />
+                        Text="{x:Bind ViewModel.ClientPhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
 
                 <ItemsView
@@ -530,8 +531,10 @@
                         Text="Vui lòng chọn món trong menu bên trái màn hình" />
                 </StackPanel>
 
+
                 <Grid Grid.Row="2" RowSpacing="6">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
@@ -539,11 +542,13 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock>
+                    <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                    <TextBlock Grid.Row="1">
                         <Run Text="Nhân viên:" />
                         <Run Text="{x:Bind ViewModel.EmployeeName, Mode=OneWay}" />
                     </TextBlock>
                     <StackPanel
+                        Grid.Row="1"
                         Grid.Column="1"
                         HorizontalAlignment="Right"
                         Orientation="Horizontal"
@@ -569,7 +574,7 @@
                             Text="{x:Bind ViewModel.TotalPrice, Converter={StaticResource PriceToStringConverter}, Mode=OneWay}" />
                     </StackPanel>
                     <Grid
-                        Grid.Row="1"
+                        Grid.Row="2"
                         Margin="0,0,10,0"
                         HorizontalAlignment="Center"
                         ColumnSpacing="10">
@@ -623,7 +628,7 @@
                     </Grid>
                     <Button
                         x:Name="CheckoutButton"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         Grid.Column="1"
                         Height="70"
                         Padding="0,10"
@@ -785,6 +790,7 @@
                             <Grid Grid.Column="1" RowSpacing="6">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <StackPanel Spacing="20">
@@ -971,18 +977,17 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <TextBlock
-                                        FontFamily="{StaticResource LexendMedium}"
-                                        FontWeight="Medium"
-                                        Foreground="Green"
-                                        Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}"
-                                        TextWrapping="WrapWholeWords"
-                                        Visibility="{x:Bind ViewModel.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToVisibilityConverter}, ConverterParameter=QR}" />
+
                                 </StackPanel>
+
+                                <Grid Grid.Row="1" VerticalAlignment="Bottom">
+                                    <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                                    <TextBlock Style="{StaticResource SuccessMessageStyle}" Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" />
+                                </Grid>
 
                                 <Button
                                     x:Name="CompleteOrderButton"
-                                    Grid.Row="1"
+                                    Grid.Row="2"
                                     Padding="16,9"
                                     Background="Green"
                                     BorderBrush="Transparent"
@@ -995,7 +1000,7 @@
                                     Foreground="White"
                                     Visibility="{x:Bind ViewModel.PaymentMethod, Mode=OneWay, Converter={StaticResource PaymentTypeToVisibilityConverter}, ConverterParameter=Cash}" />
                                 <Button
-                                    Grid.Row="1"
+                                    Grid.Row="2"
                                     Padding="16,9"
                                     Background="Red"
                                     BorderBrush="Transparent"

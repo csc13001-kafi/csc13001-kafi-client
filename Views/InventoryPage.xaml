@@ -168,6 +168,12 @@
                                             </Style>
                                         </StackPanel.Resources>
                                         <Button
+                                            Click="UpdateStockButton_Click"
+                                            Command="{Binding Data.TurnOnEditingCommand, Source={StaticResource InventoryProxy}}"
+                                            CommandParameter="{Binding Id}">
+                                            <FontIcon Glyph="&#xE8E5;" />
+                                        </Button>
+                                        <Button
                                             Click="AddInventoryButton_Click"
                                             Command="{Binding Data.TurnOnEditingCommand, Source={StaticResource InventoryProxy}}"
                                             CommandParameter="{Binding Id}">
@@ -365,9 +371,15 @@
                             </Border>
                         </StackPanel>
                     </Grid>
-                    <StackPanel Grid.Row="3" Spacing="40">
-                        <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.Message, Mode=OneWay}" />
+                    <Grid Grid.Row="3" RowSpacing="40">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource SuccessMessageStyle}" Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" />
                         <StackPanel
+                            Grid.Row="1"
                             HorizontalAlignment="Right"
                             Orientation="Horizontal"
                             Spacing="20">
@@ -414,7 +426,148 @@
                                 Cập nhật
                             </Button>
                         </StackPanel>
-                    </StackPanel>
+                    </Grid>
+                </Grid>
+            </Popup>
+            <Popup
+                x:Name="UpdateStockPopup"
+                Width="400"
+                Height="350"
+                Closed="UpdateStockPopup_Closed"
+                IsLightDismissEnabled="True"
+                IsOpen="False"
+                LightDismissOverlayMode="On"
+                RelativePanel.AlignRightWithPanel="True">
+                <Popup.ChildTransitions>
+                    <TransitionCollection>
+                        <PaneThemeTransition Edge="Right" />
+                    </TransitionCollection>
+                </Popup.ChildTransitions>
+                <Grid
+                    Width="{Binding ElementName=UpdateStockPopup, Path=Width}"
+                    Height="{Binding ElementName=UpdateStockPopup, Path=Height}"
+                    Padding="30"
+                    Background="White"
+                    Canvas.ZIndex="2"
+                    CornerRadius="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="StockPopupTranslateTransform" X="300" />
+                    </Grid.RenderTransform>
+                    <Grid Grid.Row="0" VerticalAlignment="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontFamily="{StaticResource LexendMedium}"
+                            FontSize="20"
+                            FontWeight="Medium"
+                            Text="Cập nhật tồn kho"
+                            TextAlignment="Center" />
+                        <Button
+                            x:Name="CloseStockPopupButton"
+                            Width="30"
+                            Height="30"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            Background="{StaticResource PrimaryBrush}"
+                            Click="CloseStockPopupButton_Click"
+                            CornerRadius="100">
+                            <FontIcon FontSize="12" Glyph="&#xE970;" />
+                        </Button>
+                    </Grid>
+                    <Border
+                        Grid.Row="1"
+                        Height="1"
+                        Margin="0,20"
+                        HorizontalAlignment="Stretch"
+                        Background="Black" />
+                    <Grid
+                        Grid.Row="2"
+                        ColumnSpacing="20"
+                        RowSpacing="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="CornerRadius" Value="16" />
+                                <Setter Property="Height" Value="40" />
+                                <Setter Property="Padding" Value="10,0,0,0" />
+                            </Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontSize" Value="16" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                                <Setter Property="Padding" Value="0,0,0,0" />
+                            </Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Spacing" Value="8" />
+                            </Style>
+                        </Grid.Resources>
+
+                        <StackPanel Grid.Row="0">
+                            <TextBlock FontSize="16" Text="Thông tin hiện tại" />
+                            <TextBlock
+                                FontSize="14"
+                                Foreground="Gray"
+                                Text="{x:Bind ViewModel.Name, Mode=OneWay}" />
+                            <TextBlock FontSize="14" Foreground="Gray">
+                                <Run Text="Tồn kho: " />
+                                <Run Text="{x:Bind ViewModel.CurrentStock, Mode=OneWay}" />
+                                <Run Text=" / " />
+                                <Run Text="{x:Bind ViewModel.OriginalStock, Mode=OneWay}" />
+                                <Run Text=" " />
+                                <Run Text="{x:Bind ViewModel.Unit, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1">
+                            <TextBlock FontSize="16" Text="Cập nhật tồn kho (số lượng mới)" />
+                            <Border>
+                                <TextBox PlaceholderText="Nhập số lượng tồn kho mới" Text="{x:Bind ViewModel.StockUpdateAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="3" RowSpacing="40">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" />
+                        <TextBlock Style="{StaticResource SuccessMessageStyle}" Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" />
+                        <StackPanel
+                            Grid.Row="1"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Spacing="20">
+                            <Button
+                                Padding="40,10,40,10"
+                                Background="{StaticResource SecondaryBrush}"
+                                Command="{x:Bind ViewModel.UpdateCurrentStockCommand}"
+                                CornerRadius="20"
+                                Foreground="White">
+                                Cập nhật
+                            </Button>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Popup>
         </RelativePanel>

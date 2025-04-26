@@ -179,9 +179,7 @@ public sealed partial class EmployeePage : Page
 
     private void EditEmployeeButton_Click(object sender, RoutedEventArgs e)
     {
-        TurnOffIsReadOnlyTextBoxes(PersonalInfoGrid);
         TurnOffIsReadOnlyTextBoxes(JobInfoGrid);
-        TurnOnDateOrTimePicker(EditBirthdatePicker);
         TurnOnDateOrTimePicker(StartShiftTimePicker);
         TurnOnDateOrTimePicker(EndShiftTimePicker);
         EditEmployeeButton.Visibility = Visibility.Collapsed;
@@ -218,9 +216,7 @@ public sealed partial class EmployeePage : Page
 
     private void ViewEmployeePopup_Closed(object sender, object e)
     {
-        TurnOnIsReadOnlyTextBoxes(PersonalInfoGrid);
         TurnOnIsReadOnlyTextBoxes(JobInfoGrid);
-        TurnOffDateOrTimePicker(EditBirthdatePicker);
         TurnOffDateOrTimePicker(StartShiftTimePicker);
         TurnOffDateOrTimePicker(EndShiftTimePicker);
         EditEmployeeButton.Visibility = Visibility.Visible;
