@@ -10,14 +10,39 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.Models;
 using kafi.Repositories;
+using Microsoft.UI.Dispatching;
 
 namespace kafi.ViewModels;
 
 [ObservableRecipient]
-public partial class InventoryViewModel(IInventoryRepository repository) : ObservableValidator, IRecipient<ValueChangedMessage<string>>
+public partial class InventoryViewModel : ObservableValidator, IRecipient<ValueChangedMessage<string>>
 {
-    private readonly IInventoryRepository _repository = repository;
+    private readonly IInventoryRepository _repository;
     private const int DefaultPageSize = 10;
+    private System.Timers.Timer? _successMessageTimer;
+    private DispatcherQueue _dispatcherQueue;
+
+    public InventoryViewModel(IInventoryRepository repository)
+    {
+        _repository = repository;
+        Messenger = WeakReferenceMessenger.Default;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
+        IsActive = true;
+
+        // Initialize the timer
+        _successMessageTimer = new System.Timers.Timer(3000); // 3 seconds
+        _successMessageTimer.Elapsed += (s, e) =>
+        {
+            // Dispatch the UI update to the UI thread
+            _dispatcherQueue.TryEnqueue(() =>
+            {
+                SuccessMessage = string.Empty;
+            });
+            _successMessageTimer.Stop();
+        };
+        _successMessageTimer.AutoReset = false;
+    }
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
@@ -33,11 +58,13 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
 
     [ObservableProperty]
     [Required]
+    [Range(0, int.MaxValue, ErrorMessage = "Khối lượng đầu vào phải là số dương")]
     public partial int OriginalStock { get; set; }
 
     [ObservableProperty]
     [Required]
-    public partial int CurrentStock { get; set; }
+    [Range(0, int.MaxValue, ErrorMessage = "Tồn kho không được âm")]
+    public partial int CurrentStock { get; set; } = 0;
 
     [ObservableProperty]
     [Required]
@@ -49,10 +76,14 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
 
     [ObservableProperty]
     [Required]
+    [Range(0, int.MaxValue, ErrorMessage = "Giá phải là số dương")]
     public partial int Price { get; set; }
 
     [ObservableProperty]
-    public partial string Message { get; set; } = string.Empty;
+    public partial string ErrorMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SuccessMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(GoToPreviousPageCommand))]
@@ -96,10 +127,19 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
     private async Task AddInventoryAsync()
     {
         ValidateAllProperties();
+        SuccessMessage = string.Empty;
 
         if (HasErrors)
         {
-            Message = "Please fix the errors above.";
+            var errors = GetErrors();
+            if (errors.Any())
+            {
+                ErrorMessage = errors.First().ErrorMessage!;
+            }
+            else
+            {
+                ErrorMessage = "Vui lòng sửa các lỗi bên trên.";
+            }
             return;
         }
 
@@ -117,13 +157,15 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
             Inventory newInventory = (Inventory)await _repository.Add(inventory) ?? throw new Exception();
             _fullInventoryList.Add(newInventory);
             UpdatePagedView();
-            Message = "Inventory added successfully.";
+            ErrorMessage = string.Empty;
             DeleteAllInput();
+            SuccessMessage = "Thêm mặt hàng thành công.";
             WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
         }
         catch (Exception ex)
         {
-            Message = $"Error adding inventory";
+            ErrorMessage = "Lỗi khi thêm mặt hàng";
+            SuccessMessage = string.Empty;
         }
     }
 
@@ -153,9 +195,26 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
     private async Task UpdateInventoryAsync()
     {
         ValidateAllProperties();
+        SuccessMessage = string.Empty;
+
+        // Additional validation for CurrentStock
+        if (CurrentStock > OriginalStock)
+        {
+            ErrorMessage = "Tồn kho không được lớn hơn khối lượng đầu vào";
+            return;
+        }
+
         if (HasErrors)
         {
-            Message = "Please fix the errors above.";
+            var errors = GetErrors();
+            if (errors.Any())
+            {
+                ErrorMessage = errors.First().ErrorMessage!;
+            }
+            else
+            {
+                ErrorMessage = "Vui lòng sửa các lỗi bên trên.";
+            }
             return;
         }
         var inventory = new InventoryRequest
@@ -186,12 +245,15 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
                 };
             }
             UpdatePagedView();
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(Message));
+            SuccessMessage = "Cập nhật mặt hàng thành công.";
+            ErrorMessage = string.Empty;
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(SuccessMessage));
             WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
         }
         catch (Exception ex)
         {
-            Message = $"Error updating inventory";
+            ErrorMessage = "Lỗi khi cập nhật mặt hàng";
+            SuccessMessage = string.Empty;
         }
     }
 
@@ -240,7 +302,8 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
             Unit = string.Empty;
             OriginalStock = 0;
             ExpiredDate = DateTimeOffset.Now.AddYears(1);
-            Message = string.Empty;
+            ErrorMessage = string.Empty;
+            SuccessMessage = string.Empty;
         }
     }
 
@@ -299,7 +362,85 @@ public partial class InventoryViewModel(IInventoryRepository repository) : Obser
         if (message.Value == "ordercreated")
         {
             await LoadDataAsync();
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("materialupdated"));
         }
     }
 
+    partial void OnSuccessMessageChanged(string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            _successMessageTimer?.Start();
+        }
+    }
+
+    [ObservableProperty]
+    [Required]
+    [Range(0, int.MaxValue, ErrorMessage = "Số lượng cập nhật không được âm")]
+    [NotifyCanExecuteChangedFor(nameof(UpdateCurrentStockCommand))]
+    public partial int StockUpdateAmount { get; set; } = 0;
+
+    private bool CanUpdateCurrentStock() => EditingId != Guid.Empty;
+    [RelayCommand(CanExecute = nameof(CanUpdateCurrentStock))]
+    private async Task UpdateCurrentStockAsync()
+    {
+        ValidateAllProperties();
+        SuccessMessage = string.Empty;
+
+        if (HasErrors)
+        {
+            var errors = GetErrors();
+            if (errors.Any())
+            {
+                ErrorMessage = errors.First().ErrorMessage!;
+            }
+            else
+            {
+                ErrorMessage = "Vui lòng sửa các lỗi bên trên.";
+            }
+            return;
+        }
+
+        try
+        {
+            // Directly use the input value instead of adding/subtracting
+            int newStockValue = StockUpdateAmount;
+
+            if (newStockValue > OriginalStock)
+            {
+                ErrorMessage = "Tồn kho không thể lớn hơn khối lượng đầu vào";
+                return;
+            }
+
+            await _repository.UpdateCurrentStock(EditingId, newStockValue);
+            var index = _fullInventoryList.FindIndex(u => u.Id == EditingId);
+            if (index != -1)
+            {
+                _fullInventoryList[index] = new Inventory
+                {
+                    Id = EditingId,
+                    Name = _fullInventoryList[index].Name,
+                    OriginalStock = _fullInventoryList[index].OriginalStock,
+                    CurrentStock = newStockValue,
+                    Unit = _fullInventoryList[index].Unit,
+                    ExpiredDate = _fullInventoryList[index].ExpiredDate,
+                    Price = _fullInventoryList[index].Price,
+                    CreatedAt = _fullInventoryList[index].CreatedAt,
+                    UpdatedAt = DateTimeOffset.Now.DateTime
+                };
+            }
+            UpdatePagedView();
+            SuccessMessage = "Cập nhật tồn kho thành công.";
+            ErrorMessage = string.Empty;
+            StockUpdateAmount = 0;
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>(SuccessMessage));
+            WeakReferenceMessenger.Default.Send(new PropertyChangedMessage<object>(this, nameof(Inventories), null, _fullInventoryList));
+            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("materialupdated"));
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Lỗi khi cập nhật tồn kho";
+            SuccessMessage = string.Empty;
+        }
+    }
 }

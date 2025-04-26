@@ -1,4 +1,5 @@
 using kafi.Views;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -16,6 +17,10 @@ namespace kafi
             this.InitializeComponent();
             this.Content = new LoginPage();
             this.AppWindow.SetIcon("Assets\\WindowIcon.ico");
+            if (this.AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+            }
         }
     }
 }

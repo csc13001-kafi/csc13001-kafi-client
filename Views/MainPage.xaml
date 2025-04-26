@@ -348,7 +348,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Top"
                         Text="Không có nguyên liệu nào sắp hết"
-                        Visibility="{x:Bind ViewModel.IsLowStockEmpty, Mode=OneWay}" />
+                        Visibility="{x:Bind ViewModel.HasLowStockMaterials, Mode=OneWay, Converter={StaticResource NotVisibilityConverter}}" />
                 </Grid>
 
             </Grid>

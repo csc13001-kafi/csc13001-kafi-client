@@ -19,7 +19,7 @@ using Microsoft.UI.Xaml;
 
 namespace kafi.ViewModels;
 
-public partial class TableViewModel : ObservableRecipient
+public partial class TableViewModel : ObservableRecipient, IRecipient<ValueChangedMessage<string>>
 {
     private readonly IMenuRepository _menuRepository;
     private readonly IOrderRepository _orderRepository;
@@ -93,6 +93,7 @@ public partial class TableViewModel : ObservableRecipient
     public partial string PaymentMethod { get; set; }
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckoutCommand))]
     public partial string ClientPhoneNumber { get; set; } = string.Empty;
 
     [ObservableProperty]
@@ -118,6 +119,9 @@ public partial class TableViewModel : ObservableRecipient
 
     [ObservableProperty]
     public partial string SuccessMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ErrorMessage { get; set; } = string.Empty;
 
     private DispatcherTimer _paymentStatusTimer;
     private int _orderCode;
@@ -233,14 +237,14 @@ public partial class TableViewModel : ObservableRecipient
     [RelayCommand(CanExecute = nameof(CanCheckout))]
     private async Task Checkout()
     {
-        if (IsVietnamesePhoneNumber(ClientPhoneNumber))
-            ClientPhoneNumber = ConvertToZeroPrefix(ClientPhoneNumber);
+        ClientPhoneNumber = ConvertToZeroPrefix(ClientPhoneNumber);
 
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("showoverlay"));
         IsCheckingout = true;
         CreatedAt = DateTime.Now;
         OrderId = Guid.NewGuid();
         SuccessMessage = string.Empty;
+        ErrorMessage = string.Empty;
 
         try
         {
@@ -274,9 +278,8 @@ public partial class TableViewModel : ObservableRecipient
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex.Message);
-            WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
-            CloseQrCode();
+            ErrorMessage = $"Lỗi trong quá trình thanh toán";
+            SuccessMessage = string.Empty;
         }
         finally
         {
@@ -285,7 +288,7 @@ public partial class TableViewModel : ObservableRecipient
     }
 
     [RelayCommand]
-    private void CompleteCheckout(string PaymentMethod)
+    private async Task CompleteCheckoutAsync(string PaymentMethod)
     {
         if (string.IsNullOrEmpty(PaymentMethod))
             return;
@@ -303,6 +306,7 @@ public partial class TableViewModel : ObservableRecipient
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("closepopup"));
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("hideoverlay"));
         WeakReferenceMessenger.Default.Send(new ValueChangedMessage<string>("ordercreated"));
+        await LoadDataAsync();
         SelectedProducts.Clear();
         GroupedSelectedProducts.Clear();
         ClientPhoneNumber = string.Empty;
@@ -543,7 +547,7 @@ public partial class TableViewModel : ObservableRecipient
                     _paymentStatusTimer = null;
                 }
                 CloseQrCode();
-                CompleteCheckout("QR");
+                await CompleteCheckoutAsync("QR");
             }
         }
         catch (Exception ex)
@@ -582,5 +586,13 @@ public partial class TableViewModel : ObservableRecipient
             return "0" + phone.Substring(3);
         }
         return phone;
+    }
+
+    public async void Receive(ValueChangedMessage<string> message)
+    {
+        if (message.Value == "materialupdated")
+        {
+            await LoadDataAsync();
+        }
     }
 }

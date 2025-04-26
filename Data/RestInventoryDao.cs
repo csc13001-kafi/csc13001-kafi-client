@@ -11,6 +11,7 @@ namespace kafi.Data;
 
 public interface IInventoryDao : IDao<Inventory>
 {
+    Task<string> UpdateCurrentStock(Guid id, int currentStock);
 }
 
 public class RestInventoryDao(IHttpClientFactory httpClientFactory) : IInventoryDao
@@ -62,5 +63,14 @@ public class RestInventoryDao(IHttpClientFactory httpClientFactory) : IInventory
     {
         var response = await _httpClient.DeleteAsync($"/materials/{id}");
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<string> UpdateCurrentStock(Guid id, int currentStock)
+    {
+        var json = JsonSerializer.Serialize(new { currentStock }, _options);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await _httpClient.PutAsync($"/materials/{id}/stock", content);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync();
     }
 }

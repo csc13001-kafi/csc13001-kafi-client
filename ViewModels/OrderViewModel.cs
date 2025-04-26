@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -142,6 +143,7 @@ public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChang
         if (message.Value == "ordercreated")
         {
             var latestOrders = await _orderRepository.GetAll();
+            Debug.WriteLine("reload order");
 
             var existingIds = _orders.Select(o => o.Id).ToHashSet();
             var newOrders = latestOrders.Where(o => !existingIds.Contains(o.Id)).ToList();
@@ -150,7 +152,7 @@ public partial class OrderViewModel : ObservableRecipient, IRecipient<ValueChang
             {
                 var sortedNewOrders = newOrders.OrderByDescending(o => o.Time);
                 _orders.InsertRange(0, sortedNewOrders);
-                
+
                 UpdatePagedView();
             }
             else

@@ -67,7 +67,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsGeneratingReport { get; set; } = false;
 
-    public bool IsLowStockEmpty => LowStockMaterials.Count == 0;
+    [ObservableProperty]
+    public partial bool HasLowStockMaterials { get; set; }
 
     public ObservableCollection<NumericReportItemViewModel> Items { get; set; }
     public ObservableCollection<LowStockMaterial> LowStockMaterials { get; set; }
@@ -100,7 +101,7 @@ public partial class MainViewModel : ObservableObject
         {
             // Reinitialize chart series configuration to prevent data label shifting
             InitializeChartSeries();
-            
+
             await ChangeTimeRangeAsync();
             if (IsManager)
             {
@@ -148,6 +149,7 @@ public partial class MainViewModel : ObservableObject
                     ExpiredDate = material.ExpiredDate,
                 });
             }
+            HasLowStockMaterials = LowStockMaterials.Count > 0;
         }
         catch (Exception ex)
         {
@@ -210,6 +212,8 @@ public partial class MainViewModel : ObservableObject
             GeometryFill = null,
             GeometryStroke = null
         });
+
+        HasLowStockMaterials = LowStockMaterials.Count > 0;
     }
 
     private bool CanChangeTimeRange() => !string.IsNullOrEmpty(SelectedTimeRange);

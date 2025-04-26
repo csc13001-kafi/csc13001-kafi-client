@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using kafi.ViewModels;
@@ -33,9 +33,13 @@ public sealed partial class InventoryPage : Page
         base.OnNavigatedTo(e);
         WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this, (recipient, message) =>
         {
-            if (message.Value == "")
+            if (message.Value == "Cập nhật mặt hàng thành công.")
             {
                 ClosePopupButton_Click(null, null);
+            }
+            else if (message.Value == "Cập nhật tồn kho thành công.")
+            {
+                CloseStockPopupButton_Click(null, null);
             }
         });
         if (ViewModel.LoadDataCommand.CanExecute(null))
@@ -127,5 +131,57 @@ public sealed partial class InventoryPage : Page
             ViewModel.DeleteAllInputCommand.Execute(null);
         }
 
+    }
+
+    private void UpdateStockButton_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateStockPopup.Height = XamlRoot.Size.Height - 20;
+        UpdateStockPopup.IsOpen = true;
+
+        var storyboard = new Storyboard();
+        var animation = new DoubleAnimation
+        {
+            From = 300,
+            To = 0,
+            Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+
+        Storyboard.SetTarget(animation, StockPopupTranslateTransform);
+        Storyboard.SetTargetProperty(animation, "X");
+        storyboard.Children.Add(animation);
+        storyboard.Begin();
+    }
+
+    private void CloseStockPopupButton_Click(object sender, RoutedEventArgs e)
+    {
+        var closeStoryboard = new Storyboard();
+        var closeAnimation = new DoubleAnimation
+        {
+            From = 0,
+            To = 300,
+            Duration = new Duration(TimeSpan.FromMilliseconds(300)),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+        };
+
+        Storyboard.SetTarget(closeAnimation, StockPopupTranslateTransform);
+        Storyboard.SetTargetProperty(closeAnimation, "X");
+        closeStoryboard.Children.Add(closeAnimation);
+
+        closeStoryboard.Completed += (s, e) =>
+        {
+            UpdateStockPopup.IsOpen = false;
+        };
+
+        closeStoryboard.Begin();
+    }
+
+    private void UpdateStockPopup_Closed(object sender, object e)
+    {
+        if (ViewModel.IsEditing)
+        {
+            ViewModel.IsEditing = false;
+            ViewModel.DeleteAllInputCommand.Execute(null);
+        }
     }
 }

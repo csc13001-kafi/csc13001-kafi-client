@@ -34,7 +34,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <StackPanel Spacing="20">
+        <StackPanel x:Name="ButtonStackPanel" Spacing="20">
             <TextBlock
                 FontFamily="{StaticResource LexendMedium}"
                 FontSize="20"
@@ -117,6 +117,18 @@
                 Visibility="{x:Bind ViewModel.IsLoading, Converter={StaticResource NotVisibilityConverter}, Mode=OneWay}">
                 Đổi mật khẩu
             </Button>
+            <Grid>
+                <TextBlock
+                    MaxWidth="{Binding ElementName=ButtonStackPanel, Path=ActualWidth}"
+                    Style="{StaticResource ErrorMessageStyle}"
+                    Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+                <TextBlock
+                    MaxWidth="{Binding ElementName=ButtonStackPanel, Path=ActualWidth}"
+                    Style="{StaticResource SuccessMessageStyle}"
+                    Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords" />
+            </Grid>
         </StackPanel>
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
             <Grid>
@@ -229,13 +241,15 @@
                         <TextBox
                             x:Name="RoleTextBox"
                             Header="Vai trò"
+                            IsReadOnly="True"
                             Text="{x:Bind ViewModel.IsManager, Converter={StaticResource RoleToStringConverter}}" />
                         <TextBox
                             x:Name="SalaryTextBox"
                             Grid.Column="1"
                             Header="Lương"
+                            IsReadOnly="True"
                             Text="{x:Bind ViewModel.Salary, Mode=OneWay}" />
-                        <TextBlock
+                        <TextBox
                             x:Name="StartShiftText"
                             Grid.Row="1"
                             Padding="10,0,0,0"
@@ -243,8 +257,10 @@
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="16"
                             FontWeight="Medium"
+                            Header="Ca bắt đầu"
+                            IsReadOnly="True"
                             Text="{x:Bind ViewModel.StartShift, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
-                        <TextBlock
+                        <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
                             Padding="10,0,0,0"
@@ -252,6 +268,8 @@
                             FontFamily="{StaticResource LexendMedium}"
                             FontSize="16"
                             FontWeight="Medium"
+                            Header="Ca kết thúc"
+                            IsReadOnly="True"
                             Text="{x:Bind ViewModel.EndShift, Converter={StaticResource TimeToStringConverter}, Mode=OneWay}" />
                     </Grid>
                 </StackPanel>

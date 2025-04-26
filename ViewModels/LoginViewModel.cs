@@ -107,7 +107,7 @@ public partial class LoginViewModel(IAuthService authService, IWindowService win
             var loginResponse = await _authService.LoginAsync(loginRequest);
             if (loginResponse is null)
             {
-                ErrorMessage = "Invalid username or password. Please try again.";
+                ErrorMessage = "Nhập sai tên (email) hoặc password, vui lòng nhập lại.";
             }
             else
             {
@@ -116,7 +116,7 @@ public partial class LoginViewModel(IAuthService authService, IWindowService win
         }
         catch
         {
-            ErrorMessage = "An error occurred during login. Please check your network and try again.";
+            ErrorMessage = "Lỗi đăng nhập, vui lòng kiểm tra lại kết nối mạng.";
         }
         finally
         {

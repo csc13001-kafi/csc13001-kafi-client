@@ -154,7 +154,7 @@ public sealed partial class MenuPage : Page, IRecipient<ValueChangedMessage<stri
 
     private void AddPopup_Closed(object sender, object e)
     {
-        ViewModel.DeleteAllInputCommand.Execute(null);
+        ViewModel.ResetFormCommand.Execute(null);
     }
 
     private void OpenPopup_Click(object sender, RoutedEventArgs e)

@@ -36,7 +36,7 @@ public sealed partial class TablePage : Page
         if (ViewModel.LoadDataCommand.CanExecute(null))
             await ViewModel.LoadDataCommand.ExecuteAsync(null);
 
-        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this, (r, m) =>
+        WeakReferenceMessenger.Default.Register<ValueChangedMessage<string>>(this, async (r, m) =>
         {
             if (m.Value == "closepopup")
                 ClosePopupButton_Click(this, null);

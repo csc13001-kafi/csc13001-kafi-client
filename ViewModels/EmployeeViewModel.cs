@@ -79,6 +79,10 @@ public partial class EmployeeViewModel(IEmployeeRepository repository) : Observa
     private List<User> _fullEmployeeList = [];
     public ObservableCollection<User> Employees { get; } = [];
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(UpdateEmployeeCommand))]
+    public partial int EditedSalary { get; set; }
+
     private bool CanLoadEmployees => !Employees.Any();
     [RelayCommand(CanExecute = nameof(CanLoadEmployees))]
     private async Task LoadEmployeesAsync()
@@ -146,37 +150,27 @@ public partial class EmployeeViewModel(IEmployeeRepository repository) : Observa
         }
     }
 
-    private bool CanUpdateEmployee()
-    {
-        if (SelectedUser == null)
-        {
-            return false;
-        }
-        if (string.IsNullOrEmpty(SelectedUser.Name) ||
-            string.IsNullOrEmpty(SelectedUser.Email) ||
-            string.IsNullOrEmpty(SelectedUser.Phone) ||
-            string.IsNullOrEmpty(SelectedUser.Address)
-            )
-        {
-            return false;
-        }
-
-        return true;
-    }
+    private bool CanUpdateEmployee() => SelectedUser != null && EditedSalary > 0;
     [RelayCommand(CanExecute = nameof(CanUpdateEmployee))]
     private async Task UpdateEmployeeAsync()
     {
+        if (EditedSalary <= 0)
+            return;
         UserRequest updatedRequest = new()
         {
+            // Keep original personal info
             Name = SelectedUser.Name,
             Email = SelectedUser.Email,
             Phone = SelectedUser.Phone,
             Address = SelectedUser.Address,
-            Salary = SelectedUser.Salary,
             Birthdate = SelectedUser.Birthdate,
+
+            // Update only salary and shifts
+            Salary = EditedSalary,
             StartShift = SelectedUser.StartShift,
             EndShift = SelectedUser.EndShift,
         };
+        SelectedUser.Salary = EditedSalary;
 
         try
         {
@@ -242,6 +236,7 @@ public partial class EmployeeViewModel(IEmployeeRepository repository) : Observa
             StartShift = user.StartShift,
             EndShift = user.EndShift
         };
+        EditedSalary = user.Salary;
     }
 
     private void UpdatePagedView()

@@ -9,6 +9,7 @@ namespace kafi.Repositories;
 
 public interface IInventoryRepository : IRepository<Inventory>
 {
+    Task<string> UpdateCurrentStock(Guid id, int currentStock);
 }
 
 public class InventoryRepository(IInventoryDao inventoryDao) : IInventoryRepository
@@ -38,5 +39,10 @@ public class InventoryRepository(IInventoryDao inventoryDao) : IInventoryReposit
     public async Task Delete(Guid id)
     {
         await _inventoryDao.Delete(id);
+    }
+
+    public async Task<string> UpdateCurrentStock(Guid id, int currentStock)
+    {
+        return await _inventoryDao.UpdateCurrentStock(id, currentStock);
     }
 }

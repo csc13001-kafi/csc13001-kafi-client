@@ -574,40 +574,14 @@
                         <TextBlock
                             Margin="0,10"
                             Style="{StaticResource ErrorMessageStyle}"
-                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                            Visibility="{x:Bind ViewModel.HasError, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"/>
                         <TextBlock
                             Foreground="Green"
-                            Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
-                            Visibility="{x:Bind ViewModel.HasSuccess, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.SuccessMessage, Mode=OneWay}" />
                         <StackPanel
                             HorizontalAlignment="Right"
                             Orientation="Horizontal"
                             Spacing="20">
-                            <Button
-                                BorderThickness="0"
-                                Command="{x:Bind ViewModel.DeleteAllInputCommand}"
-                                PointerEntered="DeleteAllInputsButton_PointerEntered"
-                                PointerExited="DeleteAllInputsButton_PointerExited"
-                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Add, Mode=OneWay}">
-                                <TextBlock>
-                                    <Underline>
-                                        Xóa
-                                    </Underline>
-                                </TextBlock>
-                            </Button>
-                            <Button
-                                BorderThickness="0"
-                                Command="{x:Bind ViewModel.DeleteAllInputCommand}"
-                                PointerEntered="DeleteAllInputsButton_PointerEntered"
-                                PointerExited="DeleteAllInputsButton_PointerExited"
-                                Visibility="{x:Bind ViewModel.CurrentMode, Converter={StaticResource ModeToVisibilityConverter}, ConverterParameter=Edit, Mode=OneWay}">
-                                <TextBlock>
-                                    <Underline>
-                                        Reset
-                                    </Underline>
-                                </TextBlock>
-                            </Button>
                             <Button
                                 Padding="40,10"
                                 Background="{StaticResource SecondaryBrush}"
